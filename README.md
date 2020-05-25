@@ -126,4 +126,3 @@ After we found the pairs with some threshold we can retrieve the original Chines
 ```
 
 There are plenty of optimizations can be add to this pipeline. The most useful ones like batches for big files and sentence ngrams will be added soon.
->>>>>>> b3fe1b5b0889acefcd17b16194b1403a8499b02c

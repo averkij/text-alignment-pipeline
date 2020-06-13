@@ -142,4 +142,4 @@ After we found the pairs with some threshold we can retrieve the original Chines
 Внутри окна был прибит ряд железных решеток, что было некрасиво. Пол был бледного цвета и покрыт деревянными шипами.
 ```
 
-This will help to aligne merged sentences from the second text. You can also adjust n-gramming with the **n_gram_sent_max_words** parameter which will combine new lines only if both sentences are long enough.
+This will help to align merged sentences from the second text. You can also adjust n-gramming with the **n_gram_sent_max_words** parameter which will combine new lines only if both sentences are long enough.

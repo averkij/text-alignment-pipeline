@@ -131,7 +131,7 @@ After we found the pairs with some threshold we can retrieve the original Chines
 
 - In order to process large files you can split them to batches and process one by one using batch_size parameter.
 
-#### N-gramed sentences.
+#### N-gramed sentences
 
 - Translation into different language sometimes requires to split original sentence into several ones or merge sentences into one big sentence. To catch this case you can use **n_gram** parameter and "n-gram" your text into something like this (n_gram=2):
 

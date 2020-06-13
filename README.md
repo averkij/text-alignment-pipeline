@@ -125,4 +125,21 @@ After we found the pairs with some threshold we can retrieve the original Chines
 ...
 ```
 
-There are plenty of optimizations can be add to this pipeline. The most useful ones like batches for big files and sentence ngrams will be added soon.
+### Optimizations & Features
+
+#### Large files
+
+- In order to process large files you can split them to batches and process one by one using batch_size parameter.
+
+#### N-gramed sentences.
+
+- Translation into different language sometimes requires to split original sentence into several ones or merge sentences into one big sentence. To catch this case you can use **n_gram** parameter and "n-gram" your text into something like this (n_gram=2):
+
+```
+Дело ясное: зима, печка часто дымит, и комната полна газа.
+Дело ясное: зима, печка часто дымит, и комната полна газа. Внутри окна был прибит ряд железных решеток, что было некрасиво. 
+Внутри окна был прибит ряд железных решеток, что было некрасиво.
+Внутри окна был прибит ряд железных решеток, что было некрасиво. Пол был бледного цвета и покрыт деревянными шипами.
+```
+
+This will help to aligne merged sentences from the second text. You can also adjust n-gramming with the **n_gram_sent_max_words** parameter which will combine new lines only if both sentences are long enough.

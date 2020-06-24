@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Your files, {{username}}:</h2>
+    <div class="div-table m-t-40 w-100">
+        <div class="div-row">
+            <div class="cell p-1 f-w-500">Russian</div>
+            <div class="cell p-1 f-w-500">Chinese</div>
+        </div>
+        <div class="div-row" style="height:10px;"></div>
+        {% for ru,zh in files %}
+            <div class="div-row">
+                <div class="cell p-1">{{ru}}</div>
+                <div class="cell p-1">{{zh}}</div>
+            </div>
+        {% endfor %}       
+    </div>
+
+    <h2 class="m-t-50">Upload text files</h2>
+    <form class="m-t-30" method=post enctype=multipart/form-data>
+        <div class="div-table m-t-20 w-100">
+            <div class="div-row p-b-20">
+                <div class="cell f-w-500">Russian</div>
+                <div class="cell f-w-500">Chinese</div>
+            </div>
+            <div class="div-row" style="height:5px;"></div>
+            <div class="div-row">
+                <div class=cell><input type=file  name=textRu></div>
+                <div class="cell"><input type=file name=textZh></div>
+            </div>    
+            <div class="div-row" style="height:25px;"></div>
+            <div class="div-row">
+                <div class=cell>
+                    <input type=submit value="Upload files">        
+                </div>
+            </div>
+        </div>    
+    </form>
+{% endblock %}

@@ -2,7 +2,6 @@
   <v-app>
     <Header />
     <v-main>
-
       <router-view></router-view>
     </v-main>
     <Footer />
@@ -15,14 +14,6 @@
 
   export default {
     name: "App",
-    data: () => ({
-      links: ['Home', 'About']
-    }),
-    methods: {
-      say: function (message) {
-        alert(message);
-      }
-    },
     components: {
       Header,
       Footer

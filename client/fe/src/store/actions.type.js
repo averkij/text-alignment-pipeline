@@ -1,3 +1,4 @@
 export const LOGIN = "login";
 export const LOGOUT = "logout";
-export const UPLOAD_TEXT = "upload_text";
+export const UPLOAD_ITEM = "upload_item";
+export const FETCH_ITEMS = "upload_items";

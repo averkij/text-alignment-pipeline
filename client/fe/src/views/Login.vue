@@ -19,7 +19,7 @@
 
 <script>
   import {
-    LOGIN
+    LOGIN,
   } from "@/store/actions.type"
 
   export default {
@@ -35,7 +35,10 @@
             username
           })
           .then(() => this.$router.push({
-            name: "upload"
+            name: "upload",
+            params: {
+              username
+            }
           }));
       }
     }

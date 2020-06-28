@@ -11,12 +11,14 @@ const routes = [{
   {
     path: "/login",
     name: "login",
-    component: () => import("@/views/Login")
+    component: () => import("@/views/Login"),
+    alias: "/user"
   },
   {
-    path: "/upload",
+    path: "/user/:username/upload",
     name: "upload",
-    component: () => import("@/views/Upload")
+    component: () => import("@/views/Upload"),
+    alias: "/user/:username"
   }
 ];
 

@@ -35,7 +35,7 @@
             username
           })
           .then(() => this.$router.push({
-            name: "upload",
+            name: "items",
             params: {
               username
             }

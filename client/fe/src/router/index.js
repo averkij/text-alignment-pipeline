@@ -15,9 +15,9 @@ const routes = [{
     alias: "/user"
   },
   {
-    path: "/user/:username/upload",
-    name: "upload",
-    component: () => import("@/views/Upload"),
+    path: "/user/:username/items",
+    name: "items",
+    component: () => import("@/views/Items"),
     alias: "/user/:username"
   }
 ];

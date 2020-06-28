@@ -4,8 +4,11 @@ import itertools
 from flask import Flask, redirect, url_for
 from flask import render_template
 from flask import request
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app)
 
 UPLOAD_FOLDER = "static"
 RAW_FOLDER = "raw"
@@ -24,7 +27,7 @@ def index():
     #         return redirect(url_for("upload", username=request.form["username"]))
     return 0
 
-@app.route("/user/<username>", methods=["GET", "POST"])
+@app.route("/items/<username>", methods=["GET", "POST"])
 def upload(username):
     create_folders(username)
 
@@ -37,7 +40,7 @@ def upload(username):
             file_ru.save(raw_ru)
             file_zh.save(raw_zh)
             return {"res": 1}
-    return {"res": 0}
+    return {"items": {"ru": ["text_ru1.txt", "text_ru2.txt"],"zh": ["text_zh1.txt", "text_zh2.txt"]}}
 
 def get_raw_files_list(username, lang):
     return os.listdir(os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, lang))

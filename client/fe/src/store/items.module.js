@@ -3,7 +3,8 @@ import {
 } from "@/common/api.service"
 
 import {
-    FETCH_ITEMS
+    FETCH_ITEMS,
+    UPLOAD_FILES
 } from "./actions.type"
 
 import {
@@ -22,12 +23,18 @@ export const state = {
 };
 
 export const actions = {
-    async [FETCH_ITEMS](context, itemsSlug) {
+    async [FETCH_ITEMS](context, username) {
         const {
             data
-        } = await ItemsService.get(itemsSlug);
+        } = await ItemsService.get(username);
         context.commit(SET_ITEMS, data.items);
         return data;
+    },
+    // params {file, username, langCode}
+    async [UPLOAD_FILES](context, params) {
+        await ItemsService.upload(params);
+        context.dispatch(FETCH_ITEMS, params.username);
+        return;
     }
 }
 

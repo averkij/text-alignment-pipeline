@@ -21,8 +21,8 @@ const ApiService = {
       });
     },
   
-    post(resource, params) {
-      return Vue.axios.post(`${resource}`, params);
+    post(resource, slug, params) {
+      return Vue.axios.post(`${resource}/${slug}`, params);
     },
   
     update(resource, slug, params) {
@@ -45,5 +45,10 @@ const ApiService = {
   export const ItemsService = {
       get(slug) {
           return ApiService.get("items", slug);
+      },
+      upload(params) {
+        let form = new FormData()
+        form.append(params.langCode, params.file)
+        return ApiService.post("items", params.username, form);
       }
   }

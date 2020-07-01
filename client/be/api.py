@@ -4,7 +4,7 @@ import itertools
 from flask import Flask, redirect, url_for
 from flask import render_template
 from flask import request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
@@ -21,27 +21,22 @@ ZH_CODE = "zh"
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # if request.method == "POST":
-    #     if request.form["username"]:
-    #         print(url_for("upload", username=request.form["username"]))
-    #         return redirect(url_for("upload", username=request.form["username"]))
     return 0
 
 @app.route("/items/<username>", methods=["GET", "POST"])
 def upload(username):
     create_folders(username)
-
     #load documents
     if request.method == "POST":
-        file_ru = request.files["textRu"]
-        file_zh = request.files["textZh"]
-        if file_ru and file_zh:
+        if RU_CODE in request.files:
+            file_ru = request.files["ru"]
             raw_ru = os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, RU_CODE, file_ru.filename)
-            raw_zh = os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, ZH_CODE, file_zh.filename)
             file_ru.save(raw_ru)
+        if ZH_CODE in request.files:
+            file_zh = request.files["zh"]
+            raw_zh = os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, ZH_CODE, file_zh.filename)
             file_zh.save(raw_zh)
-            return {"res": 1}
-
+        return {"res": 1}
     #return documents list
     files = {
         "items": {
@@ -49,7 +44,6 @@ def upload(username):
             ZH_CODE: get_raw_files_list(username, ZH_CODE),
         }
     }
-
     return files
 
 def get_raw_files_list(username, lang):

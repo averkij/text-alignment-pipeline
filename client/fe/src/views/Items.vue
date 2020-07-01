@@ -48,9 +48,10 @@
                         <v-card-title>{{card.lang}}</v-card-title>
                     </v-img>
                     <v-card-text>Upload raw {{card.lang}} document in txt format.</v-card-text>
-                    <v-card-actions>
-                        <v-file-input accept=".txt" @change="onFileChange($event,card.langCode)">Upload
-                        </v-file-input>
+                    <v-card-actions>  
+                    <v-file-input outlined dense accept=".txt" @change="onFileChange($event,card.langCode)"></v-file-input>
+                    </v-card-actions>
+                    <v-card-actions>                        
                         <v-btn @click="uploadFile(card.langCode)">Upload</v-btn>
                     </v-card-actions>
                 </v-card>

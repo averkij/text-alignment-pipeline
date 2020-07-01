@@ -31,6 +31,7 @@ def index():
 def upload(username):
     create_folders(username)
 
+    #load documents
     if request.method == "POST":
         file_ru = request.files["textRu"]
         file_zh = request.files["textZh"]
@@ -40,7 +41,16 @@ def upload(username):
             file_ru.save(raw_ru)
             file_zh.save(raw_zh)
             return {"res": 1}
-    return {"items": {"ru": ["text_ru1.txt", "text_ru2.txt"],"zh": ["text_zh1.txt", "text_zh2.txt"]}}
+
+    #return documents list
+    files = {
+        "items": {
+            RU_CODE: get_raw_files_list(username, RU_CODE),
+            ZH_CODE: get_raw_files_list(username, ZH_CODE),
+        }
+    }
+
+    return files
 
 def get_raw_files_list(username, lang):
     return os.listdir(os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, lang))

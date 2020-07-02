@@ -14,7 +14,7 @@
                     <h3>{{panel.lang}}</h3>
                     <v-list class="mt-2">
                         <v-list-item-group mandatory color="blue">
-                            <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i">
+                            <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i" @click="selected[panel.langCode]=item">
                                 <v-list-item-icon>
                                     <v-icon>mdi-star</v-icon>
                                 </v-list-item-icon>
@@ -26,6 +26,10 @@
                     </v-list>
                 </v-col>
             </v-row>
+            <div>
+                Selected ru: {{selected.ru}}
+                Selected zh: {{selected.zh}}
+            </div>
         </div>
 
         <div class="text-h5 mt-15 font-weight-bold">Upload</div>
@@ -76,6 +80,10 @@
                     img: "https://images.unsplash.com/photo-1538099023053-30e7da644196?ixlib=rb-1.2.1&&auto=format&fit=crop&w=1350&q=80"
                 }],
                 files: {
+                    "ru": null,
+                    "zh": null
+                },
+                selected: {
                     "ru": null,
                     "zh": null
                 }

@@ -43,12 +43,21 @@ const ApiService = {
   export default ApiService;
 
   export const ItemsService = {
-      get(slug) {
+      list(slug) {
           return ApiService.get("items", slug);
       },
       upload(params) {
+        //check filesize
+        if (params.file.size > 5*1024*1024) {
+          alert('File is too big (> 5MB)');
+          return;
+        }
         let form = new FormData()
         form.append(params.langCode, params.file)
         return ApiService.post("items", params.username, form);
+      },
+      getSplitted(params) {
+        return ApiService.get("items", `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}`, 
+        )
       }
   }

@@ -21,6 +21,8 @@ DONE_FOLDER = "done"
 RU_CODE = "ru"
 ZH_CODE = "zh"
 
+EMPTY_LINES = {"items": {"ru":[], "zh":[]}}
+
 pattern_ru_orig = re.compile(r'[a-zA-Z\(\)\[\]\/\<\>•\'\n]+')
 double_spaces = re.compile(r'[\s]+')
 double_commas = re.compile(r'[,]+')
@@ -38,7 +40,7 @@ def index():
     return 0
 
 @app.route("/items/<username>", methods=["GET", "POST"])
-def upload(username):
+def items(username):
     create_folders(username)
     #load documents
     if request.method == "POST":
@@ -46,23 +48,23 @@ def upload(username):
             file_ru = request.files["ru"]
             raw_ru = os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, RU_CODE, file_ru.filename)
             file_ru.save(raw_ru)
-            splitToSentences(raw_ru, RU_CODE, username)
+            split_to_sentences(file_ru.filename, RU_CODE, username)
         if ZH_CODE in request.files:
             file_zh = request.files["zh"]
             raw_zh = os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, ZH_CODE, file_zh.filename)
             file_zh.save(raw_zh)
-            splitToSentences(raw_zh, ZH_CODE, username)
+            split_to_sentences(file_zh.filename, ZH_CODE, username)
         return {"res": 1}
     #return documents list
     files = {
         "items": {
-            RU_CODE: get_raw_files_list(username, RU_CODE),
-            ZH_CODE: get_raw_files_list(username, ZH_CODE),
+            RU_CODE: get_files_list(username, RAW_FOLDER, RU_CODE),
+            ZH_CODE: get_files_list(username, RAW_FOLDER, ZH_CODE),
         }
     }
     return files
 
-def splitToSentences(filename, langcode, username):
+def split_to_sentences(filename, langcode, username):
     raw = os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, langcode, filename)
     splitted = os.path.join(UPLOAD_FOLDER, username, SPLITTED_FOLDER, langcode, filename)
     with open(raw, mode='r', encoding='utf-8') as input_file, open(splitted, mode='w', encoding='utf-8') as out_file:
@@ -87,8 +89,10 @@ def splitToSentences(filename, langcode, username):
                 out_file.write(x.strip())
             count += 1
 
-def get_raw_files_list(username, lang):
-    return os.listdir(os.path.join(UPLOAD_FOLDER, username, RAW_FOLDER, lang))
+def get_files_list(username, folder, lang):
+    if not os.path.isdir(os.path.join(UPLOAD_FOLDER, username, folder, lang)):
+        return []
+    return os.listdir(os.path.join(UPLOAD_FOLDER, username, folder, lang))
 
 def create_folders(username):
     if username and not os.path.isdir(os.path.join(UPLOAD_FOLDER, username)):
@@ -108,9 +112,25 @@ def split_zh(paragraph):
     for sent in re.findall(u'[^!?。！？\.\!\?]+[!?。！？\.\!\?]?', paragraph, flags=re.U):
         yield sent
 
-@app.route("/split")
-def split():
-    return render_template("")
+@app.route("/items/<username>/splitted/<lang>/<int:id>/<int:count>", methods=["GET"])
+def splitted(username, lang, id, count):
+    files = get_files_list(username, SPLITTED_FOLDER, lang)
+    if len(files) < id+1:
+        return EMPTY_LINES
+    path = os.path.join(UPLOAD_FOLDER, username, SPLITTED_FOLDER, lang, files[id])
+    lines = []
+    i = 0
+    with open(path, mode='r', encoding='utf-8') as input_file:
+        while True:
+            line = input_file.readline()
+            if not line:
+                break
+            lines.append(line)
+            i+=1
+            if count>0 and i>=count:
+                break
+    return {"items":{lang:lines}}
 
 if __name__ == "__main__":
     app.run(port=12000, debug=True)
+

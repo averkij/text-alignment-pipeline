@@ -14,7 +14,8 @@
                     <h3>{{panel.lang}}</h3>
                     <v-list class="mt-2">
                         <v-list-item-group mandatory color="blue">
-                            <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i" @click="selected[panel.langCode]=item">
+                            <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i"
+                                @change="loadPreview(panel.langCode, i)">
                                 <v-list-item-icon>
                                     <v-icon>mdi-star</v-icon>
                                 </v-list-item-icon>
@@ -26,14 +27,29 @@
                     </v-list>
                 </v-col>
             </v-row>
-            <div>
-                Selected ru: {{selected.ru}}
-                Selected zh: {{selected.zh}}
-            </div>
         </div>
 
+        <div class="text-h5 mt-10 font-weight-bold">Preview</div>
+        <v-row class="mt-6">
+            <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
+                <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+                    v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].length == 0">
+                    Select file to preview.
+                </v-alert>
+                <v-list class="mt-2">
+                    <v-list-item-group mandatory color="blue">
+                        <v-list-item v-for="(line, i) in splitted[panel.langCode]" :key="i">
+                            <v-list-item-content>
+                                <v-list-item-title v-text="i+1 + '. ' + line"></v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+            </v-col>
+        </v-row>
+
         <div class="text-h5 mt-15 font-weight-bold">Upload</div>
-        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2" v-show="showAlert">
+        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
             Upload each file using the corresponded language section.
         </v-alert>
         <v-row>
@@ -63,7 +79,8 @@
 
     import {
         FETCH_ITEMS,
-        UPLOAD_FILES
+        UPLOAD_FILES,
+        GET_SPLITTED
     } from "@/store/actions.type";
 
     export default {
@@ -99,13 +116,21 @@
                     username: this.$route.params.username,
                     langCode
                 });
+            },
+            loadPreview(langCode, id) {
+                this.$store.dispatch(GET_SPLITTED, {
+                    username: this.$route.params.username,
+                    langCode,
+                    fileId: id,
+                    linesCount: 10
+                });
             }
         },
         mounted() {
             this.$store.dispatch(FETCH_ITEMS, this.$route.params.username);
         },
         computed: {
-            ...mapGetters(["items"]),
+            ...mapGetters(["items", "splitted"]),
             username() {
                 return this.$route.params.username
             },

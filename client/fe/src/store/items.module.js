@@ -6,6 +6,7 @@ import {
     FETCH_ITEMS,
     UPLOAD_FILES,
     GET_SPLITTED,
+    GET_ALIGNED,
     ALIGN_SPLITTED
 } from "./actions.type"
 
@@ -21,6 +22,10 @@ const initialState = {
         zh: []
     },
     splitted: {
+        ru: [],
+        zh: []
+    },
+    aligned: {
         ru: [],
         zh: []
     }
@@ -50,13 +55,22 @@ export const actions = {
             data
         } = await ItemsService.getSplitted(params)
         context.commit(SET_SPLITTED, data.items)
+        return;
     },
     async [ALIGN_SPLITTED](context, params) {
         const {
             data
         } = await ItemsService.alignSplitted(params)
         context.commit(SET_ALIGNED, data.items)
-    }
+        return;
+    },
+    async [GET_ALIGNED](context, params) {
+        const {
+            data
+        } = await ItemsService.getAligned(params)
+        context.commit(SET_ALIGNED, data.items)
+        return;
+    },
 }
 
 export const mutations = {
@@ -73,10 +87,10 @@ export const mutations = {
     },
     [SET_ALIGNED](state, items) {
         if (items.ru) {
-            state.splitted.ru = items.ru
+            state.aligned.ru = items.ru
         }
         if (items.zh) {
-            state.splitted.zh = items.zh
+            state.aligned.zh = items.zh
         }
     }
 }
@@ -87,6 +101,9 @@ const getters = {
     },
     splitted(state) {
         return state.splitted;
+    },
+    aligned(state) {
+        return state.aligned;
     }
 }
 

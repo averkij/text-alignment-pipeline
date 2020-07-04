@@ -59,6 +59,9 @@ const ApiService = {
       getSplitted(params) {
         return ApiService.get("items", `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}`);
       },
+      getAligned(params) {
+        return ApiService.get("items", `${params.username}/aligned/${params.langCode}/${params.fileId}/${params.linesCount}`);
+      },
       alignSplitted(params) {
         return ApiService.get("items", `${params.username}/align/${params.fileIds.ru}/${params.fileIds.zh}`);
       }

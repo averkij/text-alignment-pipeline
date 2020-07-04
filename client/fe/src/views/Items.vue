@@ -82,6 +82,21 @@
             <v-divider></v-divider>
             <v-btn class="success mt-10" @click="align()">Align documents</v-btn>
         </div>
+
+        <div class="text-h5 mt-10 font-weight-bold">Result</div>
+        <v-row>
+            <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
+                <v-list class="mt-2">
+                    <v-list-item-group mandatory color="blue">
+                        <v-list-item v-for="(line, i) in aligned[panel.langCode]" :key="i">
+                            <v-list-item-content>
+                                <v-list-item-title v-text="i+1 + '. ' + line"></v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+            </v-col>
+        </v-row>
     </div>
 </template>
 
@@ -94,6 +109,7 @@
         FETCH_ITEMS,
         UPLOAD_FILES,
         GET_SPLITTED,
+        GET_ALIGNED,
         ALIGN_SPLITTED
     } from "@/store/actions.type";
 
@@ -146,11 +162,30 @@
                     fileId: id,
                     linesCount: 5
                 });
+                this.$store.dispatch(GET_ALIGNED, {
+                    username: this.$route.params.username,
+                    langCode,
+                    fileId: id,
+                    linesCount: 0
+                });
             },
             align() {
                 this.$store.dispatch(ALIGN_SPLITTED, {
                     username: this.$route.params.username,
                     fileIds: this.selectedIds
+                }).then(() => {
+                    this.$store.dispatch(GET_ALIGNED, {
+                        username: this.$route.params.username,
+                        langCode: "ru",
+                        fileId: this.selectedIds["ru"],
+                        linesCount: 0
+                    });
+                    this.$store.dispatch(GET_ALIGNED, {
+                        username: this.$route.params.username,
+                        langCode: "zh",
+                        fileId: this.selectedIds["zh"],
+                        linesCount: 0
+                    });
                 });
             },
             //helpers
@@ -173,7 +208,7 @@
             });
         },
         computed: {
-            ...mapGetters(["items", "splitted"]),
+            ...mapGetters(["items", "splitted", "aligned"]),
             username() {
                 return this.$route.params.username
             },

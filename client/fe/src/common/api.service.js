@@ -48,7 +48,7 @@ const ApiService = {
       },
       upload(params) {
         //check filesize
-        if (params.file.size > 5*1024*1024) {
+        if (!params.file | params.file.size > 5*1024*1024) {
           alert('File is too big (> 5MB)');
           return;
         }
@@ -57,7 +57,9 @@ const ApiService = {
         return ApiService.post("items", params.username, form);
       },
       getSplitted(params) {
-        return ApiService.get("items", `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}`, 
-        )
+        return ApiService.get("items", `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}`);
+      },
+      alignSplitted(params) {
+        return ApiService.get("items", `${params.username}/align/${params.fileIds.ru}/${params.fileIds.zh}`);
       }
   }

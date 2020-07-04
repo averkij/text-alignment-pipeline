@@ -69,9 +69,19 @@
         <div class="text-h5 mt-10 font-weight-bold">Alignment</div>
         <v-row class="mt-6">
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
-                Selected file: {{selected[panel.langCode]}}
+                <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+                    v-show="!selected[panel.langCode]">
+                    Document is not selected.
+                </v-alert>
+                <div v-show="selected[panel.langCode]">
+                    <span class="font-weight-bold">Selected file</span>: {{selected[panel.langCode]}}
+                </div>
             </v-col>
         </v-row>
+        <div>
+            <v-divider></v-divider>
+            <v-btn class="success mt-10" @click="align()">Align documents</v-btn>
+        </div>
     </div>
 </template>
 
@@ -83,7 +93,8 @@
     import {
         FETCH_ITEMS,
         UPLOAD_FILES,
-        GET_SPLITTED
+        GET_SPLITTED,
+        ALIGN_SPLITTED
     } from "@/store/actions.type";
 
     export default {
@@ -106,6 +117,10 @@
                 selected: {
                     "ru": null,
                     "zh": null
+                },
+                selectedIds: {
+                    "ru": null,
+                    "zh": null
                 }
             }
         },
@@ -124,6 +139,7 @@
             },
             selectAndLoadPreview(langCode, name, id) {
                 this.selected[langCode] = name;
+                this.selectedIds[langCode] = id;
                 this.$store.dispatch(GET_SPLITTED, {
                     username: this.$route.params.username,
                     langCode,
@@ -131,6 +147,13 @@
                     linesCount: 5
                 });
             },
+            align() {
+                this.$store.dispatch(ALIGN_SPLITTED, {
+                    username: this.$route.params.username,
+                    fileIds: this.selectedIds
+                });
+            },
+            //helpers
             itemsNotEmpty(langCode) {
                 if (!this.items | !this.items[langCode]) {
                     return true
@@ -139,7 +162,7 @@
             },
             selectFirstDocument(langCode) {
                 if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
-                    this.selectAndLoadPreview(langCode, "aaa.txt", 0);
+                    this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
                 }
             }
         },

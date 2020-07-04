@@ -39,7 +39,7 @@ export const actions = {
     // params {file, username, langCode}
     async [UPLOAD_FILES](context, params) {
         await ItemsService.upload(params);
-        context.dispatch(FETCH_ITEMS, params.username);
+        await context.dispatch(FETCH_ITEMS, params.username);
         return;
     },
     // params {fileId, username, langCode, lines}

@@ -8,29 +8,47 @@
             There are no uploaded documents yet. Please upload some using the form below.
         </v-alert>
 
-        <div class="mt-6" v-show="!showAlert">
+        <div class="mt-6">
             <v-row>
-                <v-col v-for="(panel, i) in panels" :key=i>
-                    <h3>{{panel.lang}}</h3>
-                    <v-list class="mt-2">
-                        <v-list-item-group mandatory color="blue">
-                            <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i"
-                                @change="loadPreview(panel.langCode, i)">
-                                <v-list-item-icon>
-                                    <v-icon>mdi-star</v-icon>
-                                </v-list-item-icon>
-                                <v-list-item-content>
-                                    <v-list-item-title v-text="item"></v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
-                        </v-list-item-group>
-                    </v-list>
+                <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
+                    <v-card>
+                        <v-img position="top" class="white--text" height="200px" :src="panel.img">
+                            <v-card-title>{{panel.lang}}</v-card-title>
+                        </v-img>
+                        <v-list class="pa-0">
+                            <v-list-item-group mandatory color="blue">
+                                <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i"
+                                    @change="selectAndLoadPreview(panel.langCode, item, i)">
+                                    <v-list-item-icon>
+                                        <v-icon>mdi-star</v-icon>
+                                    </v-list-item-icon>
+                                    <v-list-item-content>
+                                        <v-list-item-title v-text="item"></v-list-item-title>
+                                    </v-list-item-content>
+                                </v-list-item>
+                            </v-list-item-group>
+                        </v-list>
+                        <v-divider></v-divider>
+                        <v-card-title>Upload</v-card-title>
+                        <v-card-text>Upload raw {{panel.lang}} document in txt format.</v-card-text>
+                        <v-card-actions>
+                            <v-file-input outlined dense accept=".txt" @change="onFileChange($event,panel.langCode)">
+                            </v-file-input>
+                        </v-card-actions>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                            <v-btn @click="uploadFile(panel.langCode)">Upload</v-btn>
+                        </v-card-actions>
+                    </v-card>
                 </v-col>
             </v-row>
         </div>
 
         <div class="text-h5 mt-10 font-weight-bold">Preview</div>
-        <v-row class="mt-6">
+        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
+            Documents are splitted by sentences using language specific rules.
+        </v-alert>
+        <v-row>
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
                 <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
                     v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].length == 0">
@@ -48,25 +66,10 @@
             </v-col>
         </v-row>
 
-        <div class="text-h5 mt-15 font-weight-bold">Upload</div>
-        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
-            Upload each file using the corresponded language section.
-        </v-alert>
-        <v-row>
-            <v-col v-for="(card,i) in panels" :key="i" cols="12" sm="6">
-                <v-card>
-                    <v-img position="top" class="white--text" height="150px" :src="card.img">
-                        <v-card-title>{{card.lang}}</v-card-title>
-                    </v-img>
-                    <v-card-text>Upload raw {{card.lang}} document in txt format.</v-card-text>
-                    <v-card-actions>
-                        <v-file-input outlined dense accept=".txt" @change="onFileChange($event,card.langCode)">
-                        </v-file-input>
-                    </v-card-actions>
-                    <v-card-actions>
-                        <v-btn @click="uploadFile(card.langCode)">Upload</v-btn>
-                    </v-card-actions>
-                </v-card>
+        <div class="text-h5 mt-10 font-weight-bold">Alignment</div>
+        <v-row class="mt-6">
+            <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
+                Selected file: {{selected[panel.langCode]}}
             </v-col>
         </v-row>
     </div>
@@ -115,19 +118,36 @@
                     file: this.files[langCode],
                     username: this.$route.params.username,
                     langCode
+                }).then(() => {
+                    this.selectFirstDocument(langCode);
                 });
             },
-            loadPreview(langCode, id) {
+            selectAndLoadPreview(langCode, name, id) {
+                this.selected[langCode] = name;
                 this.$store.dispatch(GET_SPLITTED, {
                     username: this.$route.params.username,
                     langCode,
                     fileId: id,
-                    linesCount: 10
+                    linesCount: 5
                 });
+            },
+            itemsNotEmpty(langCode) {
+                if (!this.items | !this.items[langCode]) {
+                    return true
+                }
+                return this.items[langCode].length != 0
+            },
+            selectFirstDocument(langCode) {
+                if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
+                    this.selectAndLoadPreview(langCode, "aaa.txt", 0);
+                }
             }
         },
         mounted() {
-            this.$store.dispatch(FETCH_ITEMS, this.$route.params.username);
+            this.$store.dispatch(FETCH_ITEMS, this.$route.params.username).then(() => {
+                this.selectFirstDocument("ru");
+                this.selectFirstDocument("zh");
+            });
         },
         computed: {
             ...mapGetters(["items", "splitted"]),

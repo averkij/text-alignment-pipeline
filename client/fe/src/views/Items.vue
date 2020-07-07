@@ -51,12 +51,12 @@
         <v-row>
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
                 <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-                    v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].length == 0">
+                    v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].lines.length == 0">
                     Select file to preview.
                 </v-alert>
                 <v-list class="mt-2">
                     <v-list-item-group mandatory color="blue">
-                        <v-list-item v-for="(line, i) in splitted[panel.langCode]" :key="i">
+                        <v-list-item v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
                             <v-list-item-content>
                                 <v-list-item-title v-text="i+1 + '. ' + line"></v-list-item-title>
                             </v-list-item-content>
@@ -73,9 +73,24 @@
                     v-show="!selected[panel.langCode]">
                     Document is not selected.
                 </v-alert>
-                <div v-show="selected[panel.langCode]">
-                    <span class="font-weight-bold">Selected file</span>: {{selected[panel.langCode]}}
-                </div>
+                <v-simple-table v-show="selected[panel.langCode]">
+                    <template v-slot:default>
+                        <tbody>
+                            <tr>
+                                <td>Selected file</td>
+                                <td>{{selected[panel.langCode]}}</td>
+                            </tr>
+                            <tr>
+                                <td>Lines</td>
+                                <td>{{splitted[panel.langCode].meta.lines_count}}</td>
+                            </tr>
+                            <tr>
+                                <td>Symbols</td>
+                                <td>{{splitted[panel.langCode].meta.symbols_count}}</td>
+                            </tr>
+                        </tbody>
+                    </template>
+                </v-simple-table>
             </v-col>
         </v-row>
         <div>

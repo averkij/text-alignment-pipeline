@@ -126,7 +126,8 @@ def splitted(username, lang, id, count):
         return EMPTY_LINES
     path = os.path.join(UPLOAD_FOLDER, username, SPLITTED_FOLDER, lang, files[id])    
     lines = []
-    i = 0
+    lines_count = 0
+    symbols_count = 0
     if not os.path.isfile(path):
         return {"items":{lang:lines}}
     with open(path, mode='r', encoding='utf-8') as input_file:
@@ -134,11 +135,13 @@ def splitted(username, lang, id, count):
             line = input_file.readline()
             if not line:
                 break
+            lines_count+=1
+            symbols_count+=len(line)
+            if count>0 and lines_count>count:
+                continue            
             lines.append(line)
-            i+=1
-            if count>0 and i>=count:
-                break
-    return {"items":{lang:lines}}
+    meta = {"lines_count": lines_count, "symbols_count": symbols_count}
+    return {"items":{lang:lines}, "meta":{lang:meta}}
 
 @app.route("/items/<username>/aligned/<lang>/<int:id>/<int:count>", methods=["GET"])
 def aligned(username, lang, id, count):

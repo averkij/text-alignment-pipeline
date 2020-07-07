@@ -22,8 +22,8 @@ const initialState = {
         zh: []
     },
     splitted: {
-        ru: [],
-        zh: []
+        ru: {"lines":[], "meta":{}},
+        zh: {"lines":[], "meta":{}},
     },
     aligned: {
         ru: [],
@@ -54,7 +54,7 @@ export const actions = {
         const {
             data
         } = await ItemsService.getSplitted(params)
-        context.commit(SET_SPLITTED, data.items)
+        context.commit(SET_SPLITTED, data)
         return;
     },
     async [ALIGN_SPLITTED](context, params) {
@@ -77,12 +77,18 @@ export const mutations = {
     [SET_ITEMS](state, items) {
         state.items = items;
     },
-    [SET_SPLITTED](state, items) {
-        if (items.ru) {
-            state.splitted.ru = items.ru
+    [SET_SPLITTED](state, data) {
+        if (data.items.ru) {
+            state.splitted.ru.lines = data.items.ru
         }
-        if (items.zh) {
-            state.splitted.zh = items.zh
+        if (data.items.zh) {
+            state.splitted.zh.lines = data.items.zh
+        }
+        if (data.meta.ru) {
+            state.splitted.ru.meta = data.meta.ru
+        }
+        if (data.meta.zh) {
+            state.splitted.zh.meta = data.meta.zh
         }
     },
     [SET_ALIGNED](state, items) {

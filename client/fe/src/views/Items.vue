@@ -82,11 +82,11 @@
                             </tr>
                             <tr>
                                 <td>Lines</td>
-                                <td>{{splitted[panel.langCode].meta.lines_count}}</td>
+                                <td>{{splitted[panel.langCode].meta.lines_count | separator}}</td>
                             </tr>
                             <tr>
                                 <td>Symbols</td>
-                                <td>{{splitted[panel.langCode].meta.symbols_count}}</td>
+                                <td>{{splitted[panel.langCode].meta.symbols_count | separator}}</td>
                             </tr>
                         </tbody>
                     </template>

@@ -6,6 +6,7 @@ import {
     FETCH_ITEMS,
     UPLOAD_FILES,
     GET_SPLITTED,
+    GET_PROCESSING,
     GET_ALIGNED,
     ALIGN_SPLITTED
 } from "./actions.type"
@@ -13,6 +14,7 @@ import {
 import {
     SET_ITEMS,
     SET_SPLITTED,
+    SET_PROCESSING,
     SET_ALIGNED
 } from "./mutations.type"
 
@@ -22,8 +24,18 @@ const initialState = {
         zh: []
     },
     splitted: {
-        ru: {"lines":[], "meta":{}},
-        zh: {"lines":[], "meta":{}},
+        ru: {
+            "lines": [],
+            "meta": {}
+        },
+        zh: {
+            "lines": [],
+            "meta": {}
+        },
+    },
+    processing: {
+        ru: [],
+        zh: []
     },
     aligned: {
         ru: [],
@@ -55,6 +67,14 @@ export const actions = {
             data
         } = await ItemsService.getSplitted(params)
         context.commit(SET_SPLITTED, data)
+        return;
+    },
+    // params {fileId, username}
+    async [GET_PROCESSING](context, params) {
+        const {
+            data
+        } = await ItemsService.getProcessing(params)
+        context.commit(SET_PROCESSING, data)
         return;
     },
     async [ALIGN_SPLITTED](context, params) {
@@ -91,6 +111,9 @@ export const mutations = {
             state.splitted.zh.meta = data.meta.zh
         }
     },
+    [SET_PROCESSING](state, data) {
+        state.processing = data.items
+    },
     [SET_ALIGNED](state, items) {
         if (items.ru) {
             state.aligned.ru = items.ru
@@ -107,6 +130,9 @@ const getters = {
     },
     splitted(state) {
         return state.splitted;
+    },
+    processing(state) {
+        return state.processing;
     },
     aligned(state) {
         return state.aligned;

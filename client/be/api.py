@@ -1,12 +1,15 @@
 import os
+from typing import List, Tuple
 import itertools
 import re
 import razdel
+import pickle
 
 from flask import Flask, redirect, url_for
 from flask import render_template
 from flask import request
 from flask_cors import CORS, cross_origin
+from mlflow import log_metric
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -21,6 +24,7 @@ RAW_FOLDER = "raw"
 PROXY_FOLDER = "proxy"
 SPLITTED_FOLDER = "splitted"
 NGRAM_FOLDER = "ngramed"
+PROCESSING_FOLDER = "processing"
 DONE_FOLDER = "done"
 RU_CODE = "ru"
 ZH_CODE = "zh"
@@ -108,6 +112,7 @@ def create_folders(username):
         create_subfolders(os.path.join(UPLOAD_FOLDER, username, SPLITTED_FOLDER))
         create_subfolders(os.path.join(UPLOAD_FOLDER, username, PROXY_FOLDER))
         create_subfolders(os.path.join(UPLOAD_FOLDER, username, NGRAM_FOLDER))
+        create_subfolders(os.path.join(UPLOAD_FOLDER, username, PROCESSING_FOLDER))
         create_subfolders(os.path.join(UPLOAD_FOLDER, username, DONE_FOLDER))
 
 def create_subfolders(folder):
@@ -166,7 +171,7 @@ def aligned(username, lang, id, count):
 
 @app.route("/items/<username>/align/<int:id_ru>/<int:id_zh>", methods=["GET"])
 def align(username, id_ru, id_zh):
-    batch_size = 50
+    batch_size = 100
     window = 20
     threshold = 0.5
     l_diff = 0.6
@@ -187,6 +192,8 @@ def align(username, id_ru, id_zh):
     output_ru = os.path.join(UPLOAD_FOLDER, username, DONE_FOLDER, RU_CODE, files_ru[id_ru])
     output_zh = os.path.join(UPLOAD_FOLDER, username, DONE_FOLDER, ZH_CODE, files_zh[id_zh])
 
+    processing_ru = os.path.join(UPLOAD_FOLDER, username, PROCESSING_FOLDER, RU_CODE, files_ru[id_ru])
+
     with open(splitted_ru, mode="r", encoding="utf-8") as input_ru, \
          open(splitted_zh, mode="r", encoding="utf-8") as input_zh:
         #  ,open(ngramed_proxy_ru, mode="r", encoding="utf-8") as input_proxy:
@@ -194,10 +201,10 @@ def align(username, id_ru, id_zh):
         lines_zh = input_zh.readlines()
         #lines_ru_proxy = input_proxy.readlines()
 
+    docs = []
     with open(output_ru, mode='w', encoding='utf-8') as out_ru, open(output_zh, mode='w', encoding='utf-8') as out_zh:
         for lines_ru_batch, lines_ru_proxy_batch, lines_zh_batch in get_batch(lines_ru, lines_zh, lines_zh, batch_size):
-            batch_number += 1
-            print("batch:", batch_number)            
+            print("batch:", batch_number+1)            
             vectors1 = get_line_vectors(lines_zh_batch)
             vectors2 = get_line_vectors(lines_ru_batch)
             sim_matrix = get_sim_matrix(vectors1, vectors2, window)  
@@ -214,7 +221,12 @@ def align(username, id_ru, id_zh):
                 sentences_ru.append(x)
                 sentences_ru.append(y)
                 similarities.append(s)
-        
+            
+            doc = get_processed(lines_ru_batch, lines_zh_batch, sim_matrix, threshold, batch_number, batch_size)
+            docs.append(doc)            
+            batch_number += 1  
+    pickle.dump(docs, open(processing_ru, "wb"))
+
     return {"items": {"ru": sentences_ru, "zh":sentences_zh, "sims": similarities}}
 
 def get_batch(iter1, iter2, iter3, n):
@@ -228,6 +240,17 @@ def get_batch(iter1, iter2, iter3, n):
 
 def get_line_vectors(lines):
     return model.encode(lines)
+
+def get_processed(ru_lines, zh_lines, sim_matrix, threshold, batch_number, batch_size):
+    doc = {}
+    for i in range(sim_matrix.shape[0]):
+        for j in range(sim_matrix.shape[1]):
+            if sim_matrix[i,j] >= threshold:
+                line = DocLine([j + batch_number*batch_size], ru_lines[j])
+                if not line in doc:
+                    doc[line] = []
+                doc[line].append((DocLine([i + batch_number*batch_size], zh_lines[i]),sim_matrix[i,j]))
+    return doc
 
 def get_pairs(ru_lines, zh_lines, ru_proxy_lines, sim_matrix, threshold):
     ru = []
@@ -253,7 +276,31 @@ def get_sim_matrix(ru_vec, ru_vec2, window=10):
                 sim = 1 - spatial.distance.cosine(ru_vec[i], ru_vec2[j])
             sim_matrix[i,j] = sim
 
-    return sim_matrix 
+    return sim_matrix
+
+class DocLine:
+    def __init__(self, line_ids:List, text=None):
+        self.line_ids = line_ids
+        self.text = text
+    def __hash__(self):
+        return hash(self.text)
+    def __eq__(self, other):
+        return self.text == other
+    def isNgramed(self) -> bool:
+        return len(self.line_ids)>1
+
+@app.route("/items/<username>/processing/<int:id_ru>", methods=["GET"])
+def processing(username, id_ru):
+    files_ru = get_files_list(username, SPLITTED_FOLDER, RU_CODE)
+    if len(files_ru) < id_ru+1:
+        return EMPTY_SIMS
+    processing_ru = os.path.join(UPLOAD_FOLDER, username, PROCESSING_FOLDER, RU_CODE, files_ru[id_ru])
+    docs = pickle.load(open(processing_ru, "rb"))
+    res = []
+    for doc in docs:
+        for line in doc:
+            res.append({"text": line.text, "line_ids": line.line_ids, "trans": [{"text": t[0].text, "line_ids":t[0].line_ids, "sim": t[1]} for t in doc[line]]})
+    return {"items": res}
 
 if __name__ == "__main__":
     app.run(port=12000, debug=True)

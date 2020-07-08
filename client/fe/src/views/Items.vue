@@ -77,7 +77,7 @@
                     <template v-slot:default>
                         <tbody>
                             <tr>
-                                <td>Selected file</td>
+                                <td>File</td>
                                 <td>{{selected[panel.langCode]}}</td>
                             </tr>
                             <tr>
@@ -94,9 +94,40 @@
             </v-col>
         </v-row>
         <div>
-            <v-divider></v-divider>
             <v-btn class="success mt-10" @click="align()">Align documents</v-btn>
         </div>
+
+        <div class="text-h5 mt-10 font-weight-bold">Edit</div>
+        <v-row>
+            <v-col cols="12" sm="6">
+                <v-list class="mt-2">
+                    <v-list-item-group mandatory color="blue">
+                        <v-list-item v-for="(line, i) in processing" :key="i">
+                            <v-list-item-content>
+                                <v-list-item-title v-text="line.line_ids + '. ' + line.text"></v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+            </v-col>
+            <v-col cols="12" sm="6">
+                <v-list class="mt-2">
+                    <v-list-group v-for="(line, i) in processing" :key="i" mandatory color="blue">
+                        <template v-slot:activator>
+                            <v-list-item-content>
+                                <v-list-item-title v-text="line.trans[0].line_ids + '. ' + line.trans[0].text"></v-list-item-title>
+                            </v-list-item-content>
+                        </template>
+                        <v-list-item v-for="tran in line.trans" :key="tran.sim">
+                            <v-list-item-content>
+                                <v-list-item-title class="pl-5" v-text="tran.line_ids + '. ' + tran.text + ' (' + tran.sim + ')'">
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-group>
+                </v-list>
+            </v-col>
+        </v-row>
 
         <div class="text-h5 mt-10 font-weight-bold">Result</div>
         <v-row>
@@ -125,6 +156,7 @@
         UPLOAD_FILES,
         GET_SPLITTED,
         GET_ALIGNED,
+        GET_PROCESSING,
         ALIGN_SPLITTED
     } from "@/store/actions.type";
 
@@ -134,8 +166,7 @@
                 panels: [{
                     langCode: "ru",
                     lang: "Russian",
-                    img: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                    // img: "https://images.unsplash.com/photo-1568057374096-fb959e503fd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                    img: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
                 }, {
                     langCode: "zh",
                     lang: "Chinese",
@@ -183,6 +214,12 @@
                     fileId: id,
                     linesCount: 0
                 });
+                if (langCode == "ru") {
+                    this.$store.dispatch(GET_PROCESSING, {
+                        username: this.$route.params.username,
+                        fileId: id
+                    });
+                }
             },
             align() {
                 this.$store.dispatch(ALIGN_SPLITTED, {
@@ -223,7 +260,7 @@
             });
         },
         computed: {
-            ...mapGetters(["items", "splitted", "aligned"]),
+            ...mapGetters(["items", "splitted", "aligned", "processing"]),
             username() {
                 return this.$route.params.username
             },

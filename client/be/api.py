@@ -124,17 +124,20 @@ def split_zh(paragraph):
     for sent in re.findall(u'[^!?。！？\.\!\?]+[!?。！？\.\!\?]?', paragraph, flags=re.U):
         yield sent
 
-@app.route("/items/<username>/splitted/<lang>/<int:id>/<int:count>", methods=["GET"])
-def splitted(username, lang, id, count):
+@app.route("/items/<username>/splitted/<lang>/<int:id>/<int:count>/<int:page>", methods=["GET"])
+def splitted(username, lang, id, count, page):
     files = get_files_list(username, SPLITTED_FOLDER, lang)
     if len(files) < id+1:
         return EMPTY_LINES
     path = os.path.join(UPLOAD_FOLDER, username, SPLITTED_FOLDER, lang, files[id])    
+    if not os.path.isfile(path):
+        return {"items":{lang:[]}}
+
     lines = []
     lines_count = 0
     symbols_count = 0
-    if not os.path.isfile(path):
-        return {"items":{lang:lines}}
+    shift = (page-1)*count
+
     with open(path, mode='r', encoding='utf-8') as input_file:
         while True:
             line = input_file.readline()
@@ -142,10 +145,12 @@ def splitted(username, lang, id, count):
                 break
             lines_count+=1
             symbols_count+=len(line)
-            if count>0 and lines_count>count:
-                continue            
-            lines.append(line)
-    meta = {"lines_count": lines_count, "symbols_count": symbols_count}
+            if count>0 and (lines_count<=shift or lines_count>shift+count):
+                continue
+            lines.append((line, lines_count))
+
+    total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
+    meta = {"lines_count": lines_count, "symbols_count": symbols_count, "page": page, "total_pages": total_pages}
     return {"items":{lang:lines}, "meta":{lang:meta}}
 
 @app.route("/items/<username>/aligned/<lang>/<int:id>/<int:count>", methods=["GET"])

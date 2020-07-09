@@ -58,11 +58,17 @@
                     <v-list-item-group mandatory color="blue">
                         <v-list-item v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
                             <v-list-item-content>
-                                <v-list-item-title v-text="i+1 + '. ' + line"></v-list-item-title>
+                                <v-list-item-title v-text="line[1] + '. ' + line[0]"></v-list-item-title>
                             </v-list-item-content>
                         </v-list-item>
                     </v-list-item-group>
                 </v-list>
+                <div class="text-center">
+                    <v-pagination v-model="splitted[panel.langCode].meta.page"
+                        :length="splitted[panel.langCode].meta.total_pages" total-visible="7"
+                        @input="onPreviewChange(splitted[panel.langCode].meta.page,panel.langCode)">
+                    </v-pagination>
+                </div>
             </v-col>
         </v-row>
 
@@ -98,7 +104,7 @@
         </div>
 
         <div class="text-h5 mt-10 font-weight-bold">Edit</div>
-        <v-row>
+        <v-row v-show="processing.length > 0">
             <v-col cols="12" sm="6">
                 <v-list class="mt-2">
                     <v-list-item-group mandatory color="blue">
@@ -115,12 +121,14 @@
                     <v-list-group v-for="(line, i) in processing" :key="i" mandatory color="blue">
                         <template v-slot:activator>
                             <v-list-item-content>
-                                <v-list-item-title v-text="line.trans[0].line_ids + '. ' + line.trans[0].text"></v-list-item-title>
+                                <v-list-item-title v-text="line.trans[0].line_ids + '. ' + line.trans[0].text">
+                                </v-list-item-title>
                             </v-list-item-content>
                         </template>
                         <v-list-item v-for="tran in line.trans" :key="tran.sim">
                             <v-list-item-content>
-                                <v-list-item-title class="pl-5" v-text="tran.line_ids + '. ' + tran.text + ' (' + tran.sim + ')'">
+                                <v-list-item-title class="pl-5"
+                                    v-text="tran.line_ids + '. ' + tran.text + ' (' + tran.sim + ')'">
                                 </v-list-item-title>
                             </v-list-item-content>
                         </v-list-item>
@@ -190,6 +198,15 @@
             onFileChange(file, langCode) {
                 this.files[langCode] = file
             },
+            onPreviewChange(page, langCode) {
+                this.$store.dispatch(GET_SPLITTED, {
+                    username: this.$route.params.username,
+                    langCode,
+                    fileId: this.selectedIds[langCode],
+                    linesCount: 10,
+                    page: page
+                });
+            },
             uploadFile(langCode) {
                 this.$store.dispatch(UPLOAD_FILES, {
                     file: this.files[langCode],
@@ -199,25 +216,26 @@
                     this.selectFirstDocument(langCode);
                 });
             },
-            selectAndLoadPreview(langCode, name, id) {
+            selectAndLoadPreview(langCode, name, fileId) {
                 this.selected[langCode] = name;
-                this.selectedIds[langCode] = id;
+                this.selectedIds[langCode] = fileId;
                 this.$store.dispatch(GET_SPLITTED, {
                     username: this.$route.params.username,
                     langCode,
-                    fileId: id,
-                    linesCount: 5
+                    fileId,
+                    linesCount: 10,
+                    page: 1
                 });
                 this.$store.dispatch(GET_ALIGNED, {
                     username: this.$route.params.username,
                     langCode,
-                    fileId: id,
+                    fileId,
                     linesCount: 0
                 });
                 if (langCode == "ru") {
                     this.$store.dispatch(GET_PROCESSING, {
                         username: this.$route.params.username,
-                        fileId: id
+                        fileId
                     });
                 }
             },

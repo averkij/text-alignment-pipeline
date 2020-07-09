@@ -33,10 +33,7 @@ const initialState = {
             "meta": {}
         },
     },
-    processing: {
-        ru: [],
-        zh: []
-    },
+    processing: [],
     aligned: {
         ru: [],
         zh: []
@@ -61,7 +58,7 @@ export const actions = {
         await context.dispatch(FETCH_ITEMS, params.username);
         return;
     },
-    // params {fileId, username, langCode, lines}
+    // params {fileId, username, langCode, count, page}
     async [GET_SPLITTED](context, params) {
         const {
             data

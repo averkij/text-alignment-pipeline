@@ -51,7 +51,7 @@ const ApiService = {
         return ApiService.post("items", params.username, form);
       },
       getSplitted(params) {
-        return ApiService.get("items", `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}`);
+        return ApiService.get("items", `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}/${params.page}`);
       },
       getAligned(params) {
         return ApiService.get("items", `${params.username}/aligned/${params.langCode}/${params.fileId}/${params.linesCount}`);

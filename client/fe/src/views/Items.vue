@@ -104,7 +104,15 @@
         </div>
 
         <div class="text-h5 mt-10 font-weight-bold">Edit</div>
-        <v-row v-show="processing.length > 0">
+
+        <div class="mt-10">
+            <div v-for="(line,i) in processing" :key="i">
+                <EditItem :item="line"></EditItem>
+                <v-divider></v-divider>
+            </div>
+        </div>
+
+        <!-- <v-row v-show="processing.length > 0">
             <v-col cols="12" sm="6">
                 <v-list class="mt-2">
                     <v-list-item-group mandatory color="blue">
@@ -135,7 +143,7 @@
                     </v-list-group>
                 </v-list>
             </v-col>
-        </v-row>
+        </v-row> -->
 
         <div class="text-h5 mt-10 font-weight-bold">Result</div>
         <v-row>
@@ -155,6 +163,7 @@
 </template>
 
 <script>
+    import EditItem from "@/components/EditItem"
     import {
         mapGetters
     } from "vuex";
@@ -288,6 +297,9 @@
                 }
                 return this.items.ru.length == 0 & this.items.zh.length == 0
             }
+        },
+        components: {
+            EditItem
         }
     }
 </script>

@@ -92,6 +92,7 @@ def split_to_sentences(filename, langcode, username):
             sentences = list(re.sub(pattern_zh,'', x.strip()) for x in split_zh(lines))
         else:
             raise Exception("Unknown language code.")
+        
         count = 1
         for x in sentences:
             if count < len(sentences)-1:
@@ -99,6 +100,10 @@ def split_to_sentences(filename, langcode, username):
             else:
                 out_file.write(x.strip())
             count += 1
+            #DEBUG
+            #if count>50:
+                #break
+
 
 def get_files_list(username, folder, lang):
     if not os.path.isdir(os.path.join(UPLOAD_FOLDER, username, folder, lang)):
@@ -172,7 +177,7 @@ def aligned(username, lang, id, count):
             i+=1
             if count>0 and i>=count:
                 break
-    return {"items":{lang:lines}}
+    return {"items":{lang:lines[:5]}}
 
 @app.route("/items/<username>/align/<int:id_ru>/<int:id_zh>", methods=["GET"])
 def align(username, id_ru, id_zh):
@@ -208,28 +213,28 @@ def align(username, id_ru, id_zh):
 
     docs = []
     with open(output_ru, mode='w', encoding='utf-8') as out_ru, open(output_zh, mode='w', encoding='utf-8') as out_zh:
+        vectors1 = []
+        vectors2 = []
         for lines_ru_batch, lines_ru_proxy_batch, lines_zh_batch in get_batch(lines_ru, lines_zh, lines_zh, batch_size):
             print("batch:", batch_number+1)            
-            vectors1 = get_line_vectors(lines_zh_batch)
-            vectors2 = get_line_vectors(lines_ru_batch)
-            sim_matrix = get_sim_matrix(vectors1, vectors2, window)  
-            # count = 0
-            # for i in range(sim_matrix.shape[0]):
-            #     for j in range(sim_matrix.shape[1]):
-            #         if sim_matrix[i,j] >= threshold:
-            #             count += 1
-            # total_pairs += count
-            res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru_batch, lines_zh_batch, lines_ru_proxy_batch, sim_matrix, threshold)
-            for x,y,z,s in zip(res_ru, res_zh, res_ru_proxy, sims):
-                out_ru.write(x)
-                out_zh.write(y)
-                sentences_ru.append(x)
-                sentences_ru.append(y)
-                similarities.append(s)
-            
-            doc = get_processed(lines_ru_batch, lines_zh_batch, sim_matrix, threshold, batch_number, batch_size)
-            docs.append(doc)            
-            batch_number += 1  
+            vectors1 += get_line_vectors(lines_zh_batch)
+            vectors2 += get_line_vectors(lines_ru_batch)
+            batch_number += 1
+
+        sim_matrix = get_sim_matrix(vectors1, vectors2, window)
+        res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru, lines_zh, lines_zh, sim_matrix, threshold)
+
+        #write auto aligned lines
+        for x,y,z,s in zip(res_ru, res_zh, res_ru_proxy, sims):
+            out_ru.write(x)
+            out_zh.write(y)
+            sentences_ru.append(x)
+            sentences_ru.append(y)
+            similarities.append(s)
+        
+        doc = get_processed(lines_ru, lines_zh, sim_matrix, threshold, batch_number, batch_size)
+        docs.append(doc)            
+        
     pickle.dump(docs, open(processing_ru, "wb"))
 
     return {"items": {"ru": sentences_ru, "zh":sentences_zh, "sims": similarities}}
@@ -250,11 +255,15 @@ def get_processed(ru_lines, zh_lines, sim_matrix, threshold, batch_number, batch
     doc = {}
     for i in range(sim_matrix.shape[0]):
         for j in range(sim_matrix.shape[1]):
+            ru_line_id = j
+            zh_line_id = i
+            line = DocLine([ru_line_id], ru_lines[j])
+            if not line in doc:
+                doc[line] = []                
             if sim_matrix[i,j] >= threshold:
-                line = DocLine([j + batch_number*batch_size], ru_lines[j])
-                if not line in doc:
-                    doc[line] = []
-                doc[line].append((DocLine([i + batch_number*batch_size], zh_lines[i]),sim_matrix[i,j]))
+                doc[line].append((DocLine([zh_line_id], zh_lines[i]), sim_matrix[i,j]))
+            elif sim_matrix[i,j] > 0:
+                doc[line].append((DocLine([zh_line_id], "zh_line -> " + str(zh_line_id)), sim_matrix[i,j]))
     return doc
 
 def get_pairs(ru_lines, zh_lines, ru_proxy_lines, sim_matrix, threshold):
@@ -272,14 +281,14 @@ def get_pairs(ru_lines, zh_lines, ru_proxy_lines, sim_matrix, threshold):
                 
     return ru,zh,ru_proxy,sims
 
-def get_sim_matrix(ru_vec, ru_vec2, window=10):
-    sim_matrix = np.zeros((len(ru_vec), len(ru_vec2)))
-    k = len(ru_vec)/len(ru_vec2)
-    for i in range(len(ru_vec)):
-        for j in range(len(ru_vec2)):
+def get_sim_matrix(vec1, vec2, window=10):
+    sim_matrix = np.zeros((len(vec1), len(vec2)))
+    k = len(vec1)/len(vec2)
+    for i in range(len(vec1)):
+        for j in range(len(vec2)):
             if (j*k > i-window) & (j*k < i+window):
-                sim = 1 - spatial.distance.cosine(ru_vec[i], ru_vec2[j])
-            sim_matrix[i,j] = sim
+                sim = 1 - spatial.distance.cosine(vec1[i], vec2[j])
+                sim_matrix[i,j] = sim
 
     return sim_matrix
 
@@ -305,7 +314,7 @@ def processing(username, id_ru):
     for doc in docs:
         for line in doc:
             res.append({"text": line.text, "line_ids": line.line_ids, "trans": [{"text": t[0].text, "line_ids":t[0].line_ids, "sim": t[1]} for t in doc[line]]})
-    return {"items": res}
+    return {"items": res[:10]}
 
 if __name__ == "__main__":
     app.run(port=12000, debug=True)

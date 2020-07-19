@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <v-row justify="center" no-gutters>
             <v-col class="text-left" cols="6">
                 <div class="d-table fill-height">

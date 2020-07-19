@@ -57,7 +57,7 @@ const ApiService = {
         return ApiService.get("items", `${params.username}/aligned/${params.langCode}/${params.fileId}/${params.linesCount}`);
       },
       getProcessing(params) {
-        return ApiService.get("items", `${params.username}/processing/${params.fileId}`);
+        return ApiService.get("items", `${params.username}/processing/${params.fileId}/${params.linesCount}/${params.page}`);
       },
       alignSplitted(params) {
         return ApiService.get("items", `${params.username}/align/${params.fileIds.ru}/${params.fileIds.zh}`);

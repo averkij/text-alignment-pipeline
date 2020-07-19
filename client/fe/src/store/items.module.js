@@ -109,7 +109,7 @@ export const mutations = {
         }
     },
     [SET_PROCESSING](state, data) {
-        state.processing = data.items
+        state.processing = data
     },
     [SET_ALIGNED](state, items) {
         if (items.ru) {

@@ -301,16 +301,21 @@ class DocLine:
     def isNgramed(self) -> bool:
         return len(self.line_ids)>1
 
-@app.route("/items/<username>/processing/<int:id_ru>", methods=["GET"])
-def processing(username, id_ru):
+@app.route("/items/<username>/processing/<int:id_ru>/<int:count>/<int:page>", methods=["GET"])
+def processing(username, id_ru, count, page):
     files_ru = get_files_list(username, SPLITTED_FOLDER, RU_CODE)
     if len(files_ru) < id_ru+1:
         return EMPTY_SIMS
     processing_ru = os.path.join(UPLOAD_FOLDER, username, PROCESSING_FOLDER, RU_CODE, files_ru[id_ru])
     docs = pickle.load(open(processing_ru, "rb"))
     res = []
+    lines_count = 0    
+    shift = (page-1)*count
     for doc in docs:
         for line in doc:
+            lines_count += 1
+            if count>0 and (lines_count<=shift or lines_count>shift+count):
+                continue
             #selected — x[2] is selected translation candidate
             selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
             #print(selected)
@@ -327,7 +332,9 @@ def processing(username, id_ru):
                     "line_ids":selected[0].line_ids, 
                     "sim": selected[1]
                     }})
-    return {"items": res[:10]}
+    total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
+    meta = {"page": page, "total_pages": total_pages}
+    return {"items": res, "meta": meta}
 
 if __name__ == "__main__":
     app.run(port=12000, debug=True)

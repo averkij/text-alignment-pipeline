@@ -66,7 +66,7 @@
                 <div class="text-center">
                     <v-pagination v-model="splitted[panel.langCode].meta.page"
                         :length="splitted[panel.langCode].meta.total_pages" total-visible="7"
-                        @input="onPreviewChange(splitted[panel.langCode].meta.page,panel.langCode)">
+                        @input="onPreviewPageChange(splitted[panel.langCode].meta.page, panel.langCode)">
                     </v-pagination>
                 </div>
             </v-col>
@@ -106,9 +106,15 @@
         <div class="text-h5 mt-10 font-weight-bold">Edit</div>
 
         <div class="mt-10">
-            <div v-for="(line,i) in processing" :key="i">
+            <div v-for="(line,i) in processing.items" :key="i">
                 <EditItem :item="line"></EditItem>
                 <v-divider></v-divider>
+            </div>
+            <div class="text-center mt-3">
+                <v-pagination v-model="processing.meta.page"
+                    :length="processing.meta.total_pages" total-visible="10"
+                    @input="onProcessingPageChange(processing.meta.page)">
+                </v-pagination>
             </div>
         </div>
 
@@ -207,11 +213,19 @@
             onFileChange(file, langCode) {
                 this.files[langCode] = file
             },
-            onPreviewChange(page, langCode) {
+            onPreviewPageChange(page, langCode) {
                 this.$store.dispatch(GET_SPLITTED, {
                     username: this.$route.params.username,
                     langCode,
                     fileId: this.selectedIds[langCode],
+                    linesCount: 10,
+                    page: page
+                });
+            },
+            onProcessingPageChange(page) {
+                this.$store.dispatch(GET_PROCESSING, {
+                    username: this.$route.params.username,
+                    fileId: this.selectedIds['ru'],
                     linesCount: 10,
                     page: page
                 });
@@ -244,7 +258,9 @@
                 if (langCode == "ru") {
                     this.$store.dispatch(GET_PROCESSING, {
                         username: this.$route.params.username,
-                        fileId
+                        fileId,
+                        linesCount: 10,
+                        page: 1
                     });
                 }
             },

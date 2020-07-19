@@ -183,7 +183,7 @@ def aligned(username, lang, id, count):
 def align(username, id_ru, id_zh):
     batch_size = 100
     window = 20
-    threshold = 0.5
+    threshold = 0.3
     l_diff = 0.6
     batch_number = 0
     total_pairs = 0
@@ -251,19 +251,17 @@ def get_batch(iter1, iter2, iter3, n):
 def get_line_vectors(lines):
     return model.encode(lines)
 
-def get_processed(ru_lines, zh_lines, sim_matrix, threshold, batch_number, batch_size):
+def get_processed(ru_lines, zh_lines, sim_matrix, threshold, batch_number, batch_size, candidates_count=5):
     doc = {}
-    for i in range(sim_matrix.shape[0]):
-        for j in range(sim_matrix.shape[1]):
-            ru_line_id = j
-            zh_line_id = i
-            line = DocLine([ru_line_id], ru_lines[j])
-            if not line in doc:
-                doc[line] = []                
-            if sim_matrix[i,j] >= threshold:
-                doc[line].append((DocLine([zh_line_id], zh_lines[i]), sim_matrix[i,j]))
-            elif sim_matrix[i,j] > 0:
-                doc[line].append((DocLine([zh_line_id], "zh_line -> " + str(zh_line_id)), sim_matrix[i,j]))
+    for ru_line_id in range(sim_matrix.shape[1]):
+        line = DocLine([ru_line_id], ru_lines[ru_line_id])
+        doc[line] = []
+        zh_candidates = []
+        for zh_line_id in range(sim_matrix.shape[0]):            
+            if sim_matrix[zh_line_id,ru_line_id] > 0 and sim_matrix[zh_line_id,ru_line_id] >= threshold:
+                zh_candidates.append((zh_line_id, sim_matrix[zh_line_id,ru_line_id]))
+        for i,c in enumerate(sorted(zh_candidates, key=lambda x: x[1], reverse=True)[:candidates_count]):
+            doc[line].append((DocLine([c[0]], zh_lines[c[0]]), sim_matrix[c[0], ru_line_id], 1 if i==0 else 0))
     return doc
 
 def get_pairs(ru_lines, zh_lines, ru_proxy_lines, sim_matrix, threshold):
@@ -313,7 +311,22 @@ def processing(username, id_ru):
     res = []
     for doc in docs:
         for line in doc:
-            res.append({"text": line.text, "line_ids": line.line_ids, "trans": [{"text": t[0].text, "line_ids":t[0].line_ids, "sim": t[1]} for t in doc[line]]})
+            #selected — x[2] is selected translation candidate
+            selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
+            #print(selected)
+            res.append({
+                "text": line.text,
+                "line_ids": line.line_ids,
+                "trans": [{
+                    "text": t[0].text, 
+                    "line_ids":t[0].line_ids, 
+                    "sim": t[1]
+                    } for t in doc[line]],
+                "selected": {
+                    "text": selected[0].text, 
+                    "line_ids":selected[0].line_ids, 
+                    "sim": selected[1]
+                    }})
     return {"items": res[:10]}
 
 if __name__ == "__main__":

@@ -48,3 +48,9 @@ for doc in docs:
 res
 
 # %%
+
+for i,x in enumerate(sorted([1,2,3,4,8,9,0,4,3,2])):
+    print(1 if i==0 else 0, x)
+
+
+# %%

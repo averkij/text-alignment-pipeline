@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <Header />
+    <!-- <Header /> -->
     <v-main>
       <v-container class="pb-15">
         <router-view></router-view>
@@ -11,13 +11,13 @@
 </template>
 
 <script>
-  import Header from "@/components/Header"
+  // import Header from "@/components/Header"
   import Footer from "@/components/Footer"
 
   export default {
     name: "App",
     components: {
-      Header,
+      // Header,
       Footer
     }
   };

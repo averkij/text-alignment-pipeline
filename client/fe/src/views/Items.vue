@@ -1,13 +1,20 @@
 <template>
 
     <div>
-        <div class="text-h3 mt-5">Hello, {{username}}!</div>
-        <div class="text-h4 mt-15 font-weight-bold">Documents</div>
+        <div class=d-flex>
+            <div class="text-h3 mt-5 align-self-start">🤗</div>
+            <div class="text-h3 mt-5 pl-3">
+                Hello, {{username}}!
+                <div class="text-subtitle-1 mt-2 pl-1"> — Let's create some cool stuff.</div>
+            </div>
+
+        </div>
+
+        <div class="text-h4 mt-15 font-weight-bold">💾 Documents</div>
 
         <v-alert type="info" class="mt-6" v-show="showAlert">
             There are no uploaded documents yet. Please upload some using the form below.
         </v-alert>
-
         <div class="mt-6">
             <v-row>
                 <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
@@ -16,7 +23,7 @@
                             <v-card-title>{{panel.lang}}</v-card-title>
                         </v-img> -->
                         <div class="blue lighten-5">
-                            <v-card-title>{{panel.lang}}</v-card-title>
+                            <v-card-title>{{panel.icon}} {{panel.lang}}</v-card-title>
                             <v-card-text>Your {{panel.lang}} files</v-card-text>
                         </div>
                         <v-divider></v-divider>
@@ -51,21 +58,21 @@
             </v-row>
         </div>
 
-        <div class="text-h4 mt-10 font-weight-bold">Preview</div>
+        <div class="text-h4 mt-10 font-weight-bold">🔍 Preview</div>
         <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
             Documents are splitted by sentences using language specific rules.
         </v-alert>
         <v-row>
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
-                <v-card>
+                <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+                    v-if="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].lines.length == 0">
+                    Select file to preview.
+                </v-alert>
+                <v-card v-else>
                     <div class="yellow lighten-5">
                         <v-card-title>{{selected[panel.langCode]}}</v-card-title>
                         <v-card-text>{{splitted[panel.langCode].meta.lines_count | separator}} lines</v-card-text>
                     </div>
-                    <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-                        v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].lines.length == 0">
-                        Select file to preview.
-                    </v-alert>
                     <v-divider></v-divider>
                     <div v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
                         <PreviewItem :item="line"></PreviewItem>
@@ -86,14 +93,14 @@
         </v-row>
 
 
-        <div class="text-h4 mt-10 font-weight-bold">Alignment</div>
+        <div class="text-h4 mt-10 font-weight-bold">⚖️ Alignment</div>
         <v-row class="mt-6">
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
                 <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-                    v-show="!selected[panel.langCode]">
+                    v-if="!selected[panel.langCode]">
                     Document is not selected.
                 </v-alert>
-                <v-card v-show="selected[panel.langCode]">
+                <v-card v-else>
                     <div class="purple lighten-5">
                         <v-card-title>{{selected[panel.langCode]}}</v-card-title>
                         <v-card-text>{{splitted[panel.langCode].meta.lines_count | separator}} lines</v-card-text>
@@ -120,15 +127,17 @@
                 </v-card>
             </v-col>
         </v-row>
-        <div>
-            <v-btn class="success mt-10" :loading="alignLoading" :disabled="alignLoading" @click="align()">
-                Align documents
-            </v-btn>
-        </div>
+        <v-btn v-show="selected['ru'] && selected['zh']" class="success mt-10" :loading="alignLoading" :disabled="alignLoading" @click="align()">
+            Align documents
+        </v-btn>
 
-        <div class="text-h4 mt-10 font-weight-bold">Result</div>
+        <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
         <div class="mt-10">
-            <v-card>
+            <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+                v-if="!processing | !processing.items | processing.items.length == 0">
+                Select previously aligned Russian document or align something new.
+            </v-alert>
+            <v-card v-else>
                 <div class="green lighten-5" dark>
                     <v-card-title>Document</v-card-title>
                     <v-card-text>Review and edit automatically aligned document</v-card-text>
@@ -149,54 +158,6 @@
                 </v-card-actions>
             </v-card>
         </div>
-
-        <!-- <v-row v-show="processing.length > 0">
-            <v-col cols="12" sm="6">
-                <v-list class="mt-2">
-                    <v-list-item-group mandatory color="blue">
-                        <v-list-item v-for="(line, i) in processing" :key="i">
-                            <v-list-item-content>
-                                <v-list-item-title v-text="line.line_ids + '. ' + line.text"></v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list-item-group>
-                </v-list>
-            </v-col>
-            <v-col cols="12" sm="6">
-                <v-list class="mt-2">
-                    <v-list-group v-for="(line, i) in processing" :key="i" mandatory color="blue">
-                        <template v-slot:activator>
-                            <v-list-item-content>
-                                <v-list-item-title v-text="line.trans[0].line_ids + '. ' + line.trans[0].text">
-                                </v-list-item-title>
-                            </v-list-item-content>
-                        </template>
-                        <v-list-item v-for="tran in line.trans" :key="tran.sim">
-                            <v-list-item-content>
-                                <v-list-item-title class="pl-5"
-                                    v-text="tran.line_ids + '. ' + tran.text + ' (' + tran.sim + ')'">
-                                </v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list-group>
-                </v-list>
-            </v-col>
-        </v-row> -->
-
-        <!-- <div class="text-h5 mt-10 font-weight-bold">Result</div>
-        <v-row>
-            <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
-                <v-list class="mt-2">
-                    <v-list-item-group mandatory color="blue">
-                        <v-list-item v-for="(line, i) in aligned[panel.langCode]" :key="i">
-                            <v-list-item-content>
-                                <v-list-item-title v-text="i+1 + '. ' + line"></v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list-item-group>
-                </v-list>
-            </v-col>
-        </v-row> -->
     </div>
 </template>
 
@@ -221,10 +182,12 @@
             return {
                 panels: [{
                     langCode: "ru",
-                    lang: "Russian"
+                    lang: "Russian",
+                    icon: "🥄"
                 }, {
                     langCode: "zh",
-                    lang: "Chinese"
+                    lang: "Chinese",
+                    icon: "🥢"
                 }],
                 files: {
                     "ru": null,
@@ -302,17 +265,23 @@
                     username: this.$route.params.username,
                     fileIds: this.selectedIds
                 }).then(() => {
-                    this.$store.dispatch(GET_ALIGNED, {
+                    // this.$store.dispatch(GET_ALIGNED, {
+                    //     username: this.$route.params.username,
+                    //     langCode: "ru",
+                    //     fileId: this.selectedIds["ru"],
+                    //     linesCount: 0
+                    // });
+                    // this.$store.dispatch(GET_ALIGNED, {
+                    //     username: this.$route.params.username,
+                    //     langCode: "zh",
+                    //     fileId: this.selectedIds["zh"],
+                    //     linesCount: 0
+                    // });
+                    this.$store.dispatch(GET_PROCESSING, {
                         username: this.$route.params.username,
-                        langCode: "ru",
                         fileId: this.selectedIds["ru"],
-                        linesCount: 0
-                    });
-                    this.$store.dispatch(GET_ALIGNED, {
-                        username: this.$route.params.username,
-                        langCode: "zh",
-                        fileId: this.selectedIds["zh"],
-                        linesCount: 0
+                        linesCount: 10,
+                        page: 1
                     });
                     this.alignLoading = false;
                 });

@@ -1,16 +1,12 @@
 <template>
     <div>
         <v-row justify="center" no-gutters>
-            <v-col class="text-left" cols="6">
+            <v-col class="text-left" cols="12">
                 <div class="d-table fill-height">
-                    <div class="d-table-cell grey lighten-4 pa-2">{{ item.line_ids[0] }}</div>
-                    <div class="d-table-cell pa-2">{{ item.text }}</div>
-                </div>
-            </v-col>
-            <v-col class="text-left" cols="6">
-                <div class="d-table fill-height">
-                    <div class="d-table-cell grey lighten-4 pa-2">{{ item.trans[0].line_ids[0] }}</div>
-                    <div class="d-table-cell pa-2">{{ item.trans[0].text }}</div>
+                    <div class="d-table-cell grey lighten-4 pa-2 text-center" style="min-width:45px">
+                        {{ item[1] }}
+                    </div>
+                    <div class="d-table-cell pa-2">{{ item[0] }}</div>
                 </div>
             </v-col>
         </v-row>

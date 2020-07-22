@@ -54,16 +54,11 @@
                     v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].lines.length == 0">
                     Select file to preview.
                 </v-alert>
-                <v-list class="mt-2">
-                    <v-list-item-group mandatory color="blue">
-                        <v-list-item v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
-                            <v-list-item-content>
-                                <v-list-item-title v-text="line[1] + '. ' + line[0]"></v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list-item-group>
-                </v-list>
-                <div class="text-center">
+                <div v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
+                    <PreviewItem :item="line"></PreviewItem>
+                    <v-divider></v-divider>
+                </div>
+                <div class="text-center mt-3">
                     <v-pagination v-model="splitted[panel.langCode].meta.page"
                         :length="splitted[panel.langCode].meta.total_pages" total-visible="7"
                         @input="onPreviewPageChange(splitted[panel.langCode].meta.page, panel.langCode)">
@@ -111,8 +106,7 @@
                 <v-divider></v-divider>
             </div>
             <div class="text-center mt-3">
-                <v-pagination v-model="processing.meta.page"
-                    :length="processing.meta.total_pages" total-visible="10"
+                <v-pagination v-model="processing.meta.page" :length="processing.meta.total_pages" total-visible="10"
                     @input="onProcessingPageChange(processing.meta.page)">
                 </v-pagination>
             </div>
@@ -170,6 +164,7 @@
 
 <script>
     import EditItem from "@/components/EditItem"
+    import PreviewItem from "@/components/PreviewItem"
     import {
         mapGetters
     } from "vuex";
@@ -315,7 +310,8 @@
             }
         },
         components: {
-            EditItem
+            EditItem,
+            PreviewItem
         }
     }
 </script>

@@ -2,7 +2,7 @@
 
     <div>
         <div class="text-h3 mt-5">Hello, {{username}}!</div>
-        <div class="text-h5 mt-15 font-weight-bold">Documents</div>
+        <div class="text-h4 mt-15 font-weight-bold">Documents</div>
 
         <v-alert type="info" class="mt-6" v-show="showAlert">
             There are no uploaded documents yet. Please upload some using the form below.
@@ -12,15 +12,20 @@
             <v-row>
                 <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
                     <v-card>
-                        <v-img position="top" class="white--text" height="200px" :src="panel.img">
+                        <!-- <v-img position="top" class="white--text" height="200px" :src="panel.img">
                             <v-card-title>{{panel.lang}}</v-card-title>
-                        </v-img>
+                        </v-img> -->
+                        <div class="blue lighten-5">
+                            <v-card-title>{{panel.lang}}</v-card-title>
+                            <v-card-text>Your {{panel.lang}} files</v-card-text>
+                        </div>
+                        <v-divider></v-divider>
                         <v-list class="pa-0">
-                            <v-list-item-group mandatory color="blue">
+                            <v-list-item-group mandatory color="gray">
                                 <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i"
                                     @change="selectAndLoadPreview(panel.langCode, item, i)">
                                     <v-list-item-icon>
-                                        <v-icon>mdi-star</v-icon>
+                                        <v-icon>mdi-arrow-right</v-icon>
                                     </v-list-item-icon>
                                     <v-list-item-content>
                                         <v-list-item-title v-text="item"></v-list-item-title>
@@ -38,81 +43,111 @@
                         <v-divider></v-divider>
                         <v-card-actions>
                             <v-btn @click="uploadFile(panel.langCode)">Upload</v-btn>
+                            <!-- <v-spacer></v-spacer>
+                            <v-btn @click="uploadFile(panel.langCode)">Upload splitted</v-btn> -->
                         </v-card-actions>
                     </v-card>
                 </v-col>
             </v-row>
         </div>
 
-        <div class="text-h5 mt-10 font-weight-bold">Preview</div>
+        <div class="text-h4 mt-10 font-weight-bold">Preview</div>
         <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
             Documents are splitted by sentences using language specific rules.
         </v-alert>
         <v-row>
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
-                <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-                    v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].lines.length == 0">
-                    Select file to preview.
-                </v-alert>
-                <div v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
-                    <PreviewItem :item="line"></PreviewItem>
+                <v-card>
+                    <div class="yellow lighten-5">
+                        <v-card-title>{{selected[panel.langCode]}}</v-card-title>
+                        <v-card-text>{{splitted[panel.langCode].meta.lines_count | separator}} lines</v-card-text>
+                    </div>
+                    <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+                        v-show="!splitted | !splitted[panel.langCode] | splitted[panel.langCode].lines.length == 0">
+                        Select file to preview.
+                    </v-alert>
                     <v-divider></v-divider>
-                </div>
-                <div class="text-center mt-3">
-                    <v-pagination v-model="splitted[panel.langCode].meta.page"
-                        :length="splitted[panel.langCode].meta.total_pages" total-visible="7"
-                        @input="onPreviewPageChange(splitted[panel.langCode].meta.page, panel.langCode)">
-                    </v-pagination>
-                </div>
+                    <div v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
+                        <PreviewItem :item="line"></PreviewItem>
+                        <v-divider></v-divider>
+                    </div>
+                    <div class="text-center pa-3">
+                        <v-pagination v-model="splitted[panel.langCode].meta.page"
+                            :length="splitted[panel.langCode].meta.total_pages" total-visible="7"
+                            @input="onPreviewPageChange(splitted[panel.langCode].meta.page, panel.langCode)">
+                        </v-pagination>
+                    </div>
+                    <v-divider></v-divider>
+                    <v-card-actions>
+                        <v-btn>Download</v-btn>
+                    </v-card-actions>
+                </v-card>
             </v-col>
         </v-row>
 
-        <div class="text-h5 mt-10 font-weight-bold">Alignment</div>
+
+        <div class="text-h4 mt-10 font-weight-bold">Alignment</div>
         <v-row class="mt-6">
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
                 <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
                     v-show="!selected[panel.langCode]">
                     Document is not selected.
                 </v-alert>
-                <v-simple-table v-show="selected[panel.langCode]">
-                    <template v-slot:default>
-                        <tbody>
-                            <tr>
-                                <td>File</td>
-                                <td>{{selected[panel.langCode]}}</td>
-                            </tr>
-                            <tr>
-                                <td>Lines</td>
-                                <td>{{splitted[panel.langCode].meta.lines_count | separator}}</td>
-                            </tr>
-                            <tr>
-                                <td>Symbols</td>
-                                <td>{{splitted[panel.langCode].meta.symbols_count | separator}}</td>
-                            </tr>
-                        </tbody>
-                    </template>
-                </v-simple-table>
+                <v-card v-show="selected[panel.langCode]">
+                    <div class="purple lighten-5">
+                        <v-card-title>{{selected[panel.langCode]}}</v-card-title>
+                        <v-card-text>{{splitted[panel.langCode].meta.lines_count | separator}} lines</v-card-text>
+                    </div>
+                    <v-divider></v-divider>
+                    <v-simple-table>
+                        <template v-slot:default>
+                            <tbody>
+                                <tr>
+                                    <td>File</td>
+                                    <td>{{selected[panel.langCode]}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Lines</td>
+                                    <td>{{splitted[panel.langCode].meta.lines_count | separator}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Symbols</td>
+                                    <td>{{splitted[panel.langCode].meta.symbols_count | separator}}</td>
+                                </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                </v-card>
             </v-col>
         </v-row>
         <div>
-            <v-btn class="success mt-10" :loading="alignLoading" :disabled="alignLoading" @click="align()">Align documents</v-btn>
+            <v-btn class="success mt-10" :loading="alignLoading" :disabled="alignLoading" @click="align()">
+                Align documents
+            </v-btn>
         </div>
 
-        <div class="text-h5 mt-10 font-weight-bold">Edit</div>
-
+        <div class="text-h4 mt-10 font-weight-bold">Result</div>
         <div class="mt-10">
-            <div v-for="(line,i) in processing.items" :key="i">
-                <EditItem :item="line"></EditItem>
+            <v-card>
+                <div class="green lighten-5" dark>
+                    <v-card-title>Document</v-card-title>
+                    <v-card-text>Review and edit automatically aligned document</v-card-text>
+                </div>
                 <v-divider></v-divider>
-            </div>
-            <div class="text-center mt-3">
-                <v-pagination v-model="processing.meta.page" :length="processing.meta.total_pages" total-visible="10"
-                    @input="onProcessingPageChange(processing.meta.page)">
-                </v-pagination>
-            </div>
-            <div>
-                
-            </div>
+                <div v-for="(line,i) in processing.items" :key="i">
+                    <EditItem :item="line"></EditItem>
+                    <v-divider></v-divider>
+                </div>
+                <div class="text-center pa-3">
+                    <v-pagination v-model="processing.meta.page" :length="processing.meta.total_pages"
+                        total-visible="10" @input="onProcessingPageChange(processing.meta.page)">
+                    </v-pagination>
+                </div>
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-btn class="primary">Save</v-btn>
+                </v-card-actions>
+            </v-card>
         </div>
 
         <!-- <v-row v-show="processing.length > 0">
@@ -148,7 +183,7 @@
             </v-col>
         </v-row> -->
 
-        <div class="text-h5 mt-10 font-weight-bold">Result</div>
+        <!-- <div class="text-h5 mt-10 font-weight-bold">Result</div>
         <v-row>
             <v-col v-for="(panel, i) in panels" :key=i cols="12" sm="6">
                 <v-list class="mt-2">
@@ -161,7 +196,7 @@
                     </v-list-item-group>
                 </v-list>
             </v-col>
-        </v-row>
+        </v-row> -->
     </div>
 </template>
 
@@ -186,12 +221,10 @@
             return {
                 panels: [{
                     langCode: "ru",
-                    lang: "Russian",
-                    img: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                    lang: "Russian"
                 }, {
                     langCode: "zh",
-                    lang: "Chinese",
-                    img: "https://images.unsplash.com/photo-1538099023053-30e7da644196?ixlib=rb-1.2.1&&auto=format&fit=crop&w=1350&q=80"
+                    lang: "Chinese"
                 }],
                 files: {
                     "ru": null,

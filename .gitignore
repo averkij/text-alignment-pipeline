@@ -85,3 +85,15 @@ client/be/static/xxx/splitted/zh/chekhov_6_zh.txt
 client/be/static/xxx/splitted/zh/idiot_zh.txt
 client/be/static/xxx/splitted/zh/kryzhovnik_zh.txt
 client/be/static/xxx/splitted/zh/piknik_de.txt
+client/be/static/xxx/done/ru/chekhov_6_ru.txt
+client/be/static/xxx/done/ru/chekhov_futlar_ru.txt
+client/be/static/xxx/done/zh/chekhov_6_zh.txt
+client/be/static/xxx/done/zh/chekhov_futlar_zh.txt
+client/be/static/xxx/processing/ru/chekhov_6_ru.txt
+client/be/static/xxx/processing/ru/chekhov_futlar_ru.txt
+client/be/static/xxx/raw/ru/chekhov_6_ru.txt
+client/be/static/xxx/raw/ru/chekhov_futlar_ru.txt
+client/be/static/xxx/raw/zh/chekhov_futlar_zh.txt
+client/be/static/xxx/splitted/ru/chekhov_6_ru.txt
+client/be/static/xxx/splitted/ru/chekhov_futlar_ru.txt
+client/be/static/xxx/splitted/zh/chekhov_futlar_zh.txt

@@ -33,7 +33,10 @@ const initialState = {
             "meta": {}
         },
     },
-    processing: [],
+    processing: {
+        "items": [],
+        "meta": {}
+    },
     aligned: {
         ru: [],
         zh: []
@@ -68,10 +71,11 @@ export const actions = {
     },
     // params {fileId, username}
     async [GET_PROCESSING](context, params) {
-        const {
-            data
-        } = await ItemsService.getProcessing(params)
-        context.commit(SET_PROCESSING, data)
+        await ItemsService.getProcessing(params).then(function(response) {
+            context.commit(SET_PROCESSING, response.data)
+        }, function() {
+            console.log(`Didn't find processing document.`)
+        })        
         return;
     },
     async [ALIGN_SPLITTED](context, params) {

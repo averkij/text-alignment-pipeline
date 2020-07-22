@@ -95,7 +95,7 @@
             </v-col>
         </v-row>
         <div>
-            <v-btn class="success mt-10" @click="align()">Align documents</v-btn>
+            <v-btn class="success mt-10" :loading="alignLoading" :disabled="alignLoading" @click="align()">Align documents</v-btn>
         </div>
 
         <div class="text-h5 mt-10 font-weight-bold">Edit</div>
@@ -109,6 +109,9 @@
                 <v-pagination v-model="processing.meta.page" :length="processing.meta.total_pages" total-visible="10"
                     @input="onProcessingPageChange(processing.meta.page)">
                 </v-pagination>
+            </div>
+            <div>
+                
             </div>
         </div>
 
@@ -201,7 +204,8 @@
                 selectedIds: {
                     "ru": null,
                     "zh": null
-                }
+                },
+                alignLoading: false
             }
         },
         methods: {
@@ -260,6 +264,7 @@
                 }
             },
             align() {
+                this.alignLoading = true;
                 this.$store.dispatch(ALIGN_SPLITTED, {
                     username: this.$route.params.username,
                     fileIds: this.selectedIds
@@ -276,6 +281,7 @@
                         fileId: this.selectedIds["zh"],
                         linesCount: 0
                     });
+                    this.alignLoading = false;
                 });
             },
             //helpers

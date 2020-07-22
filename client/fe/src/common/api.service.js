@@ -56,7 +56,7 @@ const ApiService = {
       getAligned(params) {
         return ApiService.get("items", `${params.username}/aligned/${params.langCode}/${params.fileId}/${params.linesCount}`);
       },
-      getProcessing(params) {
+      getProcessing(params) {        
         return ApiService.get("items", `${params.username}/processing/${params.fileId}/${params.linesCount}/${params.page}`);
       },
       alignSplitted(params) {

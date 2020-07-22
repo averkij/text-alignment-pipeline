@@ -14,7 +14,9 @@
                     <div class="d-table-cell grey lighten-4 text-center" style="min-width:45px">
                         <div class="fill-height lighten-4 d-flex flex-column justify-space-between"
                             :class="{green: item.selected.sim>0.5}">
-                            <div class="pa-2">{{ item.selected.line_ids[0] + 1 }}</div>
+                            <div class="pa-2">
+                                {{ selectedLineId }}
+                            </div>
                             <div class="text-caption pa-1">{{ item.selected.sim | numeral('0.00') }}</div>
                         </div>
                     </div>
@@ -31,6 +33,14 @@
 <script>
     export default {
         name: "EditItem",
-        props: ['item']
+        props: ['item'],
+        computed: {
+            selectedLineId() {
+                if (this.item.selected.line_ids.length > 0) {
+                    return this.item.selected.line_ids[0] + 1;
+                }
+                return "x"
+            }
+        }
     }
 </script>

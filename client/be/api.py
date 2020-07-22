@@ -4,6 +4,8 @@ import itertools
 import re
 import razdel
 import pickle
+import nltk
+from nltk import tokenize
 
 from flask import Flask, redirect, url_for
 from flask import render_template
@@ -14,6 +16,8 @@ from mlflow import log_metric
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from scipy import spatial
+
+nltk.download('punkt')
 
 app = Flask(__name__)
 
@@ -87,9 +91,17 @@ def split_to_sentences(filename, langcode, username):
             lines = re.sub(double_dash, '—', lines)
             sentences = list(x.text for x in razdel.sentenize(lines))
         elif langcode == ZH_CODE:
-            lines = ''.join(input_file.readlines())    
+            lines = ''.join(input_file.readlines())
+
+            #zh  
             lines = re.sub(pat_comma, '。', lines)
             sentences = list(re.sub(pattern_zh,'', x.strip()) for x in split_zh(lines))
+
+            #de
+            # lines = re.sub(double_spaces, ' ', lines)
+            # lines = re.sub(double_commas, ',', lines)
+            # lines = re.sub(double_dash, '—', lines)
+            # sentences = list(x.text for x in razdel.sentenize(lines))
         else:
             raise Exception("Unknown language code.")
         

@@ -131,6 +131,9 @@ def processing(username, id_ru, count, page):
     if len(files_ru) < id_ru+1:
         return con.EMPTY_SIMS
     processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
+    if not os.path.isfile(processing_ru):
+        abort(404)
+        
     docs = pickle.load(open(processing_ru, "rb"))
     res = []
     lines_count = 0    

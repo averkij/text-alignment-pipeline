@@ -4,14 +4,14 @@
         <div class=d-flex>
             <div class="text-h3 mt-5 align-self-start">🤗</div>
             <div class="text-h3 mt-5 pl-3">
-                Hello, {{username}}!
-                <div class="text-subtitle-1 mt-2 pl-1"> — Let's create some cool stuff.</div>
+                Hello, <span class="text-capitalize">{{username}}!</span>
+                <div class="text-subtitle-1 mt-2 pl-1">Let's make it parallel.</div>
+                <!-- <div class="text-subtitle-2 text-right">— Somebody</div> -->
             </div>
 
         </div>
 
         <div class="text-h4 mt-15 font-weight-bold">💾 Documents</div>
-
         <v-alert type="info" class="mt-6" v-show="showAlert">
             There are no uploaded documents yet. Please upload some using the form below.
         </v-alert>

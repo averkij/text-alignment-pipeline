@@ -7,3 +7,6 @@ PROCESSING_FOLDER = "processing"
 DONE_FOLDER = "done"
 RU_CODE = "ru"
 ZH_CODE = "zh"
+
+EMPTY_LINES = {"items": {"ru":[], "zh":[]}}
+EMPTY_SIMS = {"items": {"ru":[], "zh":[], "sim":[]}}

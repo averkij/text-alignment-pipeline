@@ -139,3 +139,8 @@ client/be/static/serg/splitted/ru/kryzhovnik_ru.txt
 client/be/static/serg/splitted/zh/chekhov_futlar_zh.txt
 client/be/static/serg/splitted/zh/kryzhovnik_zh.txt
 client/be/static/serg/processing/ru/kryzhovnik_ru.txt
+client/be/static/serg/processing/ru/turgenev_love_ru.txt
+client/be/static/serg/raw/ru/turgenev_love_ru.txt
+client/be/static/serg/raw/zh/turgenev_love_zh.txt
+client/be/static/serg/splitted/ru/turgenev_love_ru.txt
+client/be/static/serg/splitted/zh/turgenev_love_zh.txt

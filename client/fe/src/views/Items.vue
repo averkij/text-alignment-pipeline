@@ -127,7 +127,7 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-btn v-show="selected['ru'] && selected['zh']" class="success mt-10" :loading="alignLoading" :disabled="alignLoading" @click="align()">
+        <v-btn v-show="selected['ru'] && selected['zh']" class="success mt-6" :loading="alignLoading" :disabled="alignLoading" @click="align()">
             Align documents
         </v-btn>
 

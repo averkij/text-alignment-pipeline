@@ -1,7 +1,7 @@
 import os
 import pickle
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, abort
 from flask_cors import CORS
 from mlflow import log_metric
 
@@ -43,6 +43,16 @@ def items(username):
         }
     }
     return files
+
+@app.route("/items/<username>/splitted/<lang>/<int:id>/download", methods=["GET"])
+def download_splitted(username, lang, id):
+    files = helper.get_files_list(username, con.SPLITTED_FOLDER, lang)
+    if len(files) < id+1:
+        abort(404)
+    path = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang, files[id])    
+    if not os.path.isfile(path):
+        abort(404)
+    return send_file(path, as_attachment=True)  
 
 @app.route("/items/<username>/splitted/<lang>/<int:id>/<int:count>/<int:page>", methods=["GET"])
 def splitted(username, lang, id, count, page):

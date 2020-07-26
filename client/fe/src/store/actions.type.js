@@ -1,6 +1,7 @@
 export const LOGIN = "login";
 export const LOGOUT = "logout";
-export const UPLOAD_FILES = "upload_files"; 
+export const UPLOAD_FILES = "upload_files";
+export const DOWNLOAD_SPLITTED = "download_splitted";
 export const FETCH_ITEMS = "fetch_items";
 export const GET_SPLITTED = "get_splitted";
 export const GET_PROCESSING = "get_processing";

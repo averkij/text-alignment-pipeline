@@ -3,9 +3,11 @@
     <v-form @submit="onSubmit(username)">
       <v-card-title>Привет, 你好, Szia, Hallo, Ahoj!</v-card-title>
       <v-card-text>
-
-        <v-text-field label="Username" prepend-icon="mdi-account-circle" v-model="username" />
-
+        <v-text-field
+          label="Username"
+          prepend-icon="mdi-account-circle"
+          v-model="username"
+        />
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
@@ -18,29 +20,29 @@
 </template>
 
 <script>
-  import {
-    LOGIN,
-  } from "@/store/actions.type"
+import { LOGIN } from "@/store/actions.type";
 
-  export default {
-    data() {
-      return {
-        username: null
-      }
-    },
-    methods: {
-      onSubmit: function (username) {
-        this.$store
-          .dispatch(LOGIN, {
-            username
-          })
-          .then(() => this.$router.push({
+export default {
+  data() {
+    return {
+      username: null
+    };
+  },
+  methods: {
+    onSubmit: function(username) {
+      this.$store
+        .dispatch(LOGIN, {
+          username
+        })
+        .then(() =>
+          this.$router.push({
             name: "items",
             params: {
               username
             }
-          }));
-      }
+          })
+        );
     }
   }
+};
 </script>

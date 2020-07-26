@@ -144,3 +144,13 @@ client/be/static/serg/raw/ru/turgenev_love_ru.txt
 client/be/static/serg/raw/zh/turgenev_love_zh.txt
 client/be/static/serg/splitted/ru/turgenev_love_ru.txt
 client/be/static/serg/splitted/zh/turgenev_love_zh.txt
+client/be/static/serg/raw/ru/master_ru.txt
+client/be/static/serg/raw/ru/turgenev_love_zh.txt
+client/be/static/serg/raw/zh/_chekhov_6_ru.txt
+client/be/static/serg/raw/zh/_chekhov_6_zh.txt
+client/be/static/serg/raw/zh/master_zh.txt
+client/be/static/serg/splitted/ru/master_ru.txt
+client/be/static/serg/splitted/ru/turgenev_love_zh.txt
+client/be/static/serg/splitted/zh/_chekhov_6_ru.txt
+client/be/static/serg/splitted/zh/_chekhov_6_zh.txt
+client/be/static/serg/splitted/zh/master_zh.txt

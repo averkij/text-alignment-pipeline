@@ -1,30 +1,28 @@
-import {
-    LOGIN
-} from "./actions.type";
+import { LOGIN } from "./actions.type";
 
 const state = {
-    errors: null,
-    user: {},
-    isAuthenticated: true
-}
+  errors: null,
+  user: {},
+  isAuthenticated: true
+};
 
 const getters = {
-    currentUser(state) {
-        return state.user;
-    },
-    isAuthenticated(state) {
-        return state.isAuthenticated;
-    }
-}
+  currentUser(state) {
+    return state.user;
+  },
+  isAuthenticated(state) {
+    return state.isAuthenticated;
+  }
+};
 
 const actions = {
-    [LOGIN]() {
-        return true;
-    }
-}
+  [LOGIN]() {
+    return true;
+  }
+};
 
 export default {
-    state,
-    actions,
-    getters
-}
+  state,
+  actions,
+  getters
+};

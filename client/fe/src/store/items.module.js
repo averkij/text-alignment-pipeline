@@ -4,6 +4,7 @@ import {
   FETCH_ITEMS,
   UPLOAD_FILES,
   DOWNLOAD_SPLITTED,
+  DOWNLOAD_PROCESSING,
   GET_SPLITTED,
   GET_PROCESSING,
   GET_ALIGNED,
@@ -61,6 +62,11 @@ export const actions = {
   // params {fileId, username, langCode, fileName}
   async [DOWNLOAD_SPLITTED](context, params) {
     await ItemsService.downloadSplitted(params);
+    return;
+  },
+  // params {fileId, username, langCode, fileName}
+  async [DOWNLOAD_PROCESSING](context, params) {
+    await ItemsService.downloadProcessing(params);
     return;
   },
   // params {fileId, username, langCode, count, page}

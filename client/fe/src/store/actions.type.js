@@ -5,5 +5,6 @@ export const DOWNLOAD_SPLITTED = "download_splitted";
 export const FETCH_ITEMS = "fetch_items";
 export const GET_SPLITTED = "get_splitted";
 export const GET_PROCESSING = "get_processing";
+export const DOWNLOAD_PROCESSING = "download_processing";
 export const GET_ALIGNED = "get_aligned";
 export const ALIGN_SPLITTED = "align_splitted";

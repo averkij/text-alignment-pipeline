@@ -230,7 +230,14 @@
         </div>
         <v-divider></v-divider>
         <v-card-actions>
-          <v-btn class="primary">Save</v-btn>
+          <v-row>
+            <v-col class="py-0" cols="12" sm="6">
+              <v-btn class="primary" @click="downloadProcessing('ru')">Download [ru]</v-btn>
+            </v-col>
+            <v-col class="py-0" cols="12" sm="6">
+              <v-btn class="primary" @click="downloadProcessing('zh')">Download [zh]</v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </div>
@@ -249,7 +256,8 @@ import {
   GET_ALIGNED,
   GET_PROCESSING,
   ALIGN_SPLITTED,
-  DOWNLOAD_SPLITTED
+  DOWNLOAD_SPLITTED,
+  DOWNLOAD_PROCESSING
 } from "@/store/actions.type";
 
 export default {
@@ -316,6 +324,14 @@ export default {
     },
     downloadSplitted(langCode) {
       this.$store.dispatch(DOWNLOAD_SPLITTED, {
+        fileId: this.selectedIds[langCode],
+        fileName: this.selected[langCode],
+        username: this.$route.params.username,
+        langCode
+      });
+    },
+    downloadProcessing(langCode) {
+      this.$store.dispatch(DOWNLOAD_PROCESSING, {
         fileId: this.selectedIds[langCode],
         fileName: this.selected[langCode],
         username: this.$route.params.username,

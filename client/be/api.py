@@ -1,7 +1,8 @@
+import datetime
 import os
 import pickle
 
-from flask import Flask, request, send_file, abort
+from flask import Flask, abort, request, send_file
 from flask_cors import CORS
 from mlflow import log_metric
 
@@ -162,6 +163,31 @@ def processing(username, id_ru, count, page):
     total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
+
+@app.route("/items/<username>/processing/<int:id_ru>/<lang>/download", methods=["GET"])
+def download_processsing(username, id_ru, lang):
+    files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
+    if len(files_ru) < id_ru+1:
+        return con.EMPTY_SIMS
+    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
+    if not os.path.isfile(processing_ru):
+        abort(404)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_ru)[0], lang, timestamp, os.path.splitext(processing_ru)[1])
+    
+    print(processing_out)
+
+    docs = pickle.load(open(processing_ru, "rb"))
+    with open(processing_out, mode="w", encoding="utf-8") as doc_out:        
+        for doc in docs:
+            for line in doc:
+                selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
+                if selected[0].text:
+                    if lang == con.RU_CODE:
+                        doc_out.write(line.text)
+                    elif lang == con.ZH_CODE:
+                        doc_out.write(selected[0].text)
+    return send_file(processing_out, as_attachment=True)  
 
 if __name__ == "__main__":
     app.run(port=12000, debug=True)

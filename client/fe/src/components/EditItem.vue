@@ -4,7 +4,7 @@
       <v-col class="text-left" cols="6">
         <div class="d-table fill-height">
           <div
-            class="d-table-cell grey lighten-4 pa-2 text-center"
+            class="d-table-cell grey lighten-4 pa-2 text-center font-weight-medium"
             style="min-width:45px"
           >
             {{ item.line_ids[0] + 1 }}
@@ -27,7 +27,7 @@
                 yellow: (item.selected.sim <= 0.5) & (item.selected.sim > 0.3)
               }"
             >
-              <div class="pa-2">
+              <div class="pa-2 font-weight-medium">
                 {{ selectedLineId }}
               </div>
               <div class="text-caption pa-1">

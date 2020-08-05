@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+    tap_single:
+        build: .
+        container_name:  tap_single
+        restart: always
+        environment: 
+            - APP_NAME=VueApp
+        ports:
+            - "80:80"

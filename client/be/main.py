@@ -4,7 +4,7 @@ import pickle
 
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
-from mlflow import log_metric
+#from mlflow import log_metric
 
 import aligner
 import constants as con
@@ -16,9 +16,10 @@ app = Flask(__name__)
 
 CORS(app)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    return 0
+@app.route("/")
+def main():
+    index_path = os.path.join(app.static_folder, "index.html")
+    return send_file(index_path)
 
 @app.route("/items/<username>", methods=["GET", "POST"])
 def items(username):
@@ -188,6 +189,19 @@ def download_processsing(username, id_ru, lang):
                     elif lang == con.ZH_CODE:
                         doc_out.write(selected[0].text)
     return send_file(processing_out, as_attachment=True)  
+    
+# Not API calls treated like static queries
+@app.route("/<path:path>")
+def route_frontend(path):
+    # ...could be a static file needed by the front end that
+    # doesn't use the `static` path (like in `<script src="bundle.js">`)
+    file_path = os.path.join(app.static_folder, path)
+    if os.path.isfile(file_path):
+        return send_file(file_path)
+    # ...or should be handled by the SPA's "router" in front end
+    else:
+        index_path = os.path.join(app.static_folder, "index.html")
+        return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(port=12000, debug=True)
+    app.run(host="0.0.0.0", debug=True, port=80)

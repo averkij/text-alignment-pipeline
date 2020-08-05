@@ -1,4 +1,4 @@
-UPLOAD_FOLDER = "static"
+UPLOAD_FOLDER = "data"
 RAW_FOLDER = "raw"
 PROXY_FOLDER = "proxy"
 SPLITTED_FOLDER = "splitted"

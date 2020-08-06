@@ -160,3 +160,10 @@ client/be/static/serg2/raw/zh/lu_xun_ben_ye_zh.txt
 client/be/static/serg2/splitted/ru/lu_xun_ben_ye_ru.txt
 client/be/static/serg2/splitted/zh/lu_xun_ben_ye_zh.txt
 client/be/models/sentence_transformers.bin
+client/be/app/__pycache__/aligner.cpython-38.pyc
+client/be/app/__pycache__/config.cpython-38.pyc
+client/be/app/__pycache__/constants.cpython-38.pyc
+client/be/app/__pycache__/helper.cpython-38.pyc
+client/be/app/__pycache__/model_dispatcher.cpython-38.pyc
+client/be/app/__pycache__/splitter.cpython-38.pyc
+client/be/app/models/sentence_transformers.bin

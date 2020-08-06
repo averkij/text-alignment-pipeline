@@ -11,6 +11,8 @@ FROM tiangolo/uwsgi-nginx-flask:python3.8 as production-stage
 #serve static/index.html
 ENV STATIC_INDEX 1
 
+ENV LISTEN_PORT 80
+
 COPY ./be /app
 RUN pip install -r /app/requirements.txt;
 

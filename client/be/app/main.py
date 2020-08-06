@@ -16,10 +16,14 @@ app = Flask(__name__)
 
 CORS(app)
 
-@app.route("/")
-def main():
-    index_path = os.path.join(app.static_folder, "index.html")
-    return send_file(index_path)
+# @app.route("/")
+# def main():
+#     index_path = os.path.join(app.static_folder, "index.html")
+#     return send_file(index_path)
+
+@app.route('/api/hello')
+def start():
+    return "Hallo, Welt."
 
 @app.route("/items/<username>", methods=["GET", "POST"])
 def items(username):

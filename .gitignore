@@ -167,3 +167,4 @@ client/be/app/__pycache__/helper.cpython-38.pyc
 client/be/app/__pycache__/model_dispatcher.cpython-38.pyc
 client/be/app/__pycache__/splitter.cpython-38.pyc
 client/be/app/models/sentence_transformers.bin
+client/be/app/2.0.0rc0

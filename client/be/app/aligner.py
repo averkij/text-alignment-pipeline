@@ -17,8 +17,8 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, threshold=config.DEFAULT_T
     
     for lines_ru_batch, lines_ru_proxy_batch, lines_zh_batch in helper.get_batch(lines_ru, lines_zh, lines_zh, batch_size):
         print("batch:", batch_number)
-        vectors1 += get_line_vectors(lines_zh_batch)
-        vectors2 += get_line_vectors(lines_ru_batch)
+        vectors1 = [*vectors1, *get_line_vectors(lines_zh_batch)]
+        vectors2 = [*vectors2, *get_line_vectors(lines_ru_batch)]
         batch_number += 1
 
         sim_matrix = get_sim_matrix(vectors1, vectors2)
@@ -30,7 +30,7 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, threshold=config.DEFAULT_T
     pickle.dump(docs, open(processing_ru, "wb"))
 
 def get_line_vectors(lines):
-    return model_dispatcher.models[config.MODEL].encode(lines)
+    return model_dispatcher.models[config.MODEL].embed(lines)
 
 def get_processed(ru_lines, zh_lines, sim_matrix, threshold, batch_number, batch_size, candidates_count=5):
     doc = {}

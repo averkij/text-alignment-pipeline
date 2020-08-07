@@ -198,3 +198,6 @@ client/be/app/data/serg/splitted/zh/_chekhov_6_zh.txt
 client/be/app/data/serg/splitted/zh/chekhov_futlar_zh.txt
 client/be/app/models/__pycache__/use_multilingual_models.cpython-38.pyc
 client/be/app/models/__pycache__/sententense_transformers_models.cpython-38.pyc
+client/be/app/models/use_multilingual_models_saved/saved_model.pb
+client/be/app/models/use_multilingual_models_saved/variables/variables.data-00000-of-00001
+client/be/app/models/use_multilingual_models_saved/variables/variables.index

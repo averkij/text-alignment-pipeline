@@ -184,6 +184,16 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-alert
+      type="info"
+      border="left"
+      colored-border
+      color="blue"
+      class="mt-2"
+      elevation="2"
+    >
+      This is a test version. Only 100 lines will be aligned. 
+    </v-alert>
     <v-btn
       v-show="selected['ru'] && selected['zh']"
       class="success mt-6"

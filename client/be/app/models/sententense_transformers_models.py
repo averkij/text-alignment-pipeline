@@ -3,7 +3,7 @@ import pickle
 
 from sentence_transformers import SentenceTransformer
 
-SENTENCE_TRANSFORMERS_MODEL_PATH = 'sentence_transformers.bin'
+SENTENCE_TRANSFORMERS_MODEL_PATH = './models/sentence_transformers.bin'
 
 class SentenceTransformersModel():
     def __init__(self):        

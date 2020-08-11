@@ -1,4 +1,4 @@
-MODEL = "use_multilingual_v3"
+MODEL = "sentence_transformer_multilingual"
 DEFAULT_TRESHOLD = 0.3
 DEFAULT_BATCHSIZE = 100
 DEFAULT_WINDOW = 20

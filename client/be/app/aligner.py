@@ -21,11 +21,14 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, threshold=config.DEFAULT_T
         vectors2 = [*vectors2, *get_line_vectors(lines_ru_batch)]
         batch_number += 1
 
-        sim_matrix = get_sim_matrix(vectors1, vectors2)
-        # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru, lines_zh, lines_zh, sim_matrix, threshold)
-        
-        doc = get_processed(lines_ru, lines_zh, sim_matrix, threshold, batch_number, batch_size)
-        docs.append(doc)            
+        #test version restriction
+        break
+
+    sim_matrix = get_sim_matrix(vectors1, vectors2)
+    # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru, lines_zh, lines_zh, sim_matrix, threshold)
+    
+    doc = get_processed(lines_ru, lines_zh, sim_matrix, threshold, batch_number, batch_size)
+    docs.append(doc)
         
     pickle.dump(docs, open(processing_ru, "wb"))
 

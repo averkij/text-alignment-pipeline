@@ -58,9 +58,11 @@
             </v-card-actions>
             <v-divider></v-divider>
             <v-card-actions>
-              <v-btn @click="uploadFile(panel.langCode)">Upload</v-btn>
-              <!-- <v-spacer></v-spacer>
-                            <v-btn @click="uploadFile(panel.langCode)">Upload splitted</v-btn> -->
+              <v-btn @click="uploadFile(panel.langCode)"
+                :loading="uploadLoading[panel.langCode]"
+                :disabled="uploadLoading[panel.langCode]">
+                Upload
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -297,6 +299,10 @@ export default {
         ru: null,
         zh: null
       },
+      uploadLoading:{
+        ru: false,
+        zh: false
+      },
       alignLoading: false
     };
   },
@@ -322,6 +328,7 @@ export default {
       });
     },
     uploadFile(langCode) {
+      this.uploadLoading[langCode] = true;
       this.$store
         .dispatch(UPLOAD_FILES, {
           file: this.files[langCode],
@@ -329,6 +336,7 @@ export default {
           langCode
         })
         .then(() => {
+          this.uploadLoading[langCode] = false;
           this.selectFirstDocument(langCode);
         });
     },
@@ -381,18 +389,6 @@ export default {
           fileIds: this.selectedIds
         })
         .then(() => {
-          // this.$store.dispatch(GET_ALIGNED, {
-          //     username: this.$route.params.username,
-          //     langCode: "ru",
-          //     fileId: this.selectedIds["ru"],
-          //     linesCount: 0
-          // });
-          // this.$store.dispatch(GET_ALIGNED, {
-          //     username: this.$route.params.username,
-          //     langCode: "zh",
-          //     fileId: this.selectedIds["zh"],
-          //     linesCount: 0
-          // });
           this.$store.dispatch(GET_PROCESSING, {
             username: this.$route.params.username,
             fileId: this.selectedIds["ru"],

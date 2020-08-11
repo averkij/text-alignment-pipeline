@@ -7,6 +7,7 @@
           label="Username"
           prepend-icon="mdi-account-circle"
           v-model="username"
+          @keydown.enter.prevent="onSubmit(username)"
         />
       </v-card-text>
       <v-divider></v-divider>

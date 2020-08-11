@@ -133,6 +133,16 @@
     </v-row>
 
     <div class="text-h4 mt-10 font-weight-bold">⚖️ Alignment</div>
+    <v-alert
+      type="info"
+      border="left"
+      colored-border
+      color="blue"
+      class="mt-6"
+      elevation="2"
+    >
+      This is a test version. Only 100 lines will be aligned. 
+    </v-alert>
     <v-row class="mt-6">
       <v-col v-for="(panel, i) in panels" :key="i" cols="12" sm="6">
         <v-alert
@@ -144,7 +154,7 @@
           elevation="2"
           v-if="!selected[panel.langCode]"
         >
-          Document is not selected.
+          Select file to align.
         </v-alert>
         <v-card v-else>
           <div class="purple lighten-5">
@@ -184,16 +194,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-alert
-      type="info"
-      border="left"
-      colored-border
-      color="blue"
-      class="mt-2"
-      elevation="2"
-    >
-      This is a test version. Only 100 lines will be aligned. 
-    </v-alert>
     <v-btn
       v-show="selected['ru'] && selected['zh']"
       class="success mt-6"

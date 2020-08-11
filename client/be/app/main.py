@@ -1,10 +1,10 @@
 import datetime
+import logging
 import os
 import pickle
 
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
-#from mlflow import log_metric
 
 import aligner
 import constants as con
@@ -12,9 +12,14 @@ import helper
 import splitter
 from aligner import DocLine
 
-app = Flask(__name__)
+#from mlflow import log_metric
 
+
+
+app = Flask(__name__)
 CORS(app)
+
+logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 # @app.route("/")
 # def main():
@@ -32,14 +37,18 @@ def items(username):
     if request.method == "POST":
         if con.RU_CODE in request.files:
             file_ru = request.files["ru"]
+            logging.debug(f"[{username}]. Loading {con.RU_CODE} document {file_ru.filename}.")
             raw_ru = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, con.RU_CODE, file_ru.filename)
             file_ru.save(raw_ru)
             splitter.split_to_sentences(file_ru.filename, con.RU_CODE, username)
+            logging.debug(f"[{username}]. Success. {file_ru.filename} is loaded.")
         if con.ZH_CODE in request.files:
             file_zh = request.files["zh"]
+            logging.debug(f"[{username}]. Loading {con.ZH_CODE} document {file_zh.filename}.")
             raw_zh = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, con.ZH_CODE, file_zh.filename)
             file_zh.save(raw_zh)
             splitter.split_to_sentences(file_zh.filename, con.ZH_CODE, username)
+            logging.debug(f"[{username}]. Success. {file_zh.filename} is loaded.")
         return {"res": 1}
     #return documents list
     files = {
@@ -52,12 +61,15 @@ def items(username):
 
 @app.route("/items/<username>/splitted/<lang>/<int:id>/download", methods=["GET"])
 def download_splitted(username, lang, id):
+    logging.debug(f"[{username}]. Downloading {lang} {id} splitted document.")
     files = helper.get_files_list(username, con.SPLITTED_FOLDER, lang)
     if len(files) < id+1:
         abort(404)
-    path = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang, files[id])    
+    path = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang, files[id])
     if not os.path.isfile(path):
+        logging.debug(f"[{username}]. Document not found.")
         abort(404)
+    logging.debug(f"[{username}]. Document found. Path: {path}. Sent to user.")
     return send_file(path, as_attachment=True)  
 
 @app.route("/items/<username>/splitted/<lang>/<int:id>/<int:count>/<int:page>", methods=["GET"])
@@ -114,13 +126,16 @@ def aligned(username, lang, id, count):
 def align(username, id_ru, id_zh):
     files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
     files_zh = helper.get_files_list(username, con.SPLITTED_FOLDER, con.ZH_CODE)
+    logging.debug(f"[{username}]. Aligning documents. {files_ru}, {files_zh}.")
     if len(files_ru) < id_ru+1 or len(files_zh) < id_zh+1:
+        logging.debug(f"[{username}]. Documents not found.")
         return con.EMPTY_SIMS
     
     processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
     splitted_ru = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE, files_ru[id_ru])
     splitted_zh = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.ZH_CODE, files_zh[id_zh])
-
+   
+    logging.debug(f"[{username}]. Preparing for alignment. {splitted_ru}, {splitted_zh}.")
     with open(splitted_ru, mode="r", encoding="utf-8") as input_ru, \
          open(splitted_zh, mode="r", encoding="utf-8") as input_zh:
         #  ,open(ngramed_proxy_ru, mode="r", encoding="utf-8") as input_proxy:
@@ -171,17 +186,19 @@ def processing(username, id_ru, count, page):
 
 @app.route("/items/<username>/processing/<int:id_ru>/<lang>/download", methods=["GET"])
 def download_processsing(username, id_ru, lang):
+    logging.debug(f"[{username}]. Downloading {lang} {id_ru} result document.")
     files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
     if len(files_ru) < id_ru+1:
+        logging.debug(f"[{username}]. Document {lang} with id={id_ru} not found.")
         return con.EMPTY_SIMS
     processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
     if not os.path.isfile(processing_ru):
+        logging.debug(f"[{username}]. Document {processing_ru} not found.")
         abort(404)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_ru)[0], lang, timestamp, os.path.splitext(processing_ru)[1])
     
-    print(processing_out)
-
+    logging.debug(f"[{username}]. Preparing file for downloading {processing_out}.")
     docs = pickle.load(open(processing_ru, "rb"))
     with open(processing_out, mode="w", encoding="utf-8") as doc_out:        
         for doc in docs:
@@ -192,6 +209,7 @@ def download_processsing(username, id_ru, lang):
                         doc_out.write(line.text)
                     elif lang == con.ZH_CODE:
                         doc_out.write(selected[0].text)
+    logging.debug(f"[{username}]. File {processing_out} prepared. Sent to user.")
     return send_file(processing_out, as_attachment=True)  
     
 # Not API calls treated like static queries

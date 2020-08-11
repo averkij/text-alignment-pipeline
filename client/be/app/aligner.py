@@ -1,3 +1,4 @@
+import logging
 import pickle
 from typing import List
 
@@ -15,21 +16,27 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, threshold=config.DEFAULT_T
     vectors1 = []
     vectors2 = []
     
+    logging.debug(f"Aligning started.")
     for lines_ru_batch, lines_ru_proxy_batch, lines_zh_batch in helper.get_batch(lines_ru, lines_zh, lines_zh, batch_size):
         print("batch:", batch_number)
+        logging.debug(f"Batch {batch_number}. Calculating vectors.")
         vectors1 = [*vectors1, *get_line_vectors(lines_zh_batch)]
         vectors2 = [*vectors2, *get_line_vectors(lines_ru_batch)]
         batch_number += 1
+        logging.debug(f"Batch {batch_number}. Vectors calculated. len(vectors1)={len(vectors1)}. len(vectors2)={len(vectors2)}.")
 
         #test version restriction
         break
-
+    
+    logging.debug(f"Calculating similarity matrix.")
     sim_matrix = get_sim_matrix(vectors1, vectors2)
     # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru, lines_zh, lines_zh, sim_matrix, threshold)
     
+    logging.debug(f"Processing lines.")
     doc = get_processed(lines_ru, lines_zh, sim_matrix, threshold, batch_number, batch_size)
     docs.append(doc)
-        
+    
+    logging.debug(f"Dumping to file {processing_ru}.")
     pickle.dump(docs, open(processing_ru, "wb"))
 
 def get_line_vectors(lines):

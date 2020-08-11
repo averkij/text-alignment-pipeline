@@ -1,4 +1,5 @@
 .vscode/settings.json
+client/fe/node_modules
 client/be/static/er5/done/ru/kryzhovnik_ru.txt
 client/be/static/er5/done/zh/kryzhovnik_zh.txt
 client/be/static/er5/raw/ru/idiot_ru.txt

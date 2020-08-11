@@ -7,6 +7,8 @@ def get_files_list(username, folder, lang):
     return os.listdir(os.path.join(con.UPLOAD_FOLDER, username, folder, lang))
 
 def create_folders(username):
+    if not os.path.isdir(con.UPLOAD_FOLDER):
+        os.mkdir(con.UPLOAD_FOLDER)
     if username and not os.path.isdir(os.path.join(con.UPLOAD_FOLDER, username)):
         os.mkdir(os.path.join(con.UPLOAD_FOLDER, username))
         create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER))

@@ -6,6 +6,6 @@ services:
         container_name:  tap_single
         restart: always
         environment: 
-            - APP_NAME=VueApp
+            - APP_NAME=AlignMeApp
         ports:
             - "80:80"

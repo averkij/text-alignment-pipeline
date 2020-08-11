@@ -1,7 +1,7 @@
 #build web app
 FROM node:lts-alpine as build-stage
 WORKDIR /app
-COPY ./fe ./
+COPY ./fe/app ./
 RUN npm install
 RUN npm run build
 
@@ -13,7 +13,7 @@ ENV STATIC_INDEX 1
 
 ENV LISTEN_PORT 80
 
-COPY ./be /app
+COPY ./be/app /app
 RUN pip install -r /app/requirements.txt;
 
 RUN mkdir /app/static

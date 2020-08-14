@@ -28,11 +28,8 @@
             <v-divider></v-divider>
             <v-list class="pa-0">
               <v-list-item-group mandatory color="gray">
-                <v-list-item
-                  v-for="(item, i) in items[panel.langCode]"
-                  :key="i"
-                  @change="selectAndLoadPreview(panel.langCode, item, i)"
-                >
+                <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i"
+                  @change="selectAndLoadPreview(panel.langCode, item, i)">
                   <v-list-item-icon>
                     <v-icon>mdi-arrow-right</v-icon>
                   </v-list-item-icon>
@@ -44,23 +41,15 @@
             </v-list>
             <v-divider></v-divider>
             <v-card-title>Upload</v-card-title>
-            <v-card-text
-              >Upload raw {{ panel.lang }} document in txt format.</v-card-text
-            >
+            <v-card-text>Upload raw {{ panel.lang }} document in txt format.</v-card-text>
             <v-card-actions>
-              <v-file-input
-                outlined
-                dense
-                accept=".txt"
-                @change="onFileChange($event, panel.langCode)"
-              >
+              <v-file-input outlined dense accept=".txt" @change="onFileChange($event, panel.langCode)">
               </v-file-input>
             </v-card-actions>
             <v-divider></v-divider>
             <v-card-actions>
-              <v-btn @click="uploadFile(panel.langCode)"
-                :loading="uploadLoading[panel.langCode]"
-                :disabled="uploadLoading[panel.langCode]">
+              <v-btn @click="uploadFile(panel.langCode)" :loading="isLoading.upload[panel.langCode]"
+                :disabled="isLoading.upload[panel.langCode]">
                 Upload
               </v-btn>
             </v-card-actions>
@@ -70,42 +59,25 @@
     </div>
 
     <div class="text-h4 mt-10 font-weight-bold">🔍 Preview</div>
-    <v-alert
-      type="info"
-      border="left"
-      colored-border
-      color="blue"
-      class="mt-6"
-      elevation="2"
-    >
+    <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
       Documents are splitted by sentences using language specific rules.
     </v-alert>
     <v-row>
       <v-col v-for="(panel, i) in panels" :key="i" cols="12" sm="6">
-        <v-alert
-          type="info"
-          border="left"
-          colored-border
-          color="blue"
-          class="mt-6"
-          elevation="2"
-          v-if="
+        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2" v-if="
             !splitted |
               !splitted[panel.langCode] |
               (splitted[panel.langCode].lines.length == 0)
-          "
-        >
+          ">
           Select file to preview.
         </v-alert>
         <v-card v-else>
           <div class="yellow lighten-5">
             <v-card-title>{{ selected[panel.langCode] }}</v-card-title>
-            <v-card-text
-              >{{
+            <v-card-text>{{
                 splitted[panel.langCode].meta.lines_count | separator
               }}
-              lines</v-card-text
-            >
+              lines</v-card-text>
           </div>
           <v-divider></v-divider>
           <div v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
@@ -113,17 +85,13 @@
             <v-divider></v-divider>
           </div>
           <div class="text-center pa-3">
-            <v-pagination
-              v-model="splitted[panel.langCode].meta.page"
-              :length="splitted[panel.langCode].meta.total_pages"
-              total-visible="7"
-              @input="
+            <v-pagination v-model="splitted[panel.langCode].meta.page"
+              :length="splitted[panel.langCode].meta.total_pages" total-visible="7" @input="
                 onPreviewPageChange(
                   splitted[panel.langCode].meta.page,
                   panel.langCode
                 )
-              "
-            >
+              ">
             </v-pagination>
           </div>
           <v-divider></v-divider>
@@ -135,38 +103,22 @@
     </v-row>
 
     <div class="text-h4 mt-10 font-weight-bold">⚖️ Alignment</div>
-    <v-alert
-      type="info"
-      border="left"
-      colored-border
-      color="blue"
-      class="mt-6"
-      elevation="2"
-    >
-      This is a test version. Only 100 lines will be aligned. 
+    <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
+      This is a test version. Only {{DEFAULT_BATCHSIZE}} lines will be aligned.
     </v-alert>
     <v-row class="mt-6">
       <v-col v-for="(panel, i) in panels" :key="i" cols="12" sm="6">
-        <v-alert
-          type="info"
-          border="left"
-          colored-border
-          color="blue"
-          class="mt-6"
-          elevation="2"
-          v-if="!selected[panel.langCode]"
-        >
+        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+          v-if="!selected[panel.langCode]">
           Select file to align.
         </v-alert>
         <v-card v-else>
           <div class="purple lighten-5">
             <v-card-title>{{ selected[panel.langCode] }}</v-card-title>
-            <v-card-text
-              >{{
+            <v-card-text>{{
                 splitted[panel.langCode].meta.lines_count | separator
               }}
-              lines</v-card-text
-            >
+              lines</v-card-text>
           </div>
           <v-divider></v-divider>
           <v-simple-table>
@@ -196,35 +148,21 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-btn
-      v-show="selected['ru'] && selected['zh']"
-      class="success mt-6"
-      :loading="alignLoading"
-      :disabled="alignLoading"
-      @click="align()"
-    >
+    <v-btn v-show="selected['ru'] && selected['zh']" class="success mt-6" :loading="isLoading.align"
+      :disabled="isLoading.align" @click="align()">
       Align documents
     </v-btn>
 
     <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
     <div class="mt-10">
-      <v-alert
-        type="info"
-        border="left"
-        colored-border
-        color="blue"
-        class="mt-6"
-        elevation="2"
-        v-if="!processing | !processing.items | (processing.items.length == 0)"
-      >
+      <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+        v-if="!processing | !processing.items | (processing.items.length == 0)">
         Select previously aligned Russian document or align something new.
       </v-alert>
       <v-card v-else>
         <div class="green lighten-5" dark>
           <v-card-title>Document</v-card-title>
-          <v-card-text
-            >Review and edit automatically aligned document</v-card-text
-          >
+          <v-card-text>Review and edit automatically aligned document</v-card-text>
         </div>
         <v-divider></v-divider>
         <div v-for="(line, i) in processing.items" :key="i">
@@ -232,12 +170,8 @@
           <v-divider></v-divider>
         </div>
         <div class="text-center pa-3">
-          <v-pagination
-            v-model="processing.meta.page"
-            :length="processing.meta.total_pages"
-            total-visible="10"
-            @input="onProcessingPageChange(processing.meta.page)"
-          >
+          <v-pagination v-model="processing.meta.page" :length="processing.meta.total_pages" total-visible="10"
+            @input="onProcessingPageChange(processing.meta.page)">
           </v-pagination>
         </div>
         <v-divider></v-divider>
@@ -257,181 +191,188 @@
 </template>
 
 <script>
-import EditItem from "@/components/EditItem";
-import PreviewItem from "@/components/PreviewItem";
-import { mapGetters } from "vuex";
+  import EditItem from "@/components/EditItem";
+  import PreviewItem from "@/components/PreviewItem";
+  import {
+    mapGetters
+  } from "vuex";
+  import {
+    DEFAULT_BATCHSIZE
+  } from "@/common/config";
 
-import {
-  FETCH_ITEMS,
-  UPLOAD_FILES,
-  GET_SPLITTED,
-  GET_ALIGNED,
-  GET_PROCESSING,
-  ALIGN_SPLITTED,
-  DOWNLOAD_SPLITTED,
-  DOWNLOAD_PROCESSING
-} from "@/store/actions.type";
+  import {
+    FETCH_ITEMS,
+    UPLOAD_FILES,
+    GET_SPLITTED,
+    GET_ALIGNED,
+    GET_PROCESSING,
+    ALIGN_SPLITTED,
+    DOWNLOAD_SPLITTED,
+    DOWNLOAD_PROCESSING
+  } from "@/store/actions.type";
 
-export default {
-  data() {
-    return {
-      panels: [
-        {
-          langCode: "ru",
-          lang: "Russian",
-          icon: "🥄"
+  export default {
+    data() {
+      return {
+        DEFAULT_BATCHSIZE,
+        panels: [{
+            langCode: "ru",
+            lang: "Russian",
+            icon: "🥄"
+          },
+          {
+            langCode: "zh",
+            lang: "Chinese",
+            icon: "🥢"
+          }
+        ],
+        files: {
+          ru: null,
+          zh: null
         },
-        {
-          langCode: "zh",
-          lang: "Chinese",
-          icon: "🥢"
-        }
-      ],
-      files: {
-        ru: null,
-        zh: null
-      },
-      selected: {
-        ru: null,
-        zh: null
-      },
-      selectedIds: {
-        ru: null,
-        zh: null
-      },
-      uploadLoading:{
-        ru: false,
-        zh: false
-      },
-      alignLoading: false
-    };
-  },
-  methods: {
-    onFileChange(file, langCode) {
-      this.files[langCode] = file;
+        selected: {
+          ru: null,
+          zh: null
+        },
+        selectedIds: {
+          ru: null,
+          zh: null
+        },
+        isLoading: {
+          upload: {
+            ru: false,
+            zh: false
+          },
+          align: false
+        },
+      };
     },
-    onPreviewPageChange(page, langCode) {
-      this.$store.dispatch(GET_SPLITTED, {
-        username: this.$route.params.username,
-        langCode,
-        fileId: this.selectedIds[langCode],
-        linesCount: 10,
-        page: page
-      });
-    },
-    onProcessingPageChange(page) {
-      this.$store.dispatch(GET_PROCESSING, {
-        username: this.$route.params.username,
-        fileId: this.selectedIds["ru"],
-        linesCount: 10,
-        page: page
-      });
-    },
-    uploadFile(langCode) {
-      this.uploadLoading[langCode] = true;
-      this.$store
-        .dispatch(UPLOAD_FILES, {
-          file: this.files[langCode],
+    methods: {
+      onFileChange(file, langCode) {
+        this.files[langCode] = file;
+      },
+      onPreviewPageChange(page, langCode) {
+        this.$store.dispatch(GET_SPLITTED, {
           username: this.$route.params.username,
-          langCode
-        })
-        .then(() => {
-          this.uploadLoading[langCode] = false;
-          this.selectFirstDocument(langCode);
+          langCode,
+          fileId: this.selectedIds[langCode],
+          linesCount: 10,
+          page: page
         });
-    },
-    downloadSplitted(langCode) {
-      this.$store.dispatch(DOWNLOAD_SPLITTED, {
-        fileId: this.selectedIds[langCode],
-        fileName: this.selected[langCode],
-        username: this.$route.params.username,
-        langCode
-      });
-    },
-    downloadProcessing(langCode) {
-      this.$store.dispatch(DOWNLOAD_PROCESSING, {
-        fileId: this.selectedIds[langCode],
-        fileName: this.selected[langCode],
-        username: this.$route.params.username,
-        langCode
-      });
-    },
-    selectAndLoadPreview(langCode, name, fileId) {
-      this.selected[langCode] = name;
-      this.selectedIds[langCode] = fileId;
-      this.$store.dispatch(GET_SPLITTED, {
-        username: this.$route.params.username,
-        langCode,
-        fileId,
-        linesCount: 10,
-        page: 1
-      });
-      this.$store.dispatch(GET_ALIGNED, {
-        username: this.$route.params.username,
-        langCode,
-        fileId,
-        linesCount: 0
-      });
-      if (langCode == "ru") {
+      },
+      onProcessingPageChange(page) {
         this.$store.dispatch(GET_PROCESSING, {
           username: this.$route.params.username,
+          fileId: this.selectedIds["ru"],
+          linesCount: 10,
+          page: page
+        });
+      },
+      uploadFile(langCode) {
+        this.isLoading.upload[langCode] = true;
+        this.$store
+          .dispatch(UPLOAD_FILES, {
+            file: this.files[langCode],
+            username: this.$route.params.username,
+            langCode
+          })
+          .then(() => {
+            this.isLoading.upload[langCode] = false;
+            this.selectFirstDocument(langCode);
+          });
+      },
+      downloadSplitted(langCode) {
+        this.$store.dispatch(DOWNLOAD_SPLITTED, {
+          fileId: this.selectedIds[langCode],
+          fileName: this.selected[langCode],
+          username: this.$route.params.username,
+          langCode
+        });
+      },
+      downloadProcessing(langCode) {
+        this.$store.dispatch(DOWNLOAD_PROCESSING, {
+          fileId: this.selectedIds[langCode],
+          fileName: this.selected[langCode],
+          username: this.$route.params.username,
+          langCode
+        });
+      },
+      selectAndLoadPreview(langCode, name, fileId) {
+        this.selected[langCode] = name;
+        this.selectedIds[langCode] = fileId;
+        this.$store.dispatch(GET_SPLITTED, {
+          username: this.$route.params.username,
+          langCode,
           fileId,
           linesCount: 10,
           page: 1
         });
-      }
-    },
-    align() {
-      this.alignLoading = true;
-      this.$store
-        .dispatch(ALIGN_SPLITTED, {
+        this.$store.dispatch(GET_ALIGNED, {
           username: this.$route.params.username,
-          fileIds: this.selectedIds
-        })
-        .then(() => {
+          langCode,
+          fileId,
+          linesCount: 0
+        });
+        if (langCode == "ru") {
           this.$store.dispatch(GET_PROCESSING, {
             username: this.$route.params.username,
-            fileId: this.selectedIds["ru"],
+            fileId,
             linesCount: 10,
             page: 1
           });
-          this.alignLoading = false;
-        });
-    },
-    //helpers
-    itemsNotEmpty(langCode) {
-      if (!this.items | !this.items[langCode]) {
-        return true;
+        }
+      },
+      align() {
+        this.isLoading.align = true;
+        this.$store
+          .dispatch(ALIGN_SPLITTED, {
+            username: this.$route.params.username,
+            fileIds: this.selectedIds
+          })
+          .then(() => {
+            this.$store.dispatch(GET_PROCESSING, {
+              username: this.$route.params.username,
+              fileId: this.selectedIds["ru"],
+              linesCount: 10,
+              page: 1
+            });
+            this.isLoading.align = false;
+          });
+      },
+      //helpers
+      itemsNotEmpty(langCode) {
+        if (!this.items | !this.items[langCode]) {
+          return true;
+        }
+        return this.items[langCode].length != 0;
+      },
+      selectFirstDocument(langCode) {
+        if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
+          this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
+        }
       }
-      return this.items[langCode].length != 0;
     },
-    selectFirstDocument(langCode) {
-      if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
-        this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
+    mounted() {
+      this.$store.dispatch(FETCH_ITEMS, this.$route.params.username).then(() => {
+        this.selectFirstDocument("ru");
+        this.selectFirstDocument("zh");
+      });
+    },
+    computed: {
+      ...mapGetters(["items", "splitted", "aligned", "processing"]),
+      username() {
+        return this.$route.params.username;
+      },
+      showAlert() {
+        if (!this.items | !this.items.ru | !this.items.zh) {
+          return true;
+        }
+        return (this.items.ru.length == 0) & (this.items.zh.length == 0);
       }
+    },
+    components: {
+      EditItem,
+      PreviewItem
     }
-  },
-  mounted() {
-    this.$store.dispatch(FETCH_ITEMS, this.$route.params.username).then(() => {
-      this.selectFirstDocument("ru");
-      this.selectFirstDocument("zh");
-    });
-  },
-  computed: {
-    ...mapGetters(["items", "splitted", "aligned", "processing"]),
-    username() {
-      return this.$route.params.username;
-    },
-    showAlert() {
-      if (!this.items | !this.items.ru | !this.items.zh) {
-        return true;
-      }
-      return (this.items.ru.length == 0) & (this.items.zh.length == 0);
-    }
-  },
-  components: {
-    EditItem,
-    PreviewItem
-  }
-};
+  };
 </script>

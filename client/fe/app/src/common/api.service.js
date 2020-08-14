@@ -51,7 +51,11 @@ export const ItemsService = {
   },
   upload(params) {
     //check filesize
-    if (!params.file | (params.file.size > 5 * 1024 * 1024)) {
+    if (!params.file) {
+      alert("File is empty");
+      return;
+    }
+    if (params.file.size > 5 * 1024 * 1024) {
       alert("File is too big (> 5MB)");
       return;
     }

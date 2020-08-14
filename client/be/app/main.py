@@ -126,11 +126,11 @@ def aligned(username, lang, id, count):
 def align(username, id_ru, id_zh):
     files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
     files_zh = helper.get_files_list(username, con.SPLITTED_FOLDER, con.ZH_CODE)
-    logging.debug(f"[{username}]. Aligning documents. {files_ru}, {files_zh}.")
     if len(files_ru) < id_ru+1 or len(files_zh) < id_zh+1:
         logging.debug(f"[{username}]. Documents not found.")
         return con.EMPTY_SIMS
     
+    logging.debug(f"[{username}]. Aligning documents. {files_ru[id_ru]}, {files_zh[id_zh]}.")
     processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
     splitted_ru = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE, files_ru[id_ru])
     splitted_zh = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.ZH_CODE, files_zh[id_zh])

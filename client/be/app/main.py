@@ -211,7 +211,22 @@ def download_processsing(username, id_ru, lang):
                         doc_out.write(selected[0].text)
     logging.debug(f"[{username}]. File {processing_out} prepared. Sent to user.")
     return send_file(processing_out, as_attachment=True)  
-    
+
+@app.route("/items/<username>/processing/list/<lang>", methods=["GET"])
+def processing_list(username, lang):
+    if not lang or lang != 'ru':
+        logging.debug(f"[{username}]. Wrong language code: {lang}.")
+        return con.EMPTY_FILES
+    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE)
+    if not os.path.isdir(processing_folder):
+        return con.EMPTY_FILES        
+    files = {
+        "items": {
+            lang: helper.get_files_list(username, con.PROCESSING_FOLDER, con.RU_CODE)
+        }
+    }
+    return files
+
 # Not API calls treated like static queries
 @app.route("/<path:path>")
 def route_frontend(path):

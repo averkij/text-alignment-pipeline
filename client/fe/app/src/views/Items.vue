@@ -154,14 +154,35 @@
     </v-btn>
 
     <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
-    <div class="mt-10">
-      <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-        v-if="!processing | !processing.items | (processing.items.length == 0)">
-        Select previously aligned Russian document or align something new.
-      </v-alert>
-      <v-card v-else>
+
+    <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
+      v-if="!processing | !processing.items | (processing.items.length == 0)">
+      There are no previously aligned documents yet.
+    </v-alert>
+
+    <div v-else class="mt-6">
+      <v-card>
         <div class="green lighten-5" dark>
-          <v-card-title>Document</v-card-title>
+          <v-card-title>Documents</v-card-title>
+          <v-card-text>List of previosly aligned documents</v-card-text>
+        </div>
+        <v-divider></v-divider>
+        <v-list class="pa-0">
+          <v-list-item-group mandatory color="gray">
+            <v-list-item v-for="(item, i) in itemsProcessing['ru']" :key="i" @change="selectProcessing('ru', item, i)">
+              <v-list-item-icon>
+                <v-icon>mdi-arrow-right</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title v-text="item"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </v-card>
+      <v-card class="mt-6">
+        <div class="green lighten-5" dark>
+          <v-card-title>{{selectedProcessed}}</v-card-title>
           <v-card-text>Review and edit automatically aligned document</v-card-text>
         </div>
         <v-divider></v-divider>
@@ -202,6 +223,7 @@
 
   import {
     FETCH_ITEMS,
+    FETCH_ITEMS_PROCESSING,
     UPLOAD_FILES,
     GET_SPLITTED,
     GET_ALIGNED,
@@ -234,6 +256,8 @@
           ru: null,
           zh: null
         },
+        selectedProcessed: null,
+        selectedProcessedId: null,
         selectedIds: {
           ru: null,
           zh: null
@@ -263,7 +287,7 @@
       onProcessingPageChange(page) {
         this.$store.dispatch(GET_PROCESSING, {
           username: this.$route.params.username,
-          fileId: this.selectedIds["ru"],
+          fileId: this.selectedProcessedId,
           linesCount: 10,
           page: page
         });
@@ -313,7 +337,11 @@
           fileId,
           linesCount: 0
         });
+      },
+      selectProcessing(langCode, name, fileId) {
         if (langCode == "ru") {
+          this.selectedProcessed = name;
+          this.selectedProcessedId = fileId;
           this.$store.dispatch(GET_PROCESSING, {
             username: this.$route.params.username,
             fileId,
@@ -336,6 +364,10 @@
               linesCount: 10,
               page: 1
             });
+            this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
+              username: this.$route.params.username,
+              langCode: 'ru'
+            });
             this.isLoading.align = false;
           });
       },
@@ -350,6 +382,11 @@
         if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
           this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
         }
+      },
+      selectFirstProcessingDocument(langCode) {
+        //if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
+          this.selectProcessing(langCode, this.items[langCode][0], 0);
+        //}
       }
     },
     mounted() {
@@ -357,9 +394,15 @@
         this.selectFirstDocument("ru");
         this.selectFirstDocument("zh");
       });
+      this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
+        username: this.$route.params.username,
+        langCode: 'ru'
+      }).then(() => {
+        this.selectFirstProcessingDocument("ru");
+      });
     },
     computed: {
-      ...mapGetters(["items", "splitted", "aligned", "processing"]),
+      ...mapGetters(["items", "itemsProcessing", "splitted", "aligned", "processing"]),
       username() {
         return this.$route.params.username;
       },

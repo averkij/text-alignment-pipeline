@@ -10,3 +10,4 @@ ZH_CODE = "zh"
 
 EMPTY_LINES = {"items": {"ru":[], "zh":[]}}
 EMPTY_SIMS = {"items": {"ru":[], "zh":[], "sim":[]}}
+EMPTY_FILES = {"items": {"ru":[]}}

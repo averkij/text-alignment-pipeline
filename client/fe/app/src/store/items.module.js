@@ -1,7 +1,10 @@
-import { ItemsService } from "@/common/api.service";
+import {
+  ItemsService
+} from "@/common/api.service";
 
 import {
   FETCH_ITEMS,
+  FETCH_ITEMS_PROCESSING,
   UPLOAD_FILES,
   DOWNLOAD_SPLITTED,
   DOWNLOAD_PROCESSING,
@@ -13,6 +16,7 @@ import {
 
 import {
   SET_ITEMS,
+  SET_ITEMS_PROCESSING,
   SET_SPLITTED,
   SET_PROCESSING,
   SET_ALIGNED
@@ -20,6 +24,10 @@ import {
 
 const initialState = {
   items: {
+    ru: [],
+    zh: []
+  },
+  itemsProcessing: {
     ru: [],
     zh: []
   },
@@ -49,8 +57,20 @@ export const state = {
 
 export const actions = {
   async [FETCH_ITEMS](context, username) {
-    const { data } = await ItemsService.list(username);
+    const {
+      data
+    } = await ItemsService.fetchItems(username);
     context.commit(SET_ITEMS, data.items);
+    return data;
+  },
+  async [FETCH_ITEMS_PROCESSING](context, params) {
+    const {
+      data
+    } = await ItemsService.fetchItemsProcessing(params);
+    context.commit(SET_ITEMS_PROCESSING, {
+      items: data.items,
+      langCode: params.langCode
+    });
     return data;
   },
   // params {file, username, langCode}
@@ -71,29 +91,35 @@ export const actions = {
   },
   // params {fileId, username, langCode, count, page}
   async [GET_SPLITTED](context, params) {
-    const { data } = await ItemsService.getSplitted(params);
+    const {
+      data
+    } = await ItemsService.getSplitted(params);
     context.commit(SET_SPLITTED, data);
     return;
   },
   // params {fileId, username}
   async [GET_PROCESSING](context, params) {
     await ItemsService.getProcessing(params).then(
-      function(response) {
+      function (response) {
         context.commit(SET_PROCESSING, response.data);
       },
-      function() {
+      function () {
         console.log(`Didn't find processing document.`);
       }
     );
     return;
   },
   async [ALIGN_SPLITTED](context, params) {
-    const { data } = await ItemsService.alignSplitted(params);
+    const {
+      data
+    } = await ItemsService.alignSplitted(params);
     context.commit(SET_ALIGNED, data.items);
     return;
   },
   async [GET_ALIGNED](context, params) {
-    const { data } = await ItemsService.getAligned(params);
+    const {
+      data
+    } = await ItemsService.getAligned(params);
     context.commit(SET_ALIGNED, data.items);
     return;
   }
@@ -102,6 +128,9 @@ export const actions = {
 export const mutations = {
   [SET_ITEMS](state, items) {
     state.items = items;
+  },
+  [SET_ITEMS_PROCESSING](state, params) {
+    state.itemsProcessing[params.langCode] = params.items[params.langCode];
   },
   [SET_SPLITTED](state, data) {
     if (data.items.ru) {
@@ -133,6 +162,9 @@ export const mutations = {
 const getters = {
   items(state) {
     return state.items;
+  },
+  itemsProcessing(state) {
+    return state.itemsProcessing;
   },
   splitted(state) {
     return state.splitted;

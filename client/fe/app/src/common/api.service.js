@@ -46,8 +46,14 @@ const ApiService = {
 export default ApiService;
 
 export const ItemsService = {
-  list(slug) {
+  fetchItems(slug) {
     return ApiService.get("items", slug);
+  },
+  fetchItemsProcessing(params) {
+    return ApiService.get(
+      "items",
+      `${params.username}/processing/list/${params.langCode}`
+    );
   },
   upload(params) {
     //check filesize

@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import pickle
+import tempfile
 
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
@@ -226,6 +227,20 @@ def processing_list(username, lang):
         }
     }
     return files
+
+@app.route("/debug/items", methods=["GET"])
+def show_items_tree():
+    tree_path = os.path.join(tempfile.gettempdir(), "items_tree.txt")
+    logging.debug(f"Temp file for tree structure: {tree_path}.")   
+    with open(tree_path, mode="w", encoding="utf-8") as tree_out: 
+        for root, dirs, files in os.walk(con.UPLOAD_FOLDER):
+            level = root.replace(con.UPLOAD_FOLDER, '').count(os.sep)
+            indent = ' ' * 4 * (level)
+            tree_out.write(f"{indent}{os.path.basename(root)}" + "\n")
+            subindent = ' ' * 4 * (level + 1)   
+            for file in files:
+                tree_out.write(f"{subindent}{file}" + "\n")
+    return send_file(tree_path)
 
 # Not API calls treated like static queries
 @app.route("/<path:path>")

@@ -180,9 +180,12 @@
           </v-list-item-group>
         </v-list>
       </v-card>
+      <div class="mt-5">
+        <v-img :src="selectedProcessingImg" aspect-ratio="1" height="600px" width="600px"></v-img>
+      </div>
       <v-card class="mt-6">
         <div class="green lighten-5" dark>
-          <v-card-title>{{selectedProcessed}}</v-card-title>
+          <v-card-title>{{selectedProcessing}}</v-card-title>
           <v-card-text>Review and edit automatically aligned document</v-card-text>
         </div>
         <v-divider></v-divider>
@@ -218,7 +221,8 @@
     mapGetters
   } from "vuex";
   import {
-    DEFAULT_BATCHSIZE
+    DEFAULT_BATCHSIZE,
+    API_URL
   } from "@/common/config";
 
   import {
@@ -256,8 +260,8 @@
           ru: null,
           zh: null
         },
-        selectedProcessed: null,
-        selectedProcessedId: null,
+        selectedProcessing: null,
+        selectedProcessingId: null,
         selectedIds: {
           ru: null,
           zh: null
@@ -287,7 +291,7 @@
       onProcessingPageChange(page) {
         this.$store.dispatch(GET_PROCESSING, {
           username: this.$route.params.username,
-          fileId: this.selectedProcessedId,
+          fileId: this.selectedProcessingId,
           linesCount: 10,
           page: page
         });
@@ -340,8 +344,8 @@
       },
       selectProcessing(langCode, name, fileId) {
         if (langCode == "ru") {
-          this.selectedProcessed = name;
-          this.selectedProcessedId = fileId;
+          this.selectedProcessing = name;
+          this.selectedProcessingId = fileId;
           this.$store.dispatch(GET_PROCESSING, {
             username: this.$route.params.username,
             fileId,
@@ -378,15 +382,21 @@
         }
         return this.items[langCode].length != 0;
       },
+      itemsProcessingNotEmpty(langCode) {
+        if (!this.itemsProcessing | !this.itemsProcessing[langCode]) {
+          return false;
+        }
+        return this.itemsProcessing[langCode].length != 0;
+      },
       selectFirstDocument(langCode) {
         if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
           this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
         }
       },
       selectFirstProcessingDocument(langCode) {
-        //if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
-          this.selectProcessing(langCode, this.items[langCode][0], 0);
-        //}
+        if (this.itemsProcessingNotEmpty(langCode)) {
+          this.selectProcessing(langCode, this.itemsProcessing[langCode][0], 0);
+        }
       }
     },
     mounted() {
@@ -398,6 +408,7 @@
         username: this.$route.params.username,
         langCode: 'ru'
       }).then(() => {
+        console.log(this.itemsProcessing)
         this.selectFirstProcessingDocument("ru");
       });
     },
@@ -411,6 +422,12 @@
           return true;
         }
         return (this.items.ru.length == 0) & (this.items.zh.length == 0);
+      },
+      selectedProcessingImg() {
+        if (!this.selectedProcessing) {
+          return "";
+        }
+        return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.png`;
       }
     },
     components: {

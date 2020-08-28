@@ -133,6 +133,7 @@ def align(username, id_ru, id_zh):
     
     logging.debug(f"[{username}]. Aligning documents. {files_ru[id_ru]}, {files_zh[id_zh]}.")
     processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
+    res_img = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_ru]}.png")
     splitted_ru = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE, files_ru[id_ru])
     splitted_zh = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.ZH_CODE, files_zh[id_zh])
    
@@ -144,7 +145,7 @@ def align(username, id_ru, id_zh):
         lines_zh = input_zh.readlines()
         #lines_ru_proxy = input_proxy.readlines()
 
-    aligner.serialize_docs(lines_ru, lines_zh, processing_ru)
+    aligner.serialize_docs(lines_ru, lines_zh, processing_ru, res_img)
     return con.EMPTY_LINES
 
 @app.route("/items/<username>/processing/<int:id_ru>/<int:count>/<int:page>", methods=["GET"])

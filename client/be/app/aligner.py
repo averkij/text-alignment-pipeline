@@ -3,6 +3,11 @@ import pickle
 from typing import List
 
 import numpy as np
+import matplotlib
+#https://stackoverflow.com/questions/49921721/runtimeerror-main-thread-is-not-in-main-loop-with-matplotlib-and-flask
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import seaborn as sns
 from scipy import spatial
 
 import config
@@ -10,7 +15,7 @@ import helper
 import model_dispatcher
 
 
-def serialize_docs(lines_ru, lines_zh, processing_ru, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
+def serialize_docs(lines_ru, lines_zh, processing_ru, res_img, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
     batch_number = 1
     docs = []
     vectors1 = []
@@ -32,6 +37,10 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, threshold=config.DEFAULT_T
     sim_matrix = get_sim_matrix(vectors1, vectors2)
     # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru, lines_zh, lines_zh, sim_matrix, threshold)
     
+    plt.figure(figsize=(16,16))
+    sns.heatmap(sim_matrix, cmap="Greens", vmin=threshold, cbar=False)
+    plt.savefig(res_img, bbox_inches="tight")
+
     logging.debug(f"Processing lines.")
     doc = get_processed(lines_ru, lines_zh, sim_matrix, threshold, batch_number, batch_size)
     docs.append(doc)
@@ -90,3 +99,4 @@ class DocLine:
         return self.text == other
     def isNgramed(self) -> bool:
         return len(self.line_ids)>1
+        

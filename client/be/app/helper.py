@@ -9,6 +9,10 @@ def get_files_list(username, folder, lang):
 def create_folders(username):
     if not os.path.isdir(con.UPLOAD_FOLDER):
         os.mkdir(con.UPLOAD_FOLDER)
+    if not os.path.isdir(con.STATIC_FOLDER):
+        os.mkdir(con.STATIC_FOLDER)
+    if username and not os.path.isdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username)):
+        create_img_folder(username)
     if username and not os.path.isdir(os.path.join(con.UPLOAD_FOLDER, username)):
         os.mkdir(os.path.join(con.UPLOAD_FOLDER, username))
         create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER))
@@ -17,11 +21,18 @@ def create_folders(username):
         create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.NGRAM_FOLDER))
         create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER))
         create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.DONE_FOLDER))
+        create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.IMG_FOLDER))
 
 def create_subfolders(folder):
     os.mkdir(folder)
     os.mkdir(os.path.join(folder, con.RU_CODE))
     os.mkdir(os.path.join(folder, con.ZH_CODE))
+
+def create_img_folder(username):
+    if not os.path.isdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER)):
+        os.mkdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER))
+    if username and not os.path.isdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username)):
+        os.mkdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username))
 
 def get_batch(iter1, iter2, iter3, n):
     l1 = len(iter1)

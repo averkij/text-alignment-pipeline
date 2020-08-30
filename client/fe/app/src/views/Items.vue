@@ -156,7 +156,7 @@
     <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
 
     <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-      v-if="!processing | !processing.items | (processing.items.length == 0)">
+      v-if="!itemsProcessing | (itemsProcessing.length == 0)">
       There are no previously aligned documents yet.
     </v-alert>
 
@@ -181,7 +181,8 @@
         </v-list>
       </v-card>
       <div class="mt-5">
-        <v-img :src="selectedProcessingImg" aspect-ratio="1" height="600px" width="600px"></v-img>
+        <!-- <v-img :src="selectedProcessingImg" aspect-ratio="1" width="50%"></v-img> -->
+        <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="50%"></v-img>
       </div>
       <v-card class="mt-6">
         <div class="green lighten-5" dark>
@@ -428,6 +429,12 @@
           return "";
         }
         return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.png`;
+      },
+      selectedProcessingImgBest() {
+        if (!this.selectedProcessing) {
+          return "";
+        }
+        return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best.png`;
       }
     },
     components: {

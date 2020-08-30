@@ -1,4 +1,9 @@
 **/node_modules
 **/dist
+**/static
+
+#sentence transformers saved model
 # **/sentence_transformers.bin
+
+#universal sentence encoder saved model
 **/use_multilingual_models_saved

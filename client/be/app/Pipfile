@@ -18,6 +18,7 @@ tensorflow-cpu = "*"
 tensorflow-text = "*"
 tensorflow-hub = "*"
 tf-sentencepiece = "*"
+seaborn = "*"
 
 [requires]
 python_version = "3.8"

@@ -18,3 +18,9 @@ RUN pip install -r /app/requirements.txt;
 
 RUN mkdir /app/static
 COPY --from=build-stage /app/dist /app/static
+
+#frontend release config
+#COPY 
+
+#backend release config
+#COPY 

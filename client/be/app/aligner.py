@@ -15,7 +15,7 @@ import helper
 import model_dispatcher
 
 
-def serialize_docs(lines_ru, lines_zh, processing_ru, res_img, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
+def serialize_docs(lines_ru, lines_zh, processing_ru, res_img, res_img_best, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
     batch_number = 1
     docs = []
     vectors1 = []
@@ -35,11 +35,18 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, res_img, threshold=config.
     
     logging.debug(f"Calculating similarity matrix.")
     sim_matrix = get_sim_matrix(vectors1, vectors2)
+
+    sim_matrix_best = np.zeros_like(sim_matrix)
+    sim_matrix_best[range(len(sim_matrix)), sim_matrix.argmax(1)] = sim_matrix[range(len(sim_matrix)), sim_matrix.argmax(1)]
     # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_ru, lines_zh, lines_zh, sim_matrix, threshold)
     
     plt.figure(figsize=(16,16))
     sns.heatmap(sim_matrix, cmap="Greens", vmin=threshold, cbar=False)
     plt.savefig(res_img, bbox_inches="tight")
+
+    plt.figure(figsize=(16,16))
+    sns.heatmap(sim_matrix_best, cmap="Greens", vmin=threshold, cbar=False)
+    plt.savefig(res_img_best, bbox_inches="tight")
 
     logging.debug(f"Processing lines.")
     doc = get_processed(lines_ru, lines_zh, sim_matrix, threshold, batch_number, batch_size)

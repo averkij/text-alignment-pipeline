@@ -46,6 +46,8 @@ def serialize_docs(lines_ru, lines_zh, processing_ru, res_img, res_img_best, thr
 
     plt.figure(figsize=(16,16))
     sns.heatmap(sim_matrix_best, cmap="Greens", vmin=threshold, cbar=False)
+    plt.xlabel("russian", fontsize=18)
+    plt.ylabel("chinese", fontsize=18)
     plt.savefig(res_img_best, bbox_inches="tight")
 
     logging.debug(f"Processing lines.")

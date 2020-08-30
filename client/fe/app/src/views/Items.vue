@@ -156,7 +156,7 @@
     <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
 
     <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-      v-if="!itemsProcessing | (itemsProcessing.length == 0)">
+      v-if="!itemsProcessing | (itemsProcessing['ru'].length == 0)">
       There are no previously aligned documents yet.
     </v-alert>
 
@@ -372,6 +372,8 @@
             this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
               username: this.$route.params.username,
               langCode: 'ru'
+            }).then(() => {
+              this.selectFirstProcessingDocument("ru");
             });
             this.isLoading.align = false;
           });
@@ -409,7 +411,7 @@
         username: this.$route.params.username,
         langCode: 'ru'
       }).then(() => {
-        console.log(this.itemsProcessing)
+        //console.log(this.itemsProcessing)
         this.selectFirstProcessingDocument("ru");
       });
     },

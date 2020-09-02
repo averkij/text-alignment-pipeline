@@ -8,10 +8,9 @@ This is a web version of text alignment application. It consists of backend and 
 
 Flask/uwsgi backend REST API service. It's pretty simple and contains all the alignment logic.
 
-### Run
+### Run for development
 
 ```
-cd ./be
 python main.py
 ```
 
@@ -21,10 +20,14 @@ python main.py
 
 SPA. Vue + vuex + vuetify. UI for managing alignment process using BE and a tool for translators to edit processing documents.
 
-### Run
+### Setup
 
 ```
-cd ./fe
 npm install
+```
+
+### Compile and run with hot-reloads for development
+
+```
 npm run serve
 ```

@@ -51,48 +51,14 @@
       This is a test version. Only {{DEFAULT_BATCHSIZE}} lines will be aligned.
     </v-alert>
     <v-row class="mt-6">
-      <v-col v-for="(panel, i) in panels" :key="i" cols="12" sm="6">
-        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-          v-if="!selected[panel.langCode]">
-          Select file to align.
-        </v-alert>
-        <v-card v-else>
-          <div class="purple lighten-5">
-            <v-card-title>{{ selected[panel.langCode] }}</v-card-title>
-            <v-card-text>{{
-                splitted[panel.langCode].meta.lines_count | separator
-              }}
-              lines</v-card-text>
-          </div>
-          <v-divider></v-divider>
-          <v-simple-table>
-            <template v-slot:default>
-              <tbody>
-                <tr>
-                  <td>File</td>
-                  <td>{{ selected[panel.langCode] }}</td>
-                </tr>
-                <tr>
-                  <td>Lines</td>
-                  <td>
-                    {{ splitted[panel.langCode].meta.lines_count | separator }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Symbols</td>
-                  <td>
-                    {{
-                      splitted[panel.langCode].meta.symbols_count | separator
-                    }}
-                  </td>
-                </tr>
-              </tbody>
-            </template>
-          </v-simple-table>
-        </v-card>
+      <v-col cols="12" sm="6">
+        <InfoPanel :info="LANGUAGES[langCodeFrom]" :splitted=splitted :selected=selected></InfoPanel>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <InfoPanel :info="LANGUAGES[langCodeTo]" :splitted=splitted :selected=selected></InfoPanel>
       </v-col>
     </v-row>
-    <v-btn v-show="selected['ru'] && selected['zh']" class="success mt-6" :loading="isLoading.align"
+    <v-btn v-show="selected[langCodeFrom] && selected[langCodeTo]" class="success mt-6" :loading="isLoading.align"
       :disabled="isLoading.align" @click="align()">
       Align documents
     </v-btn>
@@ -162,6 +128,7 @@
 <script>
   import RawPanel from "@/components/RawPanel";
   import SplittedPanel from "@/components/SplittedPanel";
+  import InfoPanel from "@/components/InfoPanel";
   import EditItem from "@/components/EditItem";
   import {
     mapGetters
@@ -423,7 +390,8 @@
     components: {
       EditItem,
       RawPanel,
-      SplittedPanel
+      SplittedPanel,
+      InfoPanel
     }
   };
 </script>

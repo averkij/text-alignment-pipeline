@@ -21,8 +21,7 @@ from aligner import DocLine
 app = Flask(__name__)
 CORS(app)
 
-#logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+#logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 # @app.route("/")
 # def main():
@@ -33,31 +32,26 @@ logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', forma
 def start():
     return "Hallo, Welt."
 
-@app.route("/items/<username>", methods=["GET", "POST"])
-def items(username):
-    helper.create_folders(username)
+@app.route("/items/<username>/raw/<lang>", methods=["GET", "POST"])
+def items(username, lang):
+
+    #TODO add language code validation
+
+    helper.create_folders(username, lang)
     #load documents
     if request.method == "POST":
-        if con.RU_CODE in request.files:
-            file_ru = request.files["ru"]
-            logging.debug(f"[{username}]. Loading {con.RU_CODE} document {file_ru.filename}.")
-            raw_ru = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, con.RU_CODE, file_ru.filename)
-            file_ru.save(raw_ru)
-            splitter.split_to_sentences(file_ru.filename, con.RU_CODE, username)
-            logging.debug(f"[{username}]. Success. {file_ru.filename} is loaded.")
-        if con.ZH_CODE in request.files:
-            file_zh = request.files["zh"]
-            logging.debug(f"[{username}]. Loading {con.ZH_CODE} document {file_zh.filename}.")
-            raw_zh = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, con.ZH_CODE, file_zh.filename)
-            file_zh.save(raw_zh)
-            splitter.split_to_sentences(file_zh.filename, con.ZH_CODE, username)
-            logging.debug(f"[{username}]. Success. {file_zh.filename} is loaded.")
+        if lang in request.files:
+            file = request.files[lang]
+            logging.debug(f"[{username}]. Loading lang document {file.filename}.")
+            raw_path = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, lang, file.filename)
+            file.save(raw_path)
+            splitter.split_to_sentences(file.filename, lang, username)
+            logging.debug(f"[{username}]. Success. {file.filename} is loaded.")
         return {"res": 1}
     #return documents list
     files = {
         "items": {
-            con.RU_CODE: helper.get_files_list(username, con.RAW_FOLDER, con.RU_CODE),
-            con.ZH_CODE: helper.get_files_list(username, con.RAW_FOLDER, con.ZH_CODE)
+            lang: helper.get_files_list(username, con.RAW_FOLDER, lang)
         }
     }
     return files

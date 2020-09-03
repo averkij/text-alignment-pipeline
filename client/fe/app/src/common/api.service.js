@@ -46,8 +46,9 @@ const ApiService = {
 export default ApiService;
 
 export const ItemsService = {
-  fetchItems(slug) {
-    return ApiService.get("items", slug);
+  fetchItems(params) {
+    return ApiService.get("items",
+    `${params.username}/raw/${params.langCode}`);
   },
   fetchItemsProcessing(params) {
     return ApiService.get(
@@ -67,7 +68,9 @@ export const ItemsService = {
     }
     let form = new FormData();
     form.append(params.langCode, params.file);
-    return ApiService.post("items", params.username, form);
+    return ApiService.post("items",
+    `${params.username}/raw/${params.langCode}`,
+    form);
   },
   downloadSplitted(params) {
     return ApiService.get(

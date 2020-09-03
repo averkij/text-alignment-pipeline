@@ -56,11 +56,14 @@ export const state = {
 };
 
 export const actions = {
-  async [FETCH_ITEMS](context, username) {
+  async [FETCH_ITEMS](context, params) {
     const {
       data
-    } = await ItemsService.fetchItems(username);
-    context.commit(SET_ITEMS, data.items);
+    } = await ItemsService.fetchItems(params);
+    context.commit(SET_ITEMS, {
+      items: data.items,
+      langCode: params.langCode
+    });
     return data;
   },
   async [FETCH_ITEMS_PROCESSING](context, params) {
@@ -126,8 +129,8 @@ export const actions = {
 };
 
 export const mutations = {
-  [SET_ITEMS](state, items) {
-    state.items = items;
+  [SET_ITEMS](state, params) {
+    state.items[params.langCode] = params.items[params.langCode];
   },
   [SET_ITEMS_PROCESSING](state, params) {
     state.itemsProcessing[params.langCode] = params.items[params.langCode];

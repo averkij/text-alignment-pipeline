@@ -1,5 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import { DEFAULT_FROM, DEFAULT_TO } from "@/common/langList";
 
 Vue.use(VueRouter);
 
@@ -16,10 +17,17 @@ const routes = [
     alias: "/user"
   },
   {
-    path: "/user/:username/items",
+    path: "/user/:username/items/:from/:to",
     name: "items",
-    component: () => import("@/views/Items"),
-    alias: "/user/:username"
+    component: () => import("@/views/Items")
+  },
+  {
+    path: "/user/:username",
+    redirect: `/user/:username/items/${DEFAULT_FROM}/${DEFAULT_TO}`
+  },
+  {
+    path: "/user/:username/items",
+    redirect: `/user/:username/items/${DEFAULT_FROM}/${DEFAULT_TO}`
   }
 ];
 

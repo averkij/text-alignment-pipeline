@@ -17,10 +17,10 @@
     <div class="mt-6">
       <v-row>
         <v-col cols="12" sm="6">
-          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[DEFAULT_FROM]" :items=items :isLoading=isLoading></LangPanel>
+          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[langCodeFrom]" :items=items :isLoading=isLoading></LangPanel>
         </v-col>
         <v-col cols="12" sm="6">
-          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[DEFAULT_TO]" :items=items :isLoading=isLoading></LangPanel>
+          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[langCodeTo]" :items=items :isLoading=isLoading></LangPanel>
         </v-col>
       </v-row>
     </div>
@@ -217,11 +217,6 @@
         DEFAULT_FROM,
         DEFAULT_TO,
         DEFAULT_BATCHSIZE,
-        asd: {
-            langCode: "ru",
-            lang: "Russian",
-            icon: "🥄"
-          },
         panels: [{
             langCode: "ru",
             lang: "Russian",
@@ -235,22 +230,26 @@
         ],
         files: {
           ru: null,
-          zh: null
+          zh: null,
+          de: null
         },
         selected: {
           ru: null,
-          zh: null
+          zh: null,
+          de: null
         },
         selectedProcessing: null,
         selectedProcessingId: null,
         selectedIds: {
           ru: null,
-          zh: null
+          zh: null,
+          de: null
         },
         isLoading: {
           upload: {
             ru: false,
-            zh: false
+            zh: false,
+            de: false
           },
           align: false
         },
@@ -372,6 +371,8 @@
         return this.itemsProcessing[langCode].length != 0;
       },
       selectFirstDocument(langCode) {
+        console.log(this.items)
+        console.log(langCode)
         if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
           this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
         }
@@ -383,9 +384,17 @@
       }
     },
     mounted() {
-      this.$store.dispatch(FETCH_ITEMS, this.$route.params.username).then(() => {
-        this.selectFirstDocument("ru");
-        this.selectFirstDocument("zh");
+      this.$store.dispatch(FETCH_ITEMS, {
+        username: this.$route.params.username,
+        langCode: this.langCodeFrom
+      }).then(() => {
+        this.selectFirstDocument(this.langCodeFrom);
+      });
+      this.$store.dispatch(FETCH_ITEMS, {
+        username: this.$route.params.username,
+        langCode: this.langCodeTo
+      }).then(() => {
+        this.selectFirstDocument(this.langCodeTo);
       });
       this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
         username: this.$route.params.username,
@@ -417,7 +426,21 @@
           return "";
         }
         return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best.png`;
-      }
+      },
+      langCodeFrom() {
+        let langCode = this.$route.params.from;
+        if (this.LANGUAGES[langCode]) {
+          return langCode;
+        }
+        return DEFAULT_FROM;
+      },
+      langCodeTo() {
+        let langCode = this.$route.params.to;
+        if (this.LANGUAGES[langCode]) {
+          return langCode;
+        }
+        return DEFAULT_TO;
+      },
     },
     components: {
       EditItem,

@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import tempfile
+import sys
 
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
@@ -20,6 +21,7 @@ from aligner import DocLine
 app = Flask(__name__)
 CORS(app)
 
+#logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 # @app.route("/")
@@ -123,20 +125,20 @@ def aligned(username, lang, id, count):
                 break
     return {"items":{lang:lines[:5]}}
 
-@app.route("/items/<username>/align/<int:id_ru>/<int:id_zh>", methods=["GET"])
-def align(username, id_ru, id_zh):
+@app.route("/items/<username>/align/<int:id_from>/<int:id_to>", methods=["GET"])
+def align(username, id_from, id_to):
     files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
     files_zh = helper.get_files_list(username, con.SPLITTED_FOLDER, con.ZH_CODE)
-    if len(files_ru) < id_ru+1 or len(files_zh) < id_zh+1:
+    if len(files_ru) < id_from+1 or len(files_zh) < id_to+1:
         logging.debug(f"[{username}]. Documents not found.")
         return con.EMPTY_SIMS
     
-    logging.debug(f"[{username}]. Aligning documents. {files_ru[id_ru]}, {files_zh[id_zh]}.")
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
-    res_img = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_ru]}.png")
-    res_img_best = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_ru]}.best.png")
-    splitted_ru = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE, files_ru[id_ru])
-    splitted_zh = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.ZH_CODE, files_zh[id_zh])
+    logging.debug(f"[{username}]. Aligning documents. {files_ru[id_from]}, {files_zh[id_to]}.")
+    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
+    res_img = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_from]}.png")
+    res_img_best = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_from]}.best.png")
+    splitted_ru = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE, files_ru[id_from])
+    splitted_zh = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.ZH_CODE, files_zh[id_to])
    
     logging.debug(f"[{username}]. Preparing for alignment. {splitted_ru}, {splitted_zh}.")
     with open(splitted_ru, mode="r", encoding="utf-8") as input_ru, \
@@ -149,12 +151,13 @@ def align(username, id_ru, id_zh):
     aligner.serialize_docs(lines_ru, lines_zh, processing_ru, res_img, res_img_best)
     return con.EMPTY_LINES
 
-@app.route("/items/<username>/processing/<int:id_ru>/<int:count>/<int:page>", methods=["GET"])
-def processing(username, id_ru, count, page):
-    files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
-    if len(files_ru) < id_ru+1:
+@app.route("/items/<username>/processing/<int:id_from>/<int:count>/<int:page>", methods=["GET"])
+def processing(username, id_from, count, page):
+    files_ru = helper.get_files_list(username, con.PROCESSING_FOLDER, con.RU_CODE)
+    if len(files_ru) < id_from+1:
         return con.EMPTY_SIMS
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
+    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
+    logging.debug(f"[{username}]. Get processing file. {processing_ru}.")
     if not os.path.isfile(processing_ru):
         abort(404)
         
@@ -187,14 +190,14 @@ def processing(username, id_ru, count, page):
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
 
-@app.route("/items/<username>/processing/<int:id_ru>/<lang>/download", methods=["GET"])
-def download_processsing(username, id_ru, lang):
-    logging.debug(f"[{username}]. Downloading {lang} {id_ru} result document.")
+@app.route("/items/<username>/processing/<int:id_from>/<lang>/download", methods=["GET"])
+def download_processsing(username, id_from, lang):
+    logging.debug(f"[{username}]. Downloading {lang} {id_from} result document.")
     files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
-    if len(files_ru) < id_ru+1:
-        logging.debug(f"[{username}]. Document {lang} with id={id_ru} not found.")
+    if len(files_ru) < id_from+1:
+        logging.debug(f"[{username}]. Document {lang} with id={id_from} not found.")
         return con.EMPTY_SIMS
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_ru])
+    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
     if not os.path.isfile(processing_ru):
         logging.debug(f"[{username}]. Document {processing_ru} not found.")
         abort(404)

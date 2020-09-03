@@ -16,44 +16,11 @@
     </v-alert>
     <div class="mt-6">
       <v-row>
-        <v-col v-for="(panel, i) in panels" :key="i" cols="12" sm="6">
-          <v-card>
-            <!-- <v-img position="top" class="white--text" height="200px" :src="panel.img">
-                            <v-card-title>{{panel.lang}}</v-card-title>
-                        </v-img> -->
-            <div class="blue lighten-5">
-              <v-card-title>{{ panel.icon }} {{ panel.lang }}</v-card-title>
-              <v-card-text>Your {{ panel.lang }} files</v-card-text>
-            </div>
-            <v-divider></v-divider>
-            <v-list class="pa-0">
-              <v-list-item-group mandatory color="gray">
-                <v-list-item v-for="(item, i) in items[panel.langCode]" :key="i"
-                  @change="selectAndLoadPreview(panel.langCode, item, i)">
-                  <v-list-item-icon>
-                    <v-icon>mdi-arrow-right</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title v-text="item"></v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group>
-            </v-list>
-            <v-divider></v-divider>
-            <v-card-title>Upload</v-card-title>
-            <v-card-text>Upload raw {{ panel.lang }} document in txt format.</v-card-text>
-            <v-card-actions>
-              <v-file-input outlined dense accept=".txt" @change="onFileChange($event, panel.langCode)">
-              </v-file-input>
-            </v-card-actions>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-btn @click="uploadFile(panel.langCode)" :loading="isLoading.upload[panel.langCode]"
-                :disabled="isLoading.upload[panel.langCode]">
-                Upload
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+        <v-col cols="12" sm="6">
+          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[DEFAULT_FROM]" :items=items :isLoading=isLoading></LangPanel>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[DEFAULT_TO]" :items=items :isLoading=isLoading></LangPanel>
         </v-col>
       </v-row>
     </div>
@@ -216,6 +183,7 @@
 </template>
 
 <script>
+  import LangPanel from "@/components/LangPanel";
   import EditItem from "@/components/EditItem";
   import PreviewItem from "@/components/PreviewItem";
   import {
@@ -225,7 +193,11 @@
     DEFAULT_BATCHSIZE,
     API_URL
   } from "@/common/config";
-
+  import {
+    LANGUAGES,
+    DEFAULT_FROM,
+    DEFAULT_TO
+  } from "@/common/langList";
   import {
     FETCH_ITEMS,
     FETCH_ITEMS_PROCESSING,
@@ -241,7 +213,15 @@
   export default {
     data() {
       return {
+        LANGUAGES,
+        DEFAULT_FROM,
+        DEFAULT_TO,
         DEFAULT_BATCHSIZE,
+        asd: {
+            langCode: "ru",
+            lang: "Russian",
+            icon: "🥄"
+          },
         panels: [{
             langCode: "ru",
             lang: "Russian",
@@ -441,7 +421,8 @@
     },
     components: {
       EditItem,
-      PreviewItem
+      PreviewItem,
+      LangPanel
     }
   };
 </script>

@@ -287,7 +287,9 @@
         this.$store
           .dispatch(ALIGN_SPLITTED, {
             username: this.$route.params.username,
-            fileIds: this.selectedIds
+            fileIds: this.selectedIds,
+            langCodeFrom: this.langCodeFrom,
+            langCodeTo: this.langCodeTo
           })
           .then(() => {
             this.$store.dispatch(GET_PROCESSING, {

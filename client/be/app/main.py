@@ -119,30 +119,30 @@ def aligned(username, lang, id, count):
                 break
     return {"items":{lang:lines[:5]}}
 
-@app.route("/items/<username>/align/<int:id_from>/<int:id_to>", methods=["GET"])
-def align(username, id_from, id_to):
-    files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
-    files_zh = helper.get_files_list(username, con.SPLITTED_FOLDER, con.ZH_CODE)
-    if len(files_ru) < id_from+1 or len(files_zh) < id_to+1:
+@app.route("/items/<username>/align/<lang_from>/<lang_to>/<int:id_from>/<int:id_to>", methods=["GET"])
+def align(username, lang_from, lang_to, id_from, id_to):
+    files_from = helper.get_files_list(username, con.SPLITTED_FOLDER, lang_from)
+    files_to = helper.get_files_list(username, con.SPLITTED_FOLDER, lang_to)
+    if len(files_from) < id_from+1 or len(files_to) < id_to+1:
         logging.debug(f"[{username}]. Documents not found.")
         return con.EMPTY_SIMS
     
-    logging.debug(f"[{username}]. Aligning documents. {files_ru[id_from]}, {files_zh[id_to]}.")
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
-    res_img = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_from]}.png")
-    res_img_best = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_ru[id_from]}.best.png")
-    splitted_ru = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE, files_ru[id_from])
-    splitted_zh = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.ZH_CODE, files_zh[id_to])
+    logging.debug(f"[{username}]. Aligning documents. {files_from[id_from]}, {files_to[id_to]}.")
+    processing_from = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, files_from[id_from])
+    res_img = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_from[id_from]}.png")
+    res_img_best = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_from[id_from]}.best.png")
+    splitted_from = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang_from, files_from[id_from])
+    splitted_to = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang_to, files_to[id_to])
    
-    logging.debug(f"[{username}]. Preparing for alignment. {splitted_ru}, {splitted_zh}.")
-    with open(splitted_ru, mode="r", encoding="utf-8") as input_ru, \
-         open(splitted_zh, mode="r", encoding="utf-8") as input_zh:
+    logging.debug(f"[{username}]. Preparing for alignment. {splitted_from}, {splitted_to}.")
+    with open(splitted_from, mode="r", encoding="utf-8") as input_from, \
+         open(splitted_to, mode="r", encoding="utf-8") as input_to:
         #  ,open(ngramed_proxy_ru, mode="r", encoding="utf-8") as input_proxy:
-        lines_ru = input_ru.readlines()
-        lines_zh = input_zh.readlines()
+        lines_from = input_from.readlines()
+        lines_to = input_to.readlines()
         #lines_ru_proxy = input_proxy.readlines()
 
-    aligner.serialize_docs(lines_ru, lines_zh, processing_ru, res_img, res_img_best)
+    aligner.serialize_docs(lines_from, lines_to, processing_from, res_img, res_img_best)
     return con.EMPTY_LINES
 
 @app.route("/items/<username>/processing/<int:id_from>/<int:count>/<int:page>", methods=["GET"])

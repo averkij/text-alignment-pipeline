@@ -15,7 +15,7 @@ export const LANGUAGES = {
         icon: "📏"
     },
     'en' :{
-        angCode: "en",
+        langCode: "en",
         name: "English",
         icon: "🧸"
     }

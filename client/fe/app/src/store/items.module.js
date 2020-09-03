@@ -25,11 +25,13 @@ import {
 const initialState = {
   items: {
     ru: [],
-    zh: []
+    zh: [],
+    de: []
   },
   itemsProcessing: {
     ru: [],
-    zh: []
+    zh: [],
+    de: []
   },
   splitted: {
     ru: {
@@ -47,7 +49,8 @@ const initialState = {
   },
   aligned: {
     ru: [],
-    zh: []
+    zh: [],
+    de: []
   }
 };
 
@@ -79,7 +82,7 @@ export const actions = {
   // params {file, username, langCode}
   async [UPLOAD_FILES](context, params) {
     await ItemsService.upload(params);
-    await context.dispatch(FETCH_ITEMS, params.username);
+    await context.dispatch(FETCH_ITEMS, params);
     return;
   },
   // params {fileId, username, langCode, fileName}

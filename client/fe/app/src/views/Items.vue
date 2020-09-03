@@ -17,10 +17,14 @@
     <div class="mt-6">
       <v-row>
         <v-col cols="12" sm="6">
-          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[langCodeFrom]" :items=items :isLoading=isLoading></LangPanel>
+          <RawPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview"
+            :info="LANGUAGES[langCodeFrom]" :items=items :isLoading=isLoading>
+            </RawPanel>
         </v-col>
         <v-col cols="12" sm="6">
-          <LangPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview" :info="LANGUAGES[langCodeTo]" :items=items :isLoading=isLoading></LangPanel>
+          <RawPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview"
+            :info="LANGUAGES[langCodeTo]" :items=items :isLoading=isLoading>
+            </RawPanel>
         </v-col>
       </v-row>
     </div>
@@ -183,7 +187,7 @@
 </template>
 
 <script>
-  import LangPanel from "@/components/LangPanel";
+  import RawPanel from "@/components/RawPanel";
   import EditItem from "@/components/EditItem";
   import PreviewItem from "@/components/PreviewItem";
   import {
@@ -231,25 +235,29 @@
         files: {
           ru: null,
           zh: null,
-          de: null
+          de: null,
+          en: null
         },
         selected: {
           ru: null,
           zh: null,
-          de: null
+          de: null,
+          en: null
         },
         selectedProcessing: null,
         selectedProcessingId: null,
         selectedIds: {
           ru: null,
           zh: null,
-          de: null
+          de: null,
+          en: null
         },
         isLoading: {
           upload: {
             ru: false,
             zh: false,
-            de: false
+            de: false,
+            en: false
           },
           align: false
         },
@@ -277,6 +285,7 @@
         });
       },
       uploadFile(langCode) {
+        console.log("langcode =>", langCode)
         this.isLoading.upload[langCode] = true;
         this.$store
           .dispatch(UPLOAD_FILES, {
@@ -371,8 +380,6 @@
         return this.itemsProcessing[langCode].length != 0;
       },
       selectFirstDocument(langCode) {
-        console.log(this.items)
-        console.log(langCode)
         if (this.itemsNotEmpty(langCode) & !this.selected[langCode]) {
           this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
         }
@@ -400,7 +407,6 @@
         username: this.$route.params.username,
         langCode: 'ru'
       }).then(() => {
-        //console.log(this.itemsProcessing)
         this.selectFirstProcessingDocument("ru");
       });
     },
@@ -445,7 +451,7 @@
     components: {
       EditItem,
       PreviewItem,
-      LangPanel
+      RawPanel
     }
   };
 </script>

@@ -24,7 +24,7 @@ def split_to_sentences(filename, langcode, username):
     raw = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, langcode, filename)
     splitted = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, langcode, filename)
     with open(raw, mode='r', encoding='utf-8') as input_file, open(splitted, mode='w', encoding='utf-8') as out_file:
-        if langcode == con.RU_CODE or langcode == con.DE_CODE:
+        if langcode == con.RU_CODE or langcode == con.DE_CODE or langcode == con.EN_CODE:
             lines = ' '.join(input_file.readlines())
             lines = re.sub(pattern_ru_orig, '', lines)
             lines = re.sub(double_spaces, ' ', lines)

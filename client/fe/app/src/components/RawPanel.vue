@@ -40,7 +40,7 @@
 
 <script>
   export default {
-    name: "LangPanel",
+    name: "RawPanel",
     props: ["info", "isLoading", "items"],
     methods: {
       onFileChange(event, langCode) {

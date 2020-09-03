@@ -19,12 +19,12 @@
         <v-col cols="12" sm="6">
           <RawPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview"
             :info="LANGUAGES[langCodeFrom]" :items=items :isLoading=isLoading>
-            </RawPanel>
+          </RawPanel>
         </v-col>
         <v-col cols="12" sm="6">
           <RawPanel @uploadFile="uploadFile" @onFileChange="onFileChange" @selectAndLoadPreview="selectAndLoadPreview"
             :info="LANGUAGES[langCodeTo]" :items=items :isLoading=isLoading>
-            </RawPanel>
+          </RawPanel>
         </v-col>
       </v-row>
     </div>
@@ -34,42 +34,15 @@
       Documents are splitted by sentences using language specific rules.
     </v-alert>
     <v-row>
-      <v-col v-for="(panel, i) in panels" :key="i" cols="12" sm="6">
-        <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2" v-if="
-            !splitted |
-              !splitted[panel.langCode] |
-              (splitted[panel.langCode].lines.length == 0)
-          ">
-          Select file to preview.
-        </v-alert>
-        <v-card v-else>
-          <div class="yellow lighten-5">
-            <v-card-title>{{ selected[panel.langCode] }}</v-card-title>
-            <v-card-text>{{
-                splitted[panel.langCode].meta.lines_count | separator
-              }}
-              lines</v-card-text>
-          </div>
-          <v-divider></v-divider>
-          <div v-for="(line, i) in splitted[panel.langCode].lines" :key="i">
-            <PreviewItem :item="line"></PreviewItem>
-            <v-divider></v-divider>
-          </div>
-          <div class="text-center pa-3">
-            <v-pagination v-model="splitted[panel.langCode].meta.page"
-              :length="splitted[panel.langCode].meta.total_pages" total-visible="7" @input="
-                onPreviewPageChange(
-                  splitted[panel.langCode].meta.page,
-                  panel.langCode
-                )
-              ">
-            </v-pagination>
-          </div>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-btn @click="downloadSplitted(panel.langCode)">Download</v-btn>
-          </v-card-actions>
-        </v-card>
+      <v-col cols="12" sm="6">
+        <SplittedPanel @onPreviewPageChange="onPreviewPageChange" @downloadSplitted="downloadSplitted"
+          :info="LANGUAGES[langCodeFrom]" :splitted=splitted :selected=selected>
+        </SplittedPanel>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <SplittedPanel @onPreviewPageChange="onPreviewPageChange" @downloadSplitted="downloadSplitted"
+          :info="LANGUAGES[langCodeTo]" :splitted=splitted :selected=selected>
+        </SplittedPanel>
       </v-col>
     </v-row>
 
@@ -188,8 +161,8 @@
 
 <script>
   import RawPanel from "@/components/RawPanel";
+  import SplittedPanel from "@/components/SplittedPanel";
   import EditItem from "@/components/EditItem";
-  import PreviewItem from "@/components/PreviewItem";
   import {
     mapGetters
   } from "vuex";
@@ -285,7 +258,6 @@
         });
       },
       uploadFile(langCode) {
-        console.log("langcode =>", langCode)
         this.isLoading.upload[langCode] = true;
         this.$store
           .dispatch(UPLOAD_FILES, {
@@ -416,10 +388,10 @@
         return this.$route.params.username;
       },
       showAlert() {
-        if (!this.items | !this.items.ru | !this.items.zh) {
+        if (!this.items | !this.items[this.langCodeFrom] | !this.items[this.langCodeTo]) {
           return true;
         }
-        return (this.items.ru.length == 0) & (this.items.zh.length == 0);
+        return (this.items[this.langCodeFrom].length == 0) & (this.items[this.langCodeTo].length == 0);
       },
       selectedProcessingImg() {
         if (!this.selectedProcessing) {
@@ -450,8 +422,8 @@
     },
     components: {
       EditItem,
-      PreviewItem,
-      RawPanel
+      RawPanel,
+      SplittedPanel
     }
   };
 </script>

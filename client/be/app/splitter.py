@@ -8,6 +8,7 @@ pattern_ru_orig = re.compile(r'[a-zA-Z\(\)\[\]\/\<\>•\'\n]+')
 double_spaces = re.compile(r'[\s]+')
 double_commas = re.compile(r'[,]+')
 double_dash = re.compile(r'[-—]+')
+german_quotes = re.compile(r'[»«]+')
 pattern_zh = re.compile(r'[」「“”„‟\x1a⓪①②③④⑤⑥⑦⑧⑨⑩⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽*a-zA-Zа-яА-Я\(\)\[\]\s\n\/\-\:•＂＃＄％＆＇（）＊＋－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､、〃》【】〔〕〖〗〘〙〜〟〰〾〿–—‘’‛‧﹏〉]+')
 pat_comma = re.compile(r'[\.]+')
 first_numbers = re.compile(r'^[0-9,\.]+')
@@ -24,9 +25,22 @@ def split_to_sentences(filename, langcode, username):
     raw = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, langcode, filename)
     splitted = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, langcode, filename)
     with open(raw, mode='r', encoding='utf-8') as input_file, open(splitted, mode='w', encoding='utf-8') as out_file:
-        if langcode == con.RU_CODE or langcode == con.DE_CODE or langcode == con.EN_CODE:
+        if langcode == con.RU_CODE:
             lines = ' '.join(input_file.readlines())
             lines = re.sub(pattern_ru_orig, '', lines)
+            lines = re.sub(double_spaces, ' ', lines)
+            lines = re.sub(double_commas, ',', lines)
+            lines = re.sub(double_dash, '—', lines)
+            sentences = list(x.text for x in razdel.sentenize(lines))
+        elif langcode == con.DE_CODE:
+            lines = ' '.join(input_file.readlines())
+            lines = re.sub(double_spaces, ' ', lines)
+            lines = re.sub(german_quotes, ' ', lines)
+            lines = re.sub(double_commas, ',', lines)
+            lines = re.sub(double_dash, '—', lines)
+            sentences = list(x.text for x in razdel.sentenize(lines))
+        elif langcode == con.EN_CODE:
+            lines = ' '.join(input_file.readlines())
             lines = re.sub(double_spaces, ' ', lines)
             lines = re.sub(double_commas, ',', lines)
             lines = re.sub(double_dash, '—', lines)

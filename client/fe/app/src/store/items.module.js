@@ -26,12 +26,14 @@ const initialState = {
   items: {
     ru: [],
     zh: [],
-    de: []
+    de: [],
+    en: []
   },
   itemsProcessing: {
     ru: [],
     zh: [],
-    de: []
+    de: [],
+    en: []
   },
   splitted: {
     ru: {
@@ -39,6 +41,14 @@ const initialState = {
       meta: {}
     },
     zh: {
+      lines: [],
+      meta: {}
+    },
+    de: {
+      lines: [],
+      meta: {}
+    },
+    en: {
       lines: [],
       meta: {}
     }
@@ -50,7 +60,8 @@ const initialState = {
   aligned: {
     ru: [],
     zh: [],
-    de: []
+    de: [],
+    en: []
   }
 };
 
@@ -100,7 +111,10 @@ export const actions = {
     const {
       data
     } = await ItemsService.getSplitted(params);
-    context.commit(SET_SPLITTED, data);
+    context.commit(SET_SPLITTED, {
+      data: data,
+      langCode: params.langCode
+    });
     return;
   },
   // params {fileId, username}
@@ -138,18 +152,12 @@ export const mutations = {
   [SET_ITEMS_PROCESSING](state, params) {
     state.itemsProcessing[params.langCode] = params.items[params.langCode];
   },
-  [SET_SPLITTED](state, data) {
-    if (data.items.ru) {
-      state.splitted.ru.lines = data.items.ru;
+  [SET_SPLITTED](state, params) {
+    if (params.data.items[params.langCode]) {
+      state.splitted[params.langCode].lines = params.data.items[params.langCode];
     }
-    if (data.items.zh) {
-      state.splitted.zh.lines = data.items.zh;
-    }
-    if (data.meta.ru) {
-      state.splitted.ru.meta = data.meta.ru;
-    }
-    if (data.meta.zh) {
-      state.splitted.zh.meta = data.meta.zh;
+    if (params.data.meta[params.langCode]) {
+      state.splitted[params.langCode].meta = params.data.meta[params.langCode];
     }
   },
   [SET_PROCESSING](state, data) {

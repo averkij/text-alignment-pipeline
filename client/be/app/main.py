@@ -142,7 +142,7 @@ def align(username, lang_from, lang_to, id_from, id_to):
         lines_to = input_to.readlines()
         #lines_ru_proxy = input_proxy.readlines()
 
-    aligner.serialize_docs(lines_from, lines_to, processing_from, res_img, res_img_best)
+    aligner.serialize_docs(lines_from, lines_to, processing_from, res_img, res_img_best, lang_from, lang_to)
     return con.EMPTY_LINES
 
 @app.route("/items/<username>/processing/<int:id_from>/<int:count>/<int:page>", methods=["GET"])

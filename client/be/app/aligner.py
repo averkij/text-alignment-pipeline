@@ -13,6 +13,7 @@ from scipy import spatial
 import config
 import helper
 import model_dispatcher
+import sim_helper
 
 
 
@@ -36,17 +37,21 @@ def serialize_docs(lines_from, lines_to, processing_ru, res_img, res_img_best, l
     
     logging.debug(f"Calculating similarity matrix.")
     sim_matrix = get_sim_matrix(vectors1, vectors2)
+    sim_matrix_best = sim_helper.best_per_row(sim_matrix)
 
-    sim_matrix_best = np.zeros_like(sim_matrix)
-    sim_matrix_best[range(len(sim_matrix)), sim_matrix.argmax(1)] = sim_matrix[range(len(sim_matrix)), sim_matrix.argmax(1)]
+    sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, 2)
+
     # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_from, lines_to, lines_to, sim_matrix, threshold)
     
     plt.figure(figsize=(16,16))
     sns.heatmap(sim_matrix, cmap="Greens", vmin=threshold, cbar=False)
     plt.savefig(res_img, bbox_inches="tight")
 
+
+    print(sim_matrix_best)
+
     plt.figure(figsize=(16,16))
-    sns.heatmap(sim_matrix_best, cmap="Greens", vmin=threshold, cbar=False)
+    sns.heatmap(sim_matrix_best, cmap="Greens", vmin=0, cbar=False)
     plt.xlabel(lang_name_to, fontsize=18)
     plt.ylabel(lang_name_from, fontsize=18)
     plt.savefig(res_img_best, bbox_inches="tight")

@@ -21,7 +21,7 @@ def create_folders(username, lang):
     create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.NGRAM_FOLDER), lang)
     create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER), lang)
     create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.DONE_FOLDER), lang)
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.IMG_FOLDER), lang)
+    #create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.IMG_FOLDER), lang)
 
 def create_subfolders(folder, lang):
     if not os.path.isdir(folder):

@@ -169,15 +169,15 @@ def processing(username, id_from, count, page):
             #print(selected)
             res.append({
                 "text": line.text,
-                "line_ids": line.line_ids,
+                "line_id": line.line_id,
                 "trans": [{
                     "text": t[0].text, 
-                    "line_ids":t[0].line_ids, 
+                    "line_id":t[0].line_id, 
                     "sim": t[1]
                     } for t in doc[line]],
                 "selected": {
                     "text": selected[0].text, 
-                    "line_ids":selected[0].line_ids, 
+                    "line_id":selected[0].line_id, 
                     "sim": selected[1]
                     }})
     total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)

@@ -22,7 +22,8 @@ def serialize_docs(lines_from, lines_to, processing_ru, res_img, res_img_best, l
     docs = []
     vectors1 = []
     vectors2 = []
-    
+    zero_treshold = 0
+
     logging.debug(f"Aligning started.")
     for lines_from_batch, lines_from_proxy_batch, lines_to_batch in helper.get_batch(lines_from, lines_to, lines_to, batch_size):
         print("batch:", batch_number)
@@ -39,25 +40,22 @@ def serialize_docs(lines_from, lines_to, processing_ru, res_img, res_img_best, l
     sim_matrix = get_sim_matrix(vectors1, vectors2)
     sim_matrix_best = sim_helper.best_per_row(sim_matrix)
 
-    sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, 2)
+    sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, window_size=2)
 
     # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_from, lines_to, lines_to, sim_matrix, threshold)
     
     plt.figure(figsize=(16,16))
-    sns.heatmap(sim_matrix, cmap="Greens", vmin=threshold, cbar=False)
+    sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)
     plt.savefig(res_img, bbox_inches="tight")
 
-
-    print(sim_matrix_best)
-
     plt.figure(figsize=(16,16))
-    sns.heatmap(sim_matrix_best, cmap="Greens", vmin=0, cbar=False)
+    sns.heatmap(sim_matrix_best, cmap="Greens", vmin=zero_treshold, cbar=False)
     plt.xlabel(lang_name_to, fontsize=18)
     plt.ylabel(lang_name_from, fontsize=18)
     plt.savefig(res_img_best, bbox_inches="tight")
 
     logging.debug(f"Processing lines.")
-    doc = get_processed(lines_from, lines_to, sim_matrix, threshold, batch_number, batch_size)
+    doc = get_processed(lines_from, lines_to, sim_matrix, zero_treshold, batch_number, batch_size)
     docs.append(doc)
     
     logging.debug(f"Dumping to file {processing_ru}.")
@@ -66,17 +64,27 @@ def serialize_docs(lines_from, lines_to, processing_ru, res_img, res_img_best, l
 def get_line_vectors(lines):
     return model_dispatcher.models[config.MODEL].embed(lines)
 
-def get_processed(lines_from, lines_to, sim_matrix, threshold, batch_number, batch_size, candidates_count=5):
+def get_processed(lines_from, lines_to, sim_matrix, threshold, batch_number, batch_size, candidates_count=50):
     doc = {}
     for ru_line_id in range(sim_matrix.shape[0]):
         line = DocLine([ru_line_id], lines_from[ru_line_id])
         doc[line] = []
         zh_candidates = []
         for zh_line_id in range(sim_matrix.shape[1]):            
-            if sim_matrix[ru_line_id, zh_line_id] > 0 and sim_matrix[ru_line_id, zh_line_id] >= threshold:
+            if sim_matrix[ru_line_id, zh_line_id] > threshold:
                 zh_candidates.append((zh_line_id, sim_matrix[ru_line_id, zh_line_id]))
         for i,c in enumerate(sorted(zh_candidates, key=lambda x: x[1], reverse=True)[:candidates_count]):
-            doc[line].append((DocLine([c[0]], lines_to[c[0]]), sim_matrix[ru_line_id, c[0]], 1 if i==0 else 0))
+            doc[line].append(
+                (
+                    #text with line_id
+                    DocLine(
+                        line_id = c[0],
+                        text = lines_to[c[0]]),
+                    #text similarity
+                    sim_matrix[ru_line_id, c[0]],
+                    #max similarity (best choice)
+                    1 if i==0 else 0)
+                )
     return doc
 
 def get_pairs(lines_from, lines_to, ru_proxy_lines, sim_matrix, threshold):
@@ -101,16 +109,14 @@ def get_sim_matrix(vec1, vec2, window=config.DEFAULT_WINDOW):
         for j in range(len(vec2)):
             if (j*k > i-window) & (j*k < i+window):
                 sim = 1 - spatial.distance.cosine(vec1[i], vec2[j])
-                sim_matrix[i,j] = sim
+                sim_matrix[i,j] = max(sim, 0.01)
     return sim_matrix
 
 class DocLine:
-    def __init__(self, line_ids:List, text=None):
-        self.line_ids = line_ids
+    def __init__(self, line_id:int, text=None):
+        self.line_id = line_id
         self.text = text
     def __hash__(self):
         return hash(self.text)
     def __eq__(self, other):
         return self.text == other
-    def isNgramed(self) -> bool:
-        return len(self.line_ids)>1

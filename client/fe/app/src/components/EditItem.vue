@@ -7,7 +7,7 @@
             class="d-table-cell grey lighten-4 pa-2 text-center font-weight-medium"
             style="min-width:45px"
           >
-            {{ item.line_ids[0] + 1 }}
+            {{ parseInt(item.line_id) + 1 }}
           </div>
           <v-divider class="d-table-cell" vertical></v-divider>
           <div class="d-table-cell pa-2">{{ item.text }}</div>
@@ -24,7 +24,7 @@
               class="fill-height lighten-5 d-flex flex-column justify-space-between"
               :class="{
                 green: item.selected.sim > 0.5,
-                yellow: (item.selected.sim <= 0.5) & (item.selected.sim > 0.3)
+                yellow: (item.selected.sim <= 0.5) && (item.selected.sim > 0.3)
               }"
             >
               <div class="pa-2 font-weight-medium">
@@ -38,7 +38,7 @@
           <v-divider class="d-table-cell" vertical></v-divider>
           <div class="d-table-cell pa-2">
             {{ item.selected.text }}
-            <!-- <span class="yellow lighten-4">{{ item.trans }}</span> -->
+            <div v-for="(t,i) in linesTo" :key="i" class="yellow lighten-4">=> {{t.line_id}} [{{t.sim | numeral("0.00")}}] {{ t.text }}</div>
           </div>
         </div>
       </v-col>
@@ -47,15 +47,16 @@
 </template>
 
 <script>
+import _ from 'lodash'
 export default {
   name: "EditItem",
   props: ["item"],
   computed: {
     selectedLineId() {
-      if (this.item.selected.line_ids.length > 0) {
-        return this.item.selected.line_ids[0] + 1;
-      }
-      return "x";
+      return parseInt(this.item.selected.line_id) + 1;
+    },
+    linesTo() {
+      return _.orderBy(this.item.trans, 'line_id')
     }
   }
 };

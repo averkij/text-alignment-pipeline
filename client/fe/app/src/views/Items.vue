@@ -63,7 +63,7 @@
       Align documents
     </v-btn>
 
-    <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
+    <div class="text-h4 mt-10 font-weight-bold">📌 Result</div>
 
     <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
       v-if="!itemsProcessing | (itemsProcessing['ru'].length == 0)">
@@ -90,10 +90,16 @@
           </v-list-item-group>
         </v-list>
       </v-card>
-      <div class="mt-5">
+
+      <div class="text-h5 mt-10 font-weight-bold">📏 Visualization</div>
+
+      <div class="mt-4">
         <!-- <v-img :src="selectedProcessingImg" aspect-ratio="1" width="50%"></v-img> -->
         <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="50%"></v-img>
       </div>
+
+      <div class="text-h5 mt-10 font-weight-bold">✒️ Edit</div>
+
       <v-card class="mt-6">
         <div class="green lighten-5" dark>
           <v-card-title>{{selectedProcessing}}</v-card-title>

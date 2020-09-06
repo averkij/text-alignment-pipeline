@@ -205,3 +205,4 @@ client/be/app/models/use_multilingual_models_saved/variables/variables.index
 client/be/app/app.log
 .vscode/.ropeproject/objectdb
 .vscode/.ropeproject/config.py
+client/be/app/__pycache__/sim_helper.cpython-38.pyc

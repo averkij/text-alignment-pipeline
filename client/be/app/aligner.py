@@ -17,7 +17,7 @@ import sim_helper
 
 
 
-def serialize_docs(lines_from, lines_to, processing_ru, res_img, res_img_best, lang_name_from, lang_name_to, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
+def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_name_from, lang_name_to, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
     batch_number = 1
     docs = []
     vectors1 = []
@@ -58,8 +58,8 @@ def serialize_docs(lines_from, lines_to, processing_ru, res_img, res_img_best, l
     doc = get_processed(lines_from, lines_to, sim_matrix, zero_treshold, batch_number, batch_size)
     docs.append(doc)
     
-    logging.debug(f"Dumping to file {processing_ru}.")
-    pickle.dump(docs, open(processing_ru, "wb"))
+    logging.debug(f"Dumping to file {processing_from_to}.")
+    pickle.dump(docs, open(processing_from_to, "wb"))
 
 def get_line_vectors(lines):
     return model_dispatcher.models[config.MODEL].embed(lines)

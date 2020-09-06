@@ -53,7 +53,7 @@ export const ItemsService = {
   fetchItemsProcessing(params) {
     return ApiService.get(
       "items",
-      `${params.username}/processing/list/${params.langCode}`
+      `${params.username}/processing/list/${params.langCodeFrom}/${params.langCodeTo}`
     );
   },
   upload(params) {
@@ -115,7 +115,7 @@ export const ItemsService = {
   getProcessing(params) {
     return ApiService.get(
       "items",
-      `${params.username}/processing/${params.fileId}/${params.linesCount}/${params.page}`
+      `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/${params.linesCount}/${params.page}`
     );
   },
   alignSplitted(params) {

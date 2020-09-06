@@ -251,7 +251,9 @@
           fileId: this.selectedIds[langCode],
           fileName: this.selected[langCode],
           username: this.$route.params.username,
-          langCode
+          langCodeFrom: this.langCodeFrom,
+          langCodeTo: this.langCodeTo,
+          langCodeDownload: langCode
         });
       },
       selectAndLoadPreview(langCode, name, fileId) {

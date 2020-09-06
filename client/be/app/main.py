@@ -188,30 +188,31 @@ def processing(username, lang_from, lang_to, file_id, count, page):
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
 
-@app.route("/items/<username>/processing/<int:id_from>/<lang>/download", methods=["GET"])
-def download_processsing(username, id_from, lang):
-    logging.debug(f"[{username}]. Downloading {lang} {id_from} result document.")
-    files_ru = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, con.RU_CODE))
-    if len(files_ru) < id_from+1:
-        logging.debug(f"[{username}]. Document {lang} with id={id_from} not found.")
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>", methods=["GET"])
+def download_processsing(username, lang_from, lang_to, file_id, lang):
+    logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
+    if len(files) < file_id+1:
+        logging.debug(f"[{username}]. Document {lang} with id={file_id} not found.")
         return con.EMPTY_SIMS
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
-    if not os.path.isfile(processing_ru):
-        logging.debug(f"[{username}]. Document {processing_ru} not found.")
+    processing_file = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
+    if not os.path.isfile(processing_file):
+        logging.debug(f"[{username}]. Document {processing_file} not found.")
         abort(404)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_ru)[0], lang, timestamp, os.path.splitext(processing_ru)[1])
+    processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_file)[0], lang, timestamp, os.path.splitext(processing_file)[1])
     
     logging.debug(f"[{username}]. Preparing file for downloading {processing_out}.")
-    docs = pickle.load(open(processing_ru, "rb"))
-    with open(processing_out, mode="w", encoding="utf-8") as doc_out:        
+    print(processing_out)
+    docs = pickle.load(open(processing_file, "rb"))
+    with open(processing_out, mode="w", encoding="utf-8") as doc_out:
         for doc in docs:
             for line in doc:
                 selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
                 if selected[0].text:
-                    if lang == con.RU_CODE:
+                    if lang == lang_from:
                         doc_out.write(line.text)
-                    elif lang == con.ZH_CODE:
+                    elif lang == lang_to:
                         doc_out.write(selected[0].text)
     logging.debug(f"[{username}]. File {processing_out} prepared. Sent to user.")
     return send_file(processing_out, as_attachment=True)  
@@ -227,7 +228,7 @@ def processing_list(username, lang_from, lang_to):
         return con.EMPTY_FILES
     processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
     if not os.path.isdir(processing_folder):
-        return con.EMPTY_FILES      
+        return con.EMPTY_FILES
     files = {
         "items": {
             lang_from: helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))

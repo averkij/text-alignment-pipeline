@@ -176,7 +176,7 @@ def processing(username, id_from, count, page):
                     "sim": t[1]
                     } for t in doc[line]],
                 "selected": {
-                    "text": selected[0].text, 
+                    "text": selected[0].text.strip(), 
                     "line_id":selected[0].line_id, 
                     "sim": selected[1]
                     }})

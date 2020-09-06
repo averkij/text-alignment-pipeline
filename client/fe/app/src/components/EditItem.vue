@@ -32,7 +32,11 @@
           <div class="d-table-cell" style="width:100%">
             <v-expansion-panels flat accordion>
               <v-expansion-panel>
-                <v-expansion-panel-header>{{ item.selected.text }} {{panel}}</v-expansion-panel-header>
+                <v-expansion-panel-header class="ta-custom">
+                  <v-textarea auto-grow rows=1 text-wrap @click.native.stop @keyup.space.prevent
+                    :value="item.selected.text"
+                  ></v-textarea>
+                </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <div v-for="(t,i) in linesTo" :key="i">
                     <v-divider></v-divider>

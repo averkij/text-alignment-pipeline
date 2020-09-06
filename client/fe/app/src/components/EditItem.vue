@@ -32,17 +32,25 @@
           <div class="d-table-cell" style="width:100%">
             <v-expansion-panels flat accordion>
               <v-expansion-panel>
-                <v-expansion-panel-header>{{ item.selected.text }}</v-expansion-panel-header>
+                <v-expansion-panel-header>{{ item.selected.text }} {{panel}}</v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <div v-for="(t,i) in linesTo" :key="i">
                     <v-divider></v-divider>
-                    <div class="d-table">
-                      <div class="d-table-cell lighten-5 pa-2 text-center font-weight-medium" style="min-width:45px"
-                        :class="[{green: t.line_id==item.selected.line_id}, {grey: t.line_id!=item.selected.line_id}]">
-                        {{ t.line_id + 1 }}
+                    <div class="d-table fill-height fill-width">
+                      <div class="d-table-cell lighten-5 grey text-center font-weight-medium" style="min-width:45px">
+                        <div class="fill-height lighten-5 d-flex flex-column justify-space-between">
+                          <div class="pa-2 font-weight-medium">
+                            {{ t.line_id + 1 }}
+                          </div>
+                          <div class="text-caption pa-1">
+                            {{ t.sim | numeral("0.00") }}
+                          </div>
+                        </div>
                       </div>
                       <v-divider class="d-table-cell" vertical></v-divider>
-                      <div class="d-table-cell pa-2">{{ t.text }}</div>
+                      <div class="d-table-cell yellow pa-2" style="width:100%;" 
+                        :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">{{ t.text }}
+                      </div>
                     </div>
                   </div>
                 </v-expansion-panel-content>

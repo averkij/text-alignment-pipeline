@@ -89,7 +89,7 @@ export const ItemsService = {
   downloadProcessing(params) {
     return ApiService.get(
       "items",
-      `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/download/${params.langCodeDownload}`
+      `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/download/${params.langCodeDownload}/${params.format}`
     ).then((response) => {
       console.log(response)
       const url = window.URL.createObjectURL(new Blob([response.data]));

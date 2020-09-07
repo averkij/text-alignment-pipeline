@@ -188,8 +188,8 @@ def processing(username, lang_from, lang_to, file_id, count, page):
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
 
-@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>", methods=["GET"])
-def download_processsing(username, lang_from, lang_to, file_id, lang):
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<format>", methods=["GET"])
+def download_processsing(username, lang_from, lang_to, file_id, lang, format):
     logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
     files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
     if len(files) < file_id+1:
@@ -200,12 +200,15 @@ def download_processsing(username, lang_from, lang_to, file_id, lang):
         logging.debug(f"[{username}]. Document {processing_file} not found.")
         abort(404)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_file)[0], lang, timestamp, os.path.splitext(processing_file)[1])
     
-    logging.debug(f"[{username}]. Preparing file for downloading {processing_out}.")
-    print(processing_out)
+    download_folder = os.path.join(con.UPLOAD_FOLDER, username, con.DOWNLOAD_FOLDER)
+    helper.check_folder(download_folder)
+    download_file = os.path.join(download_folder, "{0}_{1}_{2}{3}".format(os.path.splitext(files[file_id])[0], lang, timestamp, os.path.splitext(files[file_id])[1]))
+    
+    logging.debug(f"[{username}]. Preparing file for downloading {download_file}.")
+    print(download_file)
     docs = pickle.load(open(processing_file, "rb"))
-    with open(processing_out, mode="w", encoding="utf-8") as doc_out:
+    with open(download_file, mode="w", encoding="utf-8") as doc_out:
         for doc in docs:
             for line in doc:
                 selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
@@ -214,8 +217,8 @@ def download_processsing(username, lang_from, lang_to, file_id, lang):
                         doc_out.write(line.text)
                     elif lang == lang_to:
                         doc_out.write(selected[0].text)
-    logging.debug(f"[{username}]. File {processing_out} prepared. Sent to user.")
-    return send_file(processing_out, as_attachment=True)  
+    logging.debug(f"[{username}]. File {download_file} prepared. Sent to user.")
+    return send_file(download_file, as_attachment=True)  
 
 @app.route("/items/<username>/processing/list/<lang_from>/<lang_to>", methods=["GET"])
 def processing_list(username, lang_from, lang_to):
@@ -264,4 +267,4 @@ def route_frontend(path):
         return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=80)
+    app.run(host="0.0.0.0", debug=True, port=9000)

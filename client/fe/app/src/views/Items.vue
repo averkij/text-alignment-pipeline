@@ -63,7 +63,7 @@
       Align documents
     </v-btn>
 
-    <div class="text-h4 mt-10 font-weight-bold">📌 Result</div>
+    <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
 
     <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
       v-if="!itemsProcessing || !itemsProcessing[langCodeFrom] || (itemsProcessing[langCodeFrom].length == 0)">
@@ -92,14 +92,14 @@
         </v-list>
       </v-card>
 
-      <div class="text-h5 mt-10 font-weight-bold">📏 Visualization</div>
+      <div class="text-h5 mt-10 font-weight-bold">Visualization</div>
 
       <div class="mt-4">
         <!-- <v-img :src="selectedProcessingImg" aspect-ratio="1" width="50%"></v-img> -->
-        <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="50%"></v-img>
+        <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="20%"></v-img>
       </div>
 
-      <div class="text-h5 mt-10 font-weight-bold">✒️ Edit</div>
+      <div class="text-h5 mt-10 font-weight-bold">Edit</div>
 
       <v-card class="mt-6">
         <div class="green lighten-5" dark>
@@ -116,20 +116,16 @@
             @input="onProcessingPageChange(processing.meta.page)">
           </v-pagination>
         </div>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-row>
-            <v-col class="py-0" cols="12" sm="6">
-              <v-btn class="primary" @click="downloadProcessing(langCodeFrom)">Download [{{langCodeFrom}}]</v-btn>
-            </v-col>
-            <v-col class="py-0" cols="12" sm="6">
-              <v-btn class="primary" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
-            </v-col>
-          </v-row>
-        </v-card-actions>
-      </v-card>
+</v-card>
 
       <div class="text-h4 mt-10 font-weight-bold">🧲 Download</div>
+
+        <div class="mt-5">
+          <v-btn class="primary ma-5" @click="downloadProcessing(langCodeFrom)">Download [{{langCodeFrom}}]</v-btn>
+          <v-btn class="primary ma-5" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
+          <v-btn class="primary ma-5" @click="downloadProcessingTmx()">Download TMX</v-btn>
+        </div>
+      
 
     </div>
   </div>
@@ -248,12 +244,24 @@
       },
       downloadProcessing(langCode) {
         this.$store.dispatch(DOWNLOAD_PROCESSING, {
-          fileId: this.selectedIds[langCode],
-          fileName: this.selected[langCode],
+          fileId: this.selectedIds[this.langCodeFrom],
+          fileName: this.selected[this.langCodeFrom],
           username: this.$route.params.username,
           langCodeFrom: this.langCodeFrom,
           langCodeTo: this.langCodeTo,
-          langCodeDownload: langCode
+          langCodeDownload: langCode,
+          format: "plain"
+        });
+      },
+      downloadProcessingTmx() {
+        this.$store.dispatch(DOWNLOAD_PROCESSING, {
+          fileId: this.selectedIds[this.langCodeFrom],
+          fileName: this.selected[this.langCodeFrom],
+          username: this.$route.params.username,
+          langCodeFrom: this.langCodeFrom,
+          langCodeTo: this.langCodeTo,
+          langCodeDownload: this.langCodeFrom,
+          format: "tmx"
         });
       },
       selectAndLoadPreview(langCode, name, fileId) {

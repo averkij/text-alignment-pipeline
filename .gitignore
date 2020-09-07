@@ -205,3 +205,11 @@ client/be/app/models/use_multilingual_models_saved/variables/variables.index
 client/be/app/app.log
 .vscode/.ropeproject/objectdb
 .vscode/.ropeproject/config.py
+client/be/app/__pycache__/aligner.cpython-37.pyc
+client/be/app/__pycache__/config.cpython-37.pyc
+client/be/app/__pycache__/constants.cpython-37.pyc
+client/be/app/__pycache__/helper.cpython-37.pyc
+client/be/app/__pycache__/model_dispatcher.cpython-37.pyc
+client/be/app/__pycache__/sim_helper.cpython-37.pyc
+client/be/app/__pycache__/splitter.cpython-37.pyc
+client/be/app/models/__pycache__/sententense_transformers_models.cpython-37.pyc

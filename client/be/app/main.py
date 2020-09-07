@@ -11,6 +11,7 @@ from flask_cors import CORS
 import aligner
 import constants as con
 import helper
+import output
 import splitter
 from aligner import DocLine
 
@@ -207,16 +208,12 @@ def download_processsing(username, lang_from, lang_to, file_id, lang, format):
     
     logging.debug(f"[{username}]. Preparing file for downloading {download_file}.")
     print(download_file)
-    docs = pickle.load(open(processing_file, "rb"))
-    with open(download_file, mode="w", encoding="utf-8") as doc_out:
-        for doc in docs:
-            for line in doc:
-                selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
-                if selected[0].text:
-                    if lang == lang_from:
-                        doc_out.write(line.text)
-                    elif lang == lang_to:
-                        doc_out.write(selected[0].text)
+
+    if format==con.FORMAT_TMX:
+        output.save_tmx(processing_file, download_file)
+    elif format==con.FORMAT_PLAIN:
+        output.save_plain_text(processing_file, download_file, first_lang = lang==lang_from)
+
     logging.debug(f"[{username}]. File {download_file} prepared. Sent to user.")
     return send_file(download_file, as_attachment=True)  
 

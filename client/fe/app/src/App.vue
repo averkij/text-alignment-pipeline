@@ -1,3 +1,7 @@
+<style>
+  @import './assets/styles/main.css';
+</style>
+
 <template>
   <v-app>
     <!-- <Header /> -->

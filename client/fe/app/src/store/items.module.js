@@ -86,7 +86,7 @@ export const actions = {
     } = await ItemsService.fetchItemsProcessing(params);
     context.commit(SET_ITEMS_PROCESSING, {
       items: data.items,
-      langCode: params.langCode
+      langCode: params.langCodeFrom
     });
     return data;
   },

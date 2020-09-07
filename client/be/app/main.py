@@ -51,7 +51,7 @@ def items(username, lang):
     #return documents list
     files = {
         "items": {
-            lang: helper.get_files_list(username, con.RAW_FOLDER, lang)
+            lang: helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.RAW_FOLDER, lang))
         }
     }
     return files
@@ -59,7 +59,7 @@ def items(username, lang):
 @app.route("/items/<username>/splitted/<lang>/<int:id>/download", methods=["GET"])
 def download_splitted(username, lang, id):
     logging.debug(f"[{username}]. Downloading {lang} {id} splitted document.")
-    files = helper.get_files_list(username, con.SPLITTED_FOLDER, lang)
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang))
     if len(files) < id+1:
         abort(404)
     path = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang, files[id])
@@ -71,7 +71,7 @@ def download_splitted(username, lang, id):
 
 @app.route("/items/<username>/splitted/<lang>/<int:id>/<int:count>/<int:page>", methods=["GET"])
 def splitted(username, lang, id, count, page):
-    files = helper.get_files_list(username, con.SPLITTED_FOLDER, lang)
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang))
     if len(files) < id+1:
         return con.EMPTY_LINES
     path = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang, files[id])    
@@ -100,7 +100,7 @@ def splitted(username, lang, id, count, page):
 
 @app.route("/items/<username>/aligned/<lang>/<int:id>/<int:count>", methods=["GET"])
 def aligned(username, lang, id, count):
-    files = helper.get_files_list(username, con.SPLITTED_FOLDER, lang)
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang))
     if len(files) < id+1:
         return con.EMPTY_LINES
     path = os.path.join(con.UPLOAD_FOLDER, username, con.DONE_FOLDER, lang, files[id])
@@ -121,14 +121,17 @@ def aligned(username, lang, id, count):
 
 @app.route("/items/<username>/align/<lang_from>/<lang_to>/<int:id_from>/<int:id_to>", methods=["GET"])
 def align(username, lang_from, lang_to, id_from, id_to):
-    files_from = helper.get_files_list(username, con.SPLITTED_FOLDER, lang_from)
-    files_to = helper.get_files_list(username, con.SPLITTED_FOLDER, lang_to)
+    files_from = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang_from))
+    files_to = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang_to))
     if len(files_from) < id_from+1 or len(files_to) < id_to+1:
         logging.debug(f"[{username}]. Documents not found.")
         return con.EMPTY_SIMS
     
     logging.debug(f"[{username}]. Aligning documents. {files_from[id_from]}, {files_to[id_to]}.")
-    processing_from = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, files_from[id_from])
+    processing_folder_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
+    helper.check_folder(processing_folder_from_to)
+    processing_from_to = os.path.join(processing_folder_from_to, files_from[id_from])
+    
     res_img = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_from[id_from]}.png")
     res_img_best = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_from[id_from]}.best.png")
     splitted_from = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang_from, files_from[id_from])
@@ -142,20 +145,21 @@ def align(username, lang_from, lang_to, id_from, id_to):
         lines_to = input_to.readlines()
         #lines_ru_proxy = input_proxy.readlines()
 
-    aligner.serialize_docs(lines_from, lines_to, processing_from, res_img, res_img_best, lang_from, lang_to)
+    aligner.serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_from, lang_to)
     return con.EMPTY_LINES
 
-@app.route("/items/<username>/processing/<int:id_from>/<int:count>/<int:page>", methods=["GET"])
-def processing(username, id_from, count, page):
-    files_ru = helper.get_files_list(username, con.PROCESSING_FOLDER, con.RU_CODE)
-    if len(files_ru) < id_from+1:
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/<int:count>/<int:page>", methods=["GET"])
+def processing(username, lang_from, lang_to, file_id, count, page):
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
+    if len(files) < file_id+1:
         return con.EMPTY_SIMS
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
-    logging.debug(f"[{username}]. Get processing file. {processing_ru}.")
-    if not os.path.isfile(processing_ru):
+
+    processing_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
+    logging.debug(f"[{username}]. Get processing file. {processing_from_to}.")
+    if not os.path.isfile(processing_from_to):
         abort(404)
         
-    docs = pickle.load(open(processing_ru, "rb"))
+    docs = pickle.load(open(processing_from_to, "rb"))
     res = []
     lines_count = 0    
     shift = (page-1)*count
@@ -169,60 +173,65 @@ def processing(username, id_from, count, page):
             #print(selected)
             res.append({
                 "text": line.text,
-                "line_ids": line.line_ids,
+                "line_id": line.line_id,
                 "trans": [{
                     "text": t[0].text, 
-                    "line_ids":t[0].line_ids, 
+                    "line_id":t[0].line_id, 
                     "sim": t[1]
                     } for t in doc[line]],
                 "selected": {
-                    "text": selected[0].text, 
-                    "line_ids":selected[0].line_ids, 
+                    "text": selected[0].text.strip(), 
+                    "line_id":selected[0].line_id, 
                     "sim": selected[1]
                     }})
     total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
 
-@app.route("/items/<username>/processing/<int:id_from>/<lang>/download", methods=["GET"])
-def download_processsing(username, id_from, lang):
-    logging.debug(f"[{username}]. Downloading {lang} {id_from} result document.")
-    files_ru = helper.get_files_list(username, con.SPLITTED_FOLDER, con.RU_CODE)
-    if len(files_ru) < id_from+1:
-        logging.debug(f"[{username}]. Document {lang} with id={id_from} not found.")
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>", methods=["GET"])
+def download_processsing(username, lang_from, lang_to, file_id, lang):
+    logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
+    if len(files) < file_id+1:
+        logging.debug(f"[{username}]. Document {lang} with id={file_id} not found.")
         return con.EMPTY_SIMS
-    processing_ru = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE, files_ru[id_from])
-    if not os.path.isfile(processing_ru):
-        logging.debug(f"[{username}]. Document {processing_ru} not found.")
+    processing_file = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
+    if not os.path.isfile(processing_file):
+        logging.debug(f"[{username}]. Document {processing_file} not found.")
         abort(404)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_ru)[0], lang, timestamp, os.path.splitext(processing_ru)[1])
+    processing_out = "{0}_{1}_{2}{3}".format(os.path.splitext(processing_file)[0], lang, timestamp, os.path.splitext(processing_file)[1])
     
     logging.debug(f"[{username}]. Preparing file for downloading {processing_out}.")
-    docs = pickle.load(open(processing_ru, "rb"))
-    with open(processing_out, mode="w", encoding="utf-8") as doc_out:        
+    print(processing_out)
+    docs = pickle.load(open(processing_file, "rb"))
+    with open(processing_out, mode="w", encoding="utf-8") as doc_out:
         for doc in docs:
             for line in doc:
                 selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
                 if selected[0].text:
-                    if lang == con.RU_CODE:
+                    if lang == lang_from:
                         doc_out.write(line.text)
-                    elif lang == con.ZH_CODE:
+                    elif lang == lang_to:
                         doc_out.write(selected[0].text)
     logging.debug(f"[{username}]. File {processing_out} prepared. Sent to user.")
     return send_file(processing_out, as_attachment=True)  
 
-@app.route("/items/<username>/processing/list/<lang>", methods=["GET"])
-def processing_list(username, lang):
-    if not lang or lang != 'ru':
-        logging.debug(f"[{username}]. Wrong language code: {lang}.")
+@app.route("/items/<username>/processing/list/<lang_from>/<lang_to>", methods=["GET"])
+def processing_list(username, lang_from, lang_to):
+    
+    #TODO add language validation
+
+    logging.debug(f"[{username}]. Processing list. Language code lang_from: {lang_from}. Language code lang_to: {lang_to}.")
+    if not lang_from or not lang_to:
+        logging.debug(f"[{username}]. Wrong language code: {lang_from}-{lang_to}.")
         return con.EMPTY_FILES
-    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, con.RU_CODE)
+    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
     if not os.path.isdir(processing_folder):
-        return con.EMPTY_FILES        
+        return con.EMPTY_FILES
     files = {
         "items": {
-            lang: helper.get_files_list(username, con.PROCESSING_FOLDER, con.RU_CODE)
+            lang_from: helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
         }
     }
     return files

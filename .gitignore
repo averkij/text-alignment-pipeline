@@ -213,3 +213,4 @@ client/be/app/__pycache__/model_dispatcher.cpython-37.pyc
 client/be/app/__pycache__/sim_helper.cpython-37.pyc
 client/be/app/__pycache__/splitter.cpython-37.pyc
 client/be/app/models/__pycache__/sententense_transformers_models.cpython-37.pyc
+client/be/app/__pycache__/sim_helper.cpython-38.pyc

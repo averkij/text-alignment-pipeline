@@ -63,10 +63,10 @@
       Align documents
     </v-btn>
 
-    <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
+    <div class="text-h4 mt-10 font-weight-bold">📌 Result</div>
 
     <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2"
-      v-if="!itemsProcessing | (itemsProcessing['ru'].length == 0)">
+      v-if="!itemsProcessing || !itemsProcessing[langCodeFrom] || (itemsProcessing[langCodeFrom].length == 0)">
       There are no previously aligned documents yet.
     </v-alert>
 
@@ -79,7 +79,8 @@
         <v-divider></v-divider>
         <v-list class="pa-0">
           <v-list-item-group mandatory color="gray">
-            <v-list-item v-for="(item, i) in itemsProcessing['ru']" :key="i" @change="selectProcessing('ru', item, i)">
+            <v-list-item v-for="(item, i) in itemsProcessing[langCodeFrom]" :key="i"
+              @change="selectProcessing(langCodeFrom, item, i)">
               <v-list-item-icon>
                 <v-icon>mdi-arrow-right</v-icon>
               </v-list-item-icon>
@@ -90,10 +91,16 @@
           </v-list-item-group>
         </v-list>
       </v-card>
-      <div class="mt-5">
+
+      <div class="text-h5 mt-10 font-weight-bold">📏 Visualization</div>
+
+      <div class="mt-4">
         <!-- <v-img :src="selectedProcessingImg" aspect-ratio="1" width="50%"></v-img> -->
         <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="50%"></v-img>
       </div>
+
+      <div class="text-h5 mt-10 font-weight-bold">✒️ Edit</div>
+
       <v-card class="mt-6">
         <div class="green lighten-5" dark>
           <v-card-title>{{selectedProcessing}}</v-card-title>
@@ -113,14 +120,17 @@
         <v-card-actions>
           <v-row>
             <v-col class="py-0" cols="12" sm="6">
-              <v-btn class="primary" @click="downloadProcessing('ru')">Download [ru]</v-btn>
+              <v-btn class="primary" @click="downloadProcessing(langCodeFrom)">Download [{{langCodeFrom}}]</v-btn>
             </v-col>
             <v-col class="py-0" cols="12" sm="6">
-              <v-btn class="primary" @click="downloadProcessing('zh')">Download [zh]</v-btn>
+              <v-btn class="primary" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
             </v-col>
           </v-row>
         </v-card-actions>
       </v-card>
+
+      <div class="text-h4 mt-10 font-weight-bold">🧲 Download</div>
+
     </div>
   </div>
 </template>
@@ -161,17 +171,6 @@
         DEFAULT_FROM,
         DEFAULT_TO,
         DEFAULT_BATCHSIZE,
-        panels: [{
-            langCode: "ru",
-            lang: "Russian",
-            icon: "🥄"
-          },
-          {
-            langCode: "zh",
-            lang: "Chinese",
-            icon: "🥢"
-          }
-        ],
         files: {
           ru: null,
           zh: null,
@@ -219,6 +218,8 @@
       onProcessingPageChange(page) {
         this.$store.dispatch(GET_PROCESSING, {
           username: this.$route.params.username,
+          langCodeFrom: this.langCodeFrom,
+          langCodeTo: this.langCodeTo,
           fileId: this.selectedProcessingId,
           linesCount: 10,
           page: page
@@ -250,7 +251,9 @@
           fileId: this.selectedIds[langCode],
           fileName: this.selected[langCode],
           username: this.$route.params.username,
-          langCode
+          langCodeFrom: this.langCodeFrom,
+          langCodeTo: this.langCodeTo,
+          langCodeDownload: langCode
         });
       },
       selectAndLoadPreview(langCode, name, fileId) {
@@ -271,11 +274,13 @@
         });
       },
       selectProcessing(langCode, name, fileId) {
-        if (langCode == "ru") {
+        if (langCode == this.langCodeFrom) {
           this.selectedProcessing = name;
           this.selectedProcessingId = fileId;
           this.$store.dispatch(GET_PROCESSING, {
             username: this.$route.params.username,
+            langCodeFrom: this.langCodeFrom,
+            langCodeTo: this.langCodeTo,
             fileId,
             linesCount: 10,
             page: 1
@@ -294,15 +299,18 @@
           .then(() => {
             this.$store.dispatch(GET_PROCESSING, {
               username: this.$route.params.username,
-              fileId: this.selectedIds["ru"],
+              langCodeFrom: this.langCodeFrom,
+              langCodeTo: this.langCodeTo,
+              fileId: this.selectedIds[this.langCodeFrom],
               linesCount: 10,
               page: 1
             });
             this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
               username: this.$route.params.username,
-              langCode: 'ru'
+              langCodeFrom: this.langCodeFrom,
+              langCodeTo: this.langCodeTo
             }).then(() => {
-              this.selectFirstProcessingDocument("ru");
+              this.selectFirstProcessingDocument(this.langCodeFrom);
             });
             this.isLoading.align = false;
           });
@@ -346,9 +354,10 @@
       });
       this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
         username: this.$route.params.username,
-        langCode: 'ru'
+        langCodeFrom: this.langCodeFrom,
+        langCodeTo: this.langCodeTo
       }).then(() => {
-        this.selectFirstProcessingDocument("ru");
+        this.selectFirstProcessingDocument(this.langCodeFrom);
       });
     },
     computed: {

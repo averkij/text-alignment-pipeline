@@ -1,0 +1,23 @@
+.v-expansion-panel-content__wrap {
+    padding: 0px !important;
+}
+.v-expansion-panel-header {
+    padding: 0px 8px 0px 8px !important;
+    font-size: 16px !important;
+    line-height: 1.5em !important;
+}
+
+.ta-custom > .v-text-field {
+    padding-top: 0px !important;
+    margin-top: 0px !important;
+}
+
+.ta-custom > .v-text-field > .v-input__control > .v-input__slot:before {
+    border-style:none !important;
+}
+
+/* .v-expansion-panel:focus {
+    outline-style: none;
+box-shadow: none;
+border-color: transparent;
+} */

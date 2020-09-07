@@ -1,39 +1,24 @@
 import os
 import constants as con
+import pathlib
 
-def get_files_list(username, folder, lang):
-    if not os.path.isdir(os.path.join(con.UPLOAD_FOLDER, username, folder, lang)):
+def get_files_list(folder):
+    if not os.path.isdir(folder):
         return []
-    return os.listdir(os.path.join(con.UPLOAD_FOLDER, username, folder, lang))
+    return os.listdir(folder)
 
 def create_folders(username, lang):
-    if not os.path.isdir(con.UPLOAD_FOLDER):
-        os.mkdir(con.UPLOAD_FOLDER)
-    if not os.path.isdir(con.STATIC_FOLDER):
-        os.mkdir(con.STATIC_FOLDER)
-    if username and not os.path.isdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username)):
-        create_img_folder(username)
-    if username and not os.path.isdir(os.path.join(con.UPLOAD_FOLDER, username)):
-        os.mkdir(os.path.join(con.UPLOAD_FOLDER, username))
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER), lang)
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER), lang)
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.PROXY_FOLDER), lang)
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.NGRAM_FOLDER), lang)
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER), lang)
-    create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.DONE_FOLDER), lang)
-    #create_subfolders(os.path.join(con.UPLOAD_FOLDER, username, con.IMG_FOLDER), lang)
+    if username and lang:
+        pathlib.Path(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, lang)).mkdir(parents=True, exist_ok=True)    
+        pathlib.Path(os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.path.join(con.UPLOAD_FOLDER, username, con.PROXY_FOLDER, lang)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.path.join(con.UPLOAD_FOLDER, username, con.NGRAM_FOLDER, lang)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.path.join(con.UPLOAD_FOLDER, username, con.DONE_FOLDER, lang)).mkdir(parents=True, exist_ok=True)
 
-def create_subfolders(folder, lang):
-    if not os.path.isdir(folder):
-        os.mkdir(folder)
-    if not os.path.isdir(os.path.join(folder, lang)):
-        os.mkdir(os.path.join(folder, lang))
-
-def create_img_folder(username):
-    if not os.path.isdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER)):
-        os.mkdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER))
-    if username and not os.path.isdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username)):
-        os.mkdir(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username))
+def check_folder(folder):
+    pathlib.Path(folder).mkdir(parents=True, exist_ok=True) 
 
 def get_batch(iter1, iter2, iter3, n):
     l1 = len(iter1)

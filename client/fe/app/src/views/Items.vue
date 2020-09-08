@@ -96,7 +96,7 @@
 
       <div class="mt-4">
         <!-- <v-img :src="selectedProcessingImg" aspect-ratio="1" width="50%"></v-img> -->
-        <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="20%"></v-img>
+        <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="50%"></v-img>
       </div>
 
       <div class="text-h5 mt-10 font-weight-bold">Edit</div>
@@ -250,13 +250,13 @@
           langCodeFrom: this.langCodeFrom,
           langCodeTo: this.langCodeTo,
           langCodeDownload: langCode,
-          format: "plain"
+          format: "txt"
         });
       },
       downloadProcessingTmx() {
         this.$store.dispatch(DOWNLOAD_PROCESSING, {
           fileId: this.selectedIds[this.langCodeFrom],
-          fileName: this.selected[this.langCodeFrom],
+          fileName: this.selected[this.langCodeFrom] + ".tmx",
           username: this.$route.params.username,
           langCodeFrom: this.langCodeFrom,
           langCodeTo: this.langCodeTo,

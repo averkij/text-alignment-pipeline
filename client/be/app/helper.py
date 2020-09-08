@@ -28,3 +28,16 @@ def get_batch(iter1, iter2, iter3, n):
     for ndx in range(0, l1, n):
         kdx += k
         yield iter1[ndx:min(ndx + n, l1)], iter2[kdx:min(kdx + k, l3)], iter3[kdx:min(kdx + k, l3)]
+
+def get_culture(langCode):
+    if langCode in CULTURE_LIST:
+        return CULTURE_LIST[langCode]
+    return CULTURE_LIST[DEFAULT_CULTURE]
+
+CULTURE_LIST = {
+    "en": "en-US",
+    "zh": "zh-CN",
+    "ru": "ru-RU",
+    "de": "de-DE"
+}
+DEFAULT_CULTURE = "en"

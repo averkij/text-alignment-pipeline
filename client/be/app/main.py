@@ -189,8 +189,8 @@ def processing(username, lang_from, lang_to, file_id, count, page):
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
 
-@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<format>", methods=["GET"])
-def download_processsing(username, lang_from, lang_to, file_id, lang, format):
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<file_format>", methods=["GET"])
+def download_processsing(username, lang_from, lang_to, file_id, lang, file_format):
     logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
     files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
     if len(files) < file_id+1:
@@ -204,14 +204,14 @@ def download_processsing(username, lang_from, lang_to, file_id, lang, format):
     
     download_folder = os.path.join(con.UPLOAD_FOLDER, username, con.DOWNLOAD_FOLDER)
     helper.check_folder(download_folder)
-    download_file = os.path.join(download_folder, "{0}_{1}_{2}{3}".format(os.path.splitext(files[file_id])[0], lang, timestamp, os.path.splitext(files[file_id])[1]))
+    download_file = os.path.join(download_folder, "{0}_{1}_{2}.{3}".format(os.path.splitext(files[file_id])[0], lang, timestamp, file_format))
     
     logging.debug(f"[{username}]. Preparing file for downloading {download_file}.")
     print(download_file)
 
-    if format==con.FORMAT_TMX:
-        output.save_tmx(processing_file, download_file)
-    elif format==con.FORMAT_PLAIN:
+    if file_format==con.FORMAT_TMX:
+        output.save_tmx(processing_file, download_file, lang_from, lang_to)
+    elif file_format==con.FORMAT_PLAIN:
         output.save_plain_text(processing_file, download_file, first_lang = lang==lang_from)
 
     logging.debug(f"[{username}]. File {download_file} prepared. Sent to user.")
@@ -264,4 +264,4 @@ def route_frontend(path):
         return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=9000)
+    app.run(host="0.0.0.0", debug=True, port=80)

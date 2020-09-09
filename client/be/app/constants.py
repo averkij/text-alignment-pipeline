@@ -14,6 +14,8 @@ RU_CODE = "ru"
 ZH_CODE = "zh"
 DE_CODE = "de"
 EN_CODE = "en"
+TYPE_FROM = "from"
+TYPE_TO = "to"
 
 EMPTY_LINES = {"items": {"ru":[], "zh":[]}}
 EMPTY_SIMS = {"items": {"ru":[], "zh":[], "sim":[]}}

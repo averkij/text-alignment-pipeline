@@ -67,9 +67,9 @@ def get_line_vectors(lines):
 def get_processed(lines_from, lines_to, sim_matrix, threshold, batch_number, batch_size, candidates_count=50):
     doc = {}
     for line_from_id in range(sim_matrix.shape[0]):
-        line = DocLine([line_from_id], lines_from[line_from_id])
+        line = DocLine(line_from_id, lines_from[line_from_id])
         doc[line] = {
-            "trn": (DocLine(0), 0.0 ,False),     #translation (best from candidates)
+            "trn": (DocLine(0,''), 0.0 ,False),     #translation (best from candidates)
             "cnd": []      #all candidates
             }
         candidates = []
@@ -118,9 +118,9 @@ def get_sim_matrix(vec1, vec2, window=config.DEFAULT_WINDOW):
 
 class DocLine:
     def __init__(self, line_id:int, text=None):
-        self.line_id = line_id
+        self.line_id:int = line_id
         self.text = text
     def __hash__(self):
-        return hash(str(self.line_id))
+        return hash(self.line_id)
     def __eq__(self, other):
-        return self.text == other
+        return self.line_id == other

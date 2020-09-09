@@ -108,7 +108,7 @@
         </div>
         <v-divider></v-divider>
         <div v-for="(line, i) in processing.items" :key="i">
-          <EditItem :item="line"></EditItem>
+          <EditItem @editProcessing="editProcessing" :item="line"></EditItem>
           <v-divider></v-divider>
         </div>
         <div class="text-center pa-3">
@@ -125,7 +125,6 @@
           <v-btn class="primary ma-5" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
           <v-btn class="primary ma-5" @click="downloadProcessingTmx()">Download TMX</v-btn>
         </div>
-      
 
     </div>
   </div>
@@ -154,6 +153,7 @@
     UPLOAD_FILES,
     GET_SPLITTED,
     GET_PROCESSING,
+    EDIT_PROCESSING,
     ALIGN_SPLITTED,
     DOWNLOAD_SPLITTED,
     DOWNLOAD_PROCESSING
@@ -287,6 +287,18 @@
             page: 1
           });
         }
+      },
+      editProcessing(line_id, text, text_type) {
+        this.$store
+          .dispatch(EDIT_PROCESSING, {
+            username: this.$route.params.username,
+            fileId: this.selectedProcessingId,
+            langCodeFrom: this.langCodeFrom,
+            langCodeTo: this.langCodeTo,
+            line_id: line_id,
+            text: text,
+            text_type: text_type
+          });
       },
       align() {
         this.isLoading.align = true;

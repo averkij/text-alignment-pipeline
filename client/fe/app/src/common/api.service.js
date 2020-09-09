@@ -69,15 +69,14 @@ export const ItemsService = {
     let form = new FormData();
     form.append(params.langCode, params.file);
     return ApiService.post("items",
-    `${params.username}/raw/${params.langCode}`,
-    form);
+      `${params.username}/raw/${params.langCode}`,
+      form);
   },
   downloadSplitted(params) {
     return ApiService.get(
       "items",
       `${params.username}/splitted/${params.langCode}/${params.fileId}/download`
     ).then((response) => {
-      console.log(response)
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -91,7 +90,6 @@ export const ItemsService = {
       "items",
       `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/download/${params.langCodeDownload}/${params.format}`
     ).then((response) => {
-      console.log(response)
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -119,17 +117,18 @@ export const ItemsService = {
     );
   },
   editProcessing(params) {
-    return ApiService.get(
+    console.log("params", params)
+
+    let form = new FormData();
+    form.append("line_id", params.line_id);
+    form.append("text", params.text)
+
+    return ApiService.post(
       "items",
-      `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/download/${params.langCodeDownload}/${params.format}`
+      `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/edit`,
+      form
     ).then((response) => {
-      console.log(response)
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', params.fileName);
-      document.body.appendChild(link);
-      link.click();
+      console.log("edited =>", response)
     });
   },
 };

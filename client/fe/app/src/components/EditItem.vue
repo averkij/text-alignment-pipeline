@@ -34,6 +34,7 @@
               <v-expansion-panel>
                 <v-expansion-panel-header class="ta-custom">
                   <v-textarea auto-grow rows=1 text-wrap @click.native.stop @keyup.space.prevent
+                    @blur="editProcessing($event, item.line_id, 'text_from')"
                     :value="item.selected.text"
                   ></v-textarea>
                 </v-expansion-panel-header>
@@ -72,6 +73,11 @@
   export default {
     name: "EditItem",
     props: ["item"],
+    methods: {
+      editProcessing(event, line_id, text_type) {
+        this.$emit('editProcessing', line_id, event.target.value, text_type)
+      }
+    },
     computed: {
       selectedLineId() {
         return parseInt(this.item.selected.line_id) + 1;

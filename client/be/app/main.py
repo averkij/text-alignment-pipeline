@@ -10,6 +10,7 @@ from flask_cors import CORS
 
 import aligner
 import constants as con
+import editor
 import helper
 import output
 import splitter
@@ -48,7 +49,7 @@ def items(username, lang):
             file.save(raw_path)
             splitter.split_to_sentences(file.filename, lang, username)
             logging.debug(f"[{username}]. Success. {file.filename} is loaded.")
-        return {"res": 1}
+        return ('', 200)
     #return documents list
     files = {
         "items": {
@@ -163,7 +164,7 @@ def get_processing(username, lang_from, lang_to, file_id, count, page):
     return {"items": res, "meta": meta}
 
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/edit", methods=["POST"])
-def edit_processing(username, lang_from, lang_to, file_id, count, page):
+def edit_processing(username, lang_from, lang_to, file_id):
     files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
     if len(files) < file_id+1:
         return con.EMPTY_SIMS
@@ -171,7 +172,13 @@ def edit_processing(username, lang_from, lang_to, file_id, count, page):
     logging.debug(f"[{username}]. Editing file. {processing_from_to}.")
     if not os.path.isfile(processing_from_to):
         abort(404)
-    print("EDIT", processing_from_to)
+    line_id, line_id_is_int = helper.tryParseInt(request.form.get("line_id", -1))
+    text = request.form.get("text", '')
+    if line_id_is_int and line_id >= 0:
+        editor.edit_doc(processing_from_to, line_id, text)
+    else:
+        abort(400)
+    return ('', 200)
 
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<file_format>", methods=["GET"])
 def download_processsing(username, lang_from, lang_to, file_id, lang, file_format):

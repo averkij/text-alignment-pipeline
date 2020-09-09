@@ -48,3 +48,9 @@ def read_processing(input_file):
     for doc in docs:
         for line in doc:
             yield line, doc[line]["trn"], doc[line]["cnd"]
+
+def tryParseInt(value):
+    try:
+        return int(value), True
+    except ValueError:
+        return value, False

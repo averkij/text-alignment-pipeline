@@ -10,6 +10,7 @@ import {
   DOWNLOAD_PROCESSING,
   GET_SPLITTED,
   GET_PROCESSING,
+  EDIT_PROCESSING,
   ALIGN_SPLITTED
 } from "./actions.type";
 
@@ -117,6 +118,18 @@ export const actions = {
       },
       function () {
         console.log(`Didn't find processing document.`);
+      }
+    );
+    return;
+  },
+  // params {fileId, username}
+  async [EDIT_PROCESSING](context, params) {
+    await ItemsService.editProcessing(params).then(
+      function (response) {
+        console.log("Edit successfull.", response)
+      },
+      function (response) {
+        console.log("Error while edit.", response);
       }
     );
     return;

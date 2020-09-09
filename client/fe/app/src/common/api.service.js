@@ -106,12 +106,6 @@ export const ItemsService = {
       `${params.username}/splitted/${params.langCode}/${params.fileId}/${params.linesCount}/${params.page}`
     );
   },
-  getAligned(params) {
-    return ApiService.get(
-      "items",
-      `${params.username}/aligned/${params.langCode}/${params.fileId}/${params.linesCount}`
-    );
-  },
   getProcessing(params) {
     return ApiService.get(
       "items",
@@ -123,5 +117,19 @@ export const ItemsService = {
       "items",
       `${params.username}/align/${params.langCodeFrom}/${params.langCodeTo}/${params.fileIds[params.langCodeFrom]}/${params.fileIds[params.langCodeTo]}`
     );
-  }
+  },
+  editProcessing(params) {
+    return ApiService.get(
+      "items",
+      `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/download/${params.langCodeDownload}/${params.format}`
+    ).then((response) => {
+      console.log(response)
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', params.fileName);
+      document.body.appendChild(link);
+      link.click();
+    });
+  },
 };

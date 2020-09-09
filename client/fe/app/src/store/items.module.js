@@ -10,7 +10,6 @@ import {
   DOWNLOAD_PROCESSING,
   GET_SPLITTED,
   GET_PROCESSING,
-  GET_ALIGNED,
   ALIGN_SPLITTED
 } from "./actions.type";
 
@@ -19,7 +18,6 @@ import {
   SET_ITEMS_PROCESSING,
   SET_SPLITTED,
   SET_PROCESSING,
-  SET_ALIGNED
 } from "./mutations.type";
 
 const initialState = {
@@ -56,12 +54,6 @@ const initialState = {
   processing: {
     items: [],
     meta: {}
-  },
-  aligned: {
-    ru: [],
-    zh: [],
-    de: [],
-    en: []
   }
 };
 
@@ -130,17 +122,7 @@ export const actions = {
     return;
   },
   async [ALIGN_SPLITTED](context, params) {
-    const {
-      data
-    } = await ItemsService.alignSplitted(params);
-    context.commit(SET_ALIGNED, data.items);
-    return;
-  },
-  async [GET_ALIGNED](context, params) {
-    const {
-      data
-    } = await ItemsService.getAligned(params);
-    context.commit(SET_ALIGNED, data.items);
+    await ItemsService.alignSplitted(params);
     return;
   }
 };
@@ -162,14 +144,6 @@ export const mutations = {
   },
   [SET_PROCESSING](state, data) {
     state.processing = data;
-  },
-  [SET_ALIGNED](state, items) {
-    if (items.ru) {
-      state.aligned.ru = items.ru;
-    }
-    if (items.zh) {
-      state.aligned.zh = items.zh;
-    }
   }
 };
 
@@ -185,9 +159,6 @@ const getters = {
   },
   processing(state) {
     return state.processing;
-  },
-  aligned(state) {
-    return state.aligned;
   }
 };
 

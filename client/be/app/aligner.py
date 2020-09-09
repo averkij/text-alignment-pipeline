@@ -79,7 +79,6 @@ def get_processed(lines_from, lines_to, sim_matrix, threshold, batch_number, bat
 
         for i,c in enumerate(sorted(candidates, key=lambda x: x[1], reverse=True)[:candidates_count]):
             if i==0:
-                print(doc[line])
                 doc[line]["trn"] = (DocLine(c[0], lines_to[c[0]]), sim_matrix[line_from_id, c[0]], False)
             doc[line]["cnd"].append(
                 (

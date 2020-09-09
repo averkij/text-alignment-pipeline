@@ -153,7 +153,6 @@
     FETCH_ITEMS_PROCESSING,
     UPLOAD_FILES,
     GET_SPLITTED,
-    GET_ALIGNED,
     GET_PROCESSING,
     ALIGN_SPLITTED,
     DOWNLOAD_SPLITTED,
@@ -274,12 +273,6 @@
           linesCount: 10,
           page: 1
         });
-        this.$store.dispatch(GET_ALIGNED, {
-          username: this.$route.params.username,
-          langCode,
-          fileId,
-          linesCount: 0
-        });
       },
       selectProcessing(langCode, name, fileId) {
         if (langCode == this.langCodeFrom) {
@@ -369,7 +362,7 @@
       });
     },
     computed: {
-      ...mapGetters(["items", "itemsProcessing", "splitted", "aligned", "processing"]),
+      ...mapGetters(["items", "itemsProcessing", "splitted", "processing"]),
       username() {
         return this.$route.params.username;
       },

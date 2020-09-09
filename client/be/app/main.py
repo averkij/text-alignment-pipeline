@@ -99,27 +99,6 @@ def splitted(username, lang, id, count, page):
     meta = {"lines_count": lines_count, "symbols_count": symbols_count, "page": page, "total_pages": total_pages}
     return {"items":{lang:lines}, "meta":{lang:meta}}
 
-@app.route("/items/<username>/aligned/<lang>/<int:id>/<int:count>", methods=["GET"])
-def aligned(username, lang, id, count):
-    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang))
-    if len(files) < id+1:
-        return con.EMPTY_LINES
-    path = os.path.join(con.UPLOAD_FOLDER, username, con.DONE_FOLDER, lang, files[id])
-    lines = []
-    i = 0
-    if not os.path.isfile(path):
-        return {"items":{lang:lines}}
-    with open(path, mode='r', encoding='utf-8') as input_file:
-        while True:
-            line = input_file.readline()
-            if not line:
-                break
-            lines.append(line)
-            i+=1
-            if count>0 and i>=count:
-                break
-    return {"items":{lang:lines[:5]}}
-
 @app.route("/items/<username>/align/<lang_from>/<lang_to>/<int:id_from>/<int:id_to>", methods=["GET"])
 def align(username, lang_from, lang_to, id_from, id_to):
     files_from = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang_from))
@@ -154,11 +133,11 @@ def get_processing(username, lang_from, lang_to, file_id, count, page):
     files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
     if len(files) < file_id+1:
         return con.EMPTY_SIMS
-
     processing_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
     logging.debug(f"[{username}]. Get processing file. {processing_from_to}.")
     if not os.path.isfile(processing_from_to):
         abort(404)
+        
     res = []
     lines_count = 0    
     shift = (page-1)*count
@@ -183,6 +162,17 @@ def get_processing(username, lang_from, lang_to, file_id, count, page):
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}
 
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/edit", methods=["POST"])
+def edit_processing(username, lang_from, lang_to, file_id, count, page):
+    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
+    if len(files) < file_id+1:
+        return con.EMPTY_SIMS
+    processing_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
+    logging.debug(f"[{username}]. Editing file. {processing_from_to}.")
+    if not os.path.isfile(processing_from_to):
+        abort(404)
+    print("EDIT", processing_from_to)
+
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<file_format>", methods=["GET"])
 def download_processsing(username, lang_from, lang_to, file_id, lang, file_format):
     logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
@@ -201,7 +191,6 @@ def download_processsing(username, lang_from, lang_to, file_id, lang, file_forma
     download_file = os.path.join(download_folder, "{0}_{1}_{2}.{3}".format(os.path.splitext(files[file_id])[0], lang, timestamp, file_format))
     
     logging.debug(f"[{username}]. Preparing file for downloading {download_file}.")
-    print(download_file)
 
     if file_format==con.FORMAT_TMX:
         output.save_tmx(processing_file, download_file, lang_from, lang_to)

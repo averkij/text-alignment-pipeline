@@ -19,8 +19,11 @@ def save_tmx(input_file, output_file, lang_from, lang_to):
 def save_plain_text(input_file, output_file, first_lang):
     with open(output_file, mode="w", encoding="utf-8") as doc_out:
         for line_from, translation, candidates in helper.read_processing(input_file):
+
+            #TODO Clean from newlines because of editing.
+
             if translation[0].text:
                 if first_lang:
-                    doc_out.write(line_from.text)
+                    doc_out.write(line_from.text.strip() + "\n")
                 else:
-                    doc_out.write(translation[0].text)
+                    doc_out.write(translation[0].text.strip() + "\n")

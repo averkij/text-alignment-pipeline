@@ -66,41 +66,46 @@ def get_line_vectors(lines):
 
 def get_processed(lines_from, lines_to, sim_matrix, threshold, batch_number, batch_size, candidates_count=50):
     doc = {}
-    for ru_line_id in range(sim_matrix.shape[0]):
-        line = DocLine([ru_line_id], lines_from[ru_line_id])
-        doc[line] = []
-        zh_candidates = []
-        for zh_line_id in range(sim_matrix.shape[1]):            
-            if sim_matrix[ru_line_id, zh_line_id] > threshold:
-                zh_candidates.append((zh_line_id, sim_matrix[ru_line_id, zh_line_id]))
-        for i,c in enumerate(sorted(zh_candidates, key=lambda x: x[1], reverse=True)[:candidates_count]):
-            doc[line].append(
+    for line_from_id in range(sim_matrix.shape[0]):
+        line = DocLine([line_from_id], lines_from[line_from_id])
+        doc[line] = {
+            "trn": (DocLine(0), 0.0 ,False),     #translation (best from candidates)
+            "cnd": []      #all candidates
+            }
+        candidates = []
+        for line_to_id in range(sim_matrix.shape[1]):            
+            if sim_matrix[line_from_id, line_to_id] > threshold:
+                candidates.append((line_to_id, sim_matrix[line_from_id, line_to_id]))
+
+        for i,c in enumerate(sorted(candidates, key=lambda x: x[1], reverse=True)[:candidates_count]):
+            if i==0:
+                print(doc[line])
+                doc[line]["trn"] = (DocLine(c[0], lines_to[c[0]]), sim_matrix[line_from_id, c[0]], False)
+            doc[line]["cnd"].append(
                 (
                     #text with line_id
                     DocLine(
                         line_id = c[0],
                         text = lines_to[c[0]]),
                     #text similarity
-                    sim_matrix[ru_line_id, c[0]],
-                    #max similarity (best choice)
-                    1 if i==0 else 0)
+                    sim_matrix[line_from_id, c[0]])
                 )
     return doc
 
 def get_pairs(lines_from, lines_to, ru_proxy_lines, sim_matrix, threshold):
-    ru = []
-    zh = []
-    ru_proxy = []
+    res_from = []
+    res_to = []
+    proxy_from = []
     sims = []
     for i in range(sim_matrix.shape[0]):
         for j in range(sim_matrix.shape[1]):
             if sim_matrix[i,j] >= threshold:
-                ru.append(lines_from[j])
-                zh.append(lines_to[i])
-                ru_proxy.append(ru_proxy_lines[i])
+                res_from.append(lines_from[j])
+                res_to.append(lines_to[i])
+                proxy_from.append(ru_proxy_lines[i])
                 sims.append(sim_matrix[i,j])
                 
-    return ru,zh,ru_proxy,sims
+    return res_from,res_to,proxy_from,sims
 
 def get_sim_matrix(vec1, vec2, window=config.DEFAULT_WINDOW):
     sim_matrix = np.zeros((len(vec1), len(vec2)))
@@ -117,6 +122,6 @@ class DocLine:
         self.line_id = line_id
         self.text = text
     def __hash__(self):
-        return hash(self.text)
+        return hash(str(self.line_id))
     def __eq__(self, other):
         return self.text == other

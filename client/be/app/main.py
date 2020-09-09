@@ -150,7 +150,7 @@ def align(username, lang_from, lang_to, id_from, id_to):
     return con.EMPTY_LINES
 
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/<int:count>/<int:page>", methods=["GET"])
-def processing(username, lang_from, lang_to, file_id, count, page):
+def get_processing(username, lang_from, lang_to, file_id, count, page):
     files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
     if len(files) < file_id+1:
         return con.EMPTY_SIMS
@@ -169,9 +169,7 @@ def processing(username, lang_from, lang_to, file_id, count, page):
             lines_count += 1
             if count>0 and (lines_count<=shift or lines_count>shift+count):
                 continue
-            #selected — x[2] is selected translation candidate
-            selected = next((x for x in doc[line] if x[2]==1), (DocLine([],""), 0))
-            #print(selected)
+            selected = doc[line]["trn"]
             res.append({
                 "text": line.text,
                 "line_id": line.line_id,
@@ -179,10 +177,10 @@ def processing(username, lang_from, lang_to, file_id, count, page):
                     "text": t[0].text, 
                     "line_id":t[0].line_id, 
                     "sim": t[1]
-                    } for t in doc[line]],
+                    } for t in doc[line]["cnd"]],
                 "selected": {
-                    "text": selected[0].text.strip(), 
-                    "line_id":selected[0].line_id, 
+                    "text": selected[0].text.strip(),
+                    "line_id": selected[0].line_id,
                     "sim": selected[1]
                     }})
     total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
@@ -264,4 +262,4 @@ def route_frontend(path):
         return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=80)
+    app.run(host="0.0.0.0", debug=True, port=9000)

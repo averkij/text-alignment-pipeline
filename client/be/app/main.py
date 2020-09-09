@@ -159,30 +159,26 @@ def get_processing(username, lang_from, lang_to, file_id, count, page):
     logging.debug(f"[{username}]. Get processing file. {processing_from_to}.")
     if not os.path.isfile(processing_from_to):
         abort(404)
-        
-    docs = pickle.load(open(processing_from_to, "rb"))
     res = []
     lines_count = 0    
     shift = (page-1)*count
-    for doc in docs:
-        for line in doc:
-            lines_count += 1
-            if count>0 and (lines_count<=shift or lines_count>shift+count):
-                continue
-            selected = doc[line]["trn"]
-            res.append({
-                "text": line.text,
-                "line_id": line.line_id,
-                "trans": [{
-                    "text": t[0].text, 
-                    "line_id":t[0].line_id, 
-                    "sim": t[1]
-                    } for t in doc[line]["cnd"]],
-                "selected": {
-                    "text": selected[0].text.strip(),
-                    "line_id": selected[0].line_id,
-                    "sim": selected[1]
-                    }})
+    for line_from, translation, candidates in helper.read_processing(processing_from_to):
+        lines_count += 1
+        if count>0 and (lines_count<=shift or lines_count>shift+count):
+            continue
+        res.append({
+            "text": line_from.text,
+            "line_id": line_from.line_id,
+            "trans": [{
+                "text": t[0].text, 
+                "line_id":t[0].line_id, 
+                "sim": t[1]
+                } for t in candidates],
+            "selected": {
+                "text": translation[0].text.strip(),
+                "line_id": translation[0].line_id,
+                "sim": translation[1]
+                }})
     total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
     meta = {"page": page, "total_pages": total_pages}
     return {"items": res, "meta": meta}

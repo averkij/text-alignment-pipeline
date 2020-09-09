@@ -1,6 +1,7 @@
 import os
 import constants as con
 import pathlib
+import pickle
 
 def get_files_list(folder):
     if not os.path.isdir(folder):
@@ -41,3 +42,9 @@ CULTURE_LIST = {
     "de": "de-DE"
 }
 DEFAULT_CULTURE = "en"
+
+def read_processing(input_file):
+    docs = pickle.load(open(input_file, "rb"))
+    for doc in docs:
+        for line in doc:
+            yield line, doc[line]["trn"], doc[line]["cnd"]

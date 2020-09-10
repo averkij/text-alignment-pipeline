@@ -34,9 +34,7 @@
               <v-expansion-panel>
                 <v-expansion-panel-header class="ta-custom">
                   <v-textarea auto-grow rows=1 text-wrap @click.native.stop @keyup.space.prevent
-                    @blur="editProcessing($event, item.line_id, 'text_from')"
-                    :value="item.selected.text"
-                  ></v-textarea>
+                    @blur="editProcessing($event, item.line_id, 'text_from')" :value="item.selected.text"></v-textarea>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <div v-for="(t,i) in linesTo" :key="i">
@@ -53,8 +51,9 @@
                         </div>
                       </div>
                       <v-divider class="d-table-cell" vertical></v-divider>
-                      <div class="d-table-cell yellow pa-2" style="width:100%;" 
-                        :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">{{ t.text }}
+                      <div class="d-table-cell yellow pa-2" style="width:100%;"
+                        :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">
+                        {{ t.text }}
                       </div>
                     </div>
                   </div>
@@ -70,6 +69,9 @@
 
 <script>
   import _ from 'lodash'
+  import {
+    DEFAULT_VARIANTS_WINDOW_TO
+  } from "@/common/config"
   export default {
     name: "EditItem",
     props: ["item"],
@@ -84,7 +86,7 @@
       },
       linesTo() {
         let sid = this.item.selected.line_id;
-        let wnd = 3;
+        let wnd = DEFAULT_VARIANTS_WINDOW_TO;
         return _(this.item.trans)
           .filter(function (tr) {
             return tr.line_id < sid + wnd && tr.line_id > sid - wnd

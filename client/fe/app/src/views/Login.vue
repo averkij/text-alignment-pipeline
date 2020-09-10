@@ -37,10 +37,7 @@ export default {
         })
         .then(() =>
           this.$router.push({
-            name: "items",
-            params: {
-              username
-            }
+            path: `/user/${username}`
           })
         );
     }

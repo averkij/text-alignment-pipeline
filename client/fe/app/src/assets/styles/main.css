@@ -12,6 +12,7 @@
     font-size: 16px !important;
     line-height: 1.5em !important;
     min-height: 20px !important;
+    align-items: baseline !important;
 }
 
 .ta-custom > .v-text-field {
@@ -25,7 +26,7 @@
 
 .ta-custom > .v-text-field > .v-input__control > .v-input__slot {
     margin-bottom: 0 !important;
-    padding: 10px !important;
+    padding: 10px 10px 0 10px !important;
 }
 
 .ta-custom > .v-text-field > .v-input__control > .v-text-field__details {

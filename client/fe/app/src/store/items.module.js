@@ -123,20 +123,11 @@ export const actions = {
     return;
   },
   // params {fileId, username}
-  async [EDIT_PROCESSING](context, params) {
-    await ItemsService.editProcessing(params).then(
-      function (response) {
-        console.log("Edit successfull.", response)
-      },
-      function (response) {
-        console.log("Error while edit.", response);
-      }
-    );
-    return;
+  [EDIT_PROCESSING](context, params) {
+    return ItemsService.editProcessing(params);
   },
   async [ALIGN_SPLITTED](context, params) {
     await ItemsService.alignSplitted(params);
-    return;
   }
 };
 

@@ -116,7 +116,7 @@
             @input="onProcessingPageChange(processing.meta.page)">
           </v-pagination>
         </div>
-</v-card>
+      </v-card>
 
       <div class="text-h4 mt-10 font-weight-bold">🧲 Download</div>
 
@@ -147,6 +147,10 @@
     DEFAULT_FROM,
     DEFAULT_TO
   } from "@/common/langList";
+  import {
+    RESULT_OK,
+    RESULT_ERROR 
+  } from "@/common/constants"
   import {
     FETCH_ITEMS,
     FETCH_ITEMS_PROCESSING,
@@ -288,7 +292,7 @@
           });
         }
       },
-      editProcessing(line_id, text, text_type) {
+      editProcessing(line_id, text, text_type, callback) {
         this.$store
           .dispatch(EDIT_PROCESSING, {
             username: this.$route.params.username,
@@ -298,6 +302,10 @@
             line_id: line_id,
             text: text,
             text_type: text_type
+          }).then(function() {
+            callback(RESULT_OK)
+          }).catch(() => {
+            callback(RESULT_ERROR)
           });
       },
       align() {

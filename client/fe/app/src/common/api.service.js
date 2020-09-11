@@ -117,18 +117,13 @@ export const ItemsService = {
     );
   },
   editProcessing(params) {
-    console.log("params", params)
-
     let form = new FormData();
     form.append("line_id", params.line_id);
     form.append("text", params.text)
-
     return ApiService.post(
       "items",
       `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/edit`,
       form
-    ).then((response) => {
-      console.log("edited =>", response)
-    });
+    );
   },
 };

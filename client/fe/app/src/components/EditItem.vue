@@ -34,7 +34,11 @@
               <v-expansion-panel>
                 <v-expansion-panel-header class="ta-custom">
                   <v-textarea auto-grow rows=1 text-wrap @click.native.stop @keyup.space.prevent
-                    @blur="editProcessing($event, item.line_id, 'text_from')" :value="item.selected.text"></v-textarea>
+                    @keydown.ctrl.83.prevent="$event.target.blur()"
+                    @blur="editProcessing($event, item.line_id, 'text_from')"
+                    @input="onTextChange"
+                    :value="item.selected.text">
+                  </v-textarea>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <div v-for="(t,i) in linesTo" :key="i">
@@ -72,12 +76,33 @@
   import {
     DEFAULT_VARIANTS_WINDOW_TO
   } from "@/common/config"
+  import {
+    STATE_SAVED,
+    STATE_CHANGED,
+    RESULT_OK
+  } from "@/common/constants"
   export default {
     name: "EditItem",
     props: ["item"],
+    data() {
+      return {
+        state: STATE_SAVED
+      }
+    },
     methods: {
       editProcessing(event, line_id, text_type) {
-        this.$emit('editProcessing', line_id, event.target.value, text_type)
+        // event.target.value = event.target.value .replace(/(\r\n|\n|\r)/gm, "")
+        this.$emit('editProcessing', line_id, event.target.value, text_type, (res) => {
+          console.log("edit result:", res)
+          if (res==RESULT_OK) {
+            this.state = STATE_SAVED
+          } else {
+            console.log("Edit error on save.")
+          }
+        })
+      },
+      onTextChange() {
+        this.state = STATE_CHANGED
       }
     },
     computed: {

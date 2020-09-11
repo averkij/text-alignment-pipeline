@@ -103,7 +103,13 @@
 
       <v-card class="mt-6">
         <div class="green lighten-5" dark>
-          <v-card-title>{{selectedProcessing}}</v-card-title>
+          <v-card-title class="pr-3">
+            {{selectedProcessing}}
+            <v-spacer></v-spacer>
+            <v-btn icon @click="collapseEditItems">
+              <v-icon>mdi-collapse-all</v-icon>
+            </v-btn>
+          </v-card-title>
           <v-card-text>Review and edit automatically aligned document</v-card-text>
         </div>
         <v-divider></v-divider>
@@ -120,11 +126,11 @@
 
       <div class="text-h4 mt-10 font-weight-bold">🧲 Download</div>
 
-        <div class="mt-5">
-          <v-btn class="primary ma-5" @click="downloadProcessing(langCodeFrom)">Download [{{langCodeFrom}}]</v-btn>
-          <v-btn class="primary ma-5" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
-          <v-btn class="primary ma-5" @click="downloadProcessingTmx()">Download TMX</v-btn>
-        </div>
+      <div class="mt-5">
+        <v-btn class="primary ma-5" @click="downloadProcessing(langCodeFrom)">Download [{{langCodeFrom}}]</v-btn>
+        <v-btn class="primary ma-5" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
+        <v-btn class="primary ma-5" @click="downloadProcessingTmx()">Download TMX</v-btn>
+      </div>
 
     </div>
   </div>
@@ -149,7 +155,7 @@
   } from "@/common/langList";
   import {
     RESULT_OK,
-    RESULT_ERROR 
+    RESULT_ERROR
   } from "@/common/constants"
   import {
     FETCH_ITEMS,
@@ -216,7 +222,7 @@
         });
       },
       onProcessingPageChange(page) {
-        this.triggerCollapseEditItem = !this.triggerCollapseEditItem ;
+        this.triggerCollapseEditItem = !this.triggerCollapseEditItem;
         this.$store.dispatch(GET_PROCESSING, {
           username: this.$route.params.username,
           langCodeFrom: this.langCodeFrom,
@@ -304,7 +310,7 @@
             line_id: line_id,
             text: text,
             text_type: text_type
-          }).then(function() {
+          }).then(function () {
             callback(RESULT_OK)
           }).catch(() => {
             callback(RESULT_ERROR)
@@ -360,6 +366,9 @@
         if (this.itemsProcessingNotEmpty(langCode)) {
           this.selectProcessing(langCode, this.itemsProcessing[langCode][0], 0);
         }
+      },
+      collapseEditItems() {
+        this.triggerCollapseEditItem = !this.triggerCollapseEditItem;
       }
     },
     mounted() {

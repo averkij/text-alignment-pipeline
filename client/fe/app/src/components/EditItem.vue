@@ -28,7 +28,8 @@
             </div>
           </div>
           <v-divider class="d-table-cell" vertical></v-divider>
-          <div class="d-table-cell fill-width color-transition" :class="[{blue: state==STATE_CHANGED},{'lighten-5': state==STATE_CHANGED}]" >
+          <div class="d-table-cell fill-width color-transition"
+            :class="[{blue: state==STATE_CHANGED},{'lighten-5': state==STATE_CHANGED}]">
             <div class="pa-2">
               <div class="d-table fill-height fill-width">
                 <div class="d-table-cell">
@@ -45,26 +46,32 @@
                 </div>
               </div>
             </div>
-            <div v-for="(t,i) in linesTo" :key="i">
-              <v-divider></v-divider>
-              <div class="d-table fill-height fill-width">
-                <div class="d-table-cell lighten-5 grey text-center font-weight-medium" style="min-width:45px">
-                  <div class="fill-height lighten-5 d-flex flex-column justify-space-between">
-                    <div class="pa-2 font-weight-medium">
-                      {{ t.line_id + 1 }}
+            <!-- <v-expand-transition> -->
+              <!-- <v-slide-y-transition group hide-on-leave> -->
+              <!-- <div v-show="showLines"> -->
+                <div v-for="(t,i) in linesTo" :key="i">
+                  <v-divider></v-divider>
+                  <div class="d-table fill-height fill-width">
+                    <div class="d-table-cell lighten-5 grey text-center font-weight-medium" style="min-width:45px">
+                      <div class="fill-height lighten-5 d-flex flex-column justify-space-between">
+                        <div class="pa-2 font-weight-medium">
+                          {{ t.line_id + 1 }}
+                        </div>
+                        <div class="text-caption pa-1">
+                          {{ t.sim | numeral("0.00") }}
+                        </div>
+                      </div>
                     </div>
-                    <div class="text-caption pa-1">
-                      {{ t.sim | numeral("0.00") }}
+                    <v-divider class="d-table-cell" vertical></v-divider>
+                    <div class="d-table-cell yellow pa-2 fill-width"
+                      :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">
+                      {{ t.text }}
                     </div>
                   </div>
                 </div>
-                <v-divider class="d-table-cell" vertical></v-divider>
-                <div class="d-table-cell yellow pa-2 fill-width"
-                  :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">
-                  {{ t.text }}
-                </div>
-              </div>
-            </div>
+              <!-- </div> -->
+              <!-- </v-expand-transition> -->
+              <!-- </v-slide-y-transition> -->
           </div>
         </div>
       </v-col>
@@ -127,7 +134,7 @@
       }
     },
     watch: {
-      collapse: function() {
+      collapse: function () {
         this.showLines = false;
       }
     }

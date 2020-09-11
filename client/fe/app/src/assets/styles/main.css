@@ -24,3 +24,7 @@
     transform: rotate(180deg);
     transition: ease;
 }
+
+.color-transition {
+    transition: all 0.1s linear;
+}

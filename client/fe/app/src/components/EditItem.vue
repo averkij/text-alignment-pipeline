@@ -7,7 +7,7 @@
             {{ parseInt(item.line_id) + 1 }}
           </div>
           <v-divider class="d-table-cell" vertical></v-divider>
-          <div class="d-table-cell pa-2" :class="{green: state==STATE_CHANGED}">{{ item.text }}</div>
+          <div class="d-table-cell pa-2">{{ item.text }}</div>
         </div>
       </v-col>
       <v-col class="text-left" cols="6">
@@ -28,7 +28,7 @@
             </div>
           </div>
           <v-divider class="d-table-cell" vertical></v-divider>
-          <div class="d-table-cell" style="width:100%">
+          <div class="d-table-cell fill-width color-transition" :class="[{blue: state==STATE_CHANGED},{'lighten-5': state==STATE_CHANGED}]" >
             <div class="pa-2">
               <div class="d-table fill-height fill-width">
                 <div class="d-table-cell">

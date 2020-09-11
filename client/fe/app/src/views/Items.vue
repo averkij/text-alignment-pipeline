@@ -108,7 +108,7 @@
         </div>
         <v-divider></v-divider>
         <div v-for="(line, i) in processing.items" :key="i">
-          <EditItem @editProcessing="editProcessing" :item="line"></EditItem>
+          <EditItem @editProcessing="editProcessing" :item="line" :collapse="triggerCollapseEditItem"></EditItem>
           <v-divider></v-divider>
         </div>
         <div class="text-center pa-3">
@@ -199,6 +199,7 @@
           },
           align: false
         },
+        triggerCollapseEditItem: false
       };
     },
     methods: {
@@ -215,6 +216,7 @@
         });
       },
       onProcessingPageChange(page) {
+        this.triggerCollapseEditItem = !this.triggerCollapseEditItem ;
         this.$store.dispatch(GET_PROCESSING, {
           username: this.$route.params.username,
           langCodeFrom: this.langCodeFrom,

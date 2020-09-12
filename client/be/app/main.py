@@ -23,12 +23,7 @@ from aligner import DocLine
 app = Flask(__name__)
 CORS(app)
 
-#logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-
-# @app.route("/")
-# def main():
-#     index_path = os.path.join(app.static_folder, "index.html")
-#     return send_file(index_path)
+logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 @app.route('/api/hello')
 def start():

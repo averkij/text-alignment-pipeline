@@ -124,11 +124,11 @@
       linesTo() {
         let sid = this.item.selected.line_id;
         let wnd = DEFAULT_VARIANTS_WINDOW_TO;
-        // not working with loadash (v-for is hiding)
+        // not working with loadash _ (v-for is hiding)
         if (this.showLines) {
           return this.item.trans.filter(function (tr) {
             return tr.line_id < sid + wnd && tr.line_id > sid - wnd
-          });
+          }).slice(0,5);
         }
         return [];
       }

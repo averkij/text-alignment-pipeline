@@ -30,14 +30,19 @@ def get_batch(iter1, iter2, iter3, n):
         kdx += k
         yield iter1[ndx:min(ndx + n, l1)], iter2[kdx:min(kdx + k, l3)], iter3[kdx:min(kdx + k, l3)]
 
-def get_batch_intersected(iter1, iter2, n, window):
+def get_batch_intersected_parts(iter1, iter2, n, window):
     l1 = len(iter1)
     l2 = len(iter2)
     k = int(round(n * l2/l1))
     kdx = 0 - k
     for ndx in range(0, l1, n):
         kdx += k
-        yield iter1[ndx:min(ndx + n, l1)], iter2[max(0,kdx - window):min(kdx + k + window, l2)]
+        yield iter1[ndx:min(ndx + n, l1)], \
+        iter2[max(0,kdx - window):min(kdx + window, l2)], \
+        iter2[min(kdx + window, l2):min(kdx + k - window, l2)], \
+        iter2[min(kdx + k - window, l2):min(kdx + k + window, l2)], \
+        list(range(ndx, min(ndx + n, l1) + 1)), \
+        list(range(max(0,kdx - window), min(kdx + k + window, l2) + 1))
 
 def get_culture(langCode):
     if langCode in CULTURE_LIST:

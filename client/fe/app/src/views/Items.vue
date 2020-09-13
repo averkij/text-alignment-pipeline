@@ -94,10 +94,19 @@
 
       <div class="text-h5 mt-10 font-weight-bold">Visualization</div>
 
-      <div class="mt-4">
-        <!-- <v-img :src="selectedProcessingImg" aspect-ratio="1" width="50%"></v-img> -->
-        <v-img :src="selectedProcessingImgBest" aspect-ratio="1" width="50%"></v-img>
-      </div>
+      <v-row class="mt-6">
+        <v-col v-for="(img, i) in processingImgBest" :key=i cols="12" sm="3">
+          <v-card>
+            <div class="grey lighten-5">
+              <v-card-title>batch {{i}}</v-card-title>
+              <v-card-text>lines 0 - 40
+                lines</v-card-text>
+            </div>
+            <v-divider></v-divider>
+            <v-img :src="img"></v-img>
+          </v-card>
+        </v-col>
+      </v-row>
 
       <div class="text-h5 mt-10 font-weight-bold">Edit</div>
 
@@ -407,13 +416,16 @@
         if (!this.selectedProcessing) {
           return "";
         }
-        return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.png`;
+        return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}_1.png`;
       },
-      selectedProcessingImgBest() {
+      processingImgBest() {
         if (!this.selectedProcessing) {
           return "";
         }
-        return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best.png`;
+        return [`${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best_1.png`,
+          `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best_2.png`,
+          `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best_3.png`
+        ];
       },
       langCodeFrom() {
         let langCode = this.$route.params.from;

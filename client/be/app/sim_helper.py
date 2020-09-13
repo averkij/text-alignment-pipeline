@@ -5,8 +5,8 @@ def best_per_row(sim_matrix):
     sim_matrix_best[range(len(sim_matrix)), sim_matrix.argmax(1)] = sim_matrix[range(len(sim_matrix)), sim_matrix.argmax(1)]
     return sim_matrix_best
 
-def fix_inside_window(sim_matrix, sim_matrix_best, window_size=1):
-    window = window_size + 1
+def fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=1):
+    window = fixed_window_size + 1
     if sim_matrix_best.shape[0] <= window or window < 1:
         return sim_matrix_best
     for i in range(sim_matrix_best.shape[0] - window):

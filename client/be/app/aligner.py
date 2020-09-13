@@ -17,7 +17,7 @@ import sim_helper
 
 
 
-def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_name_from, lang_name_to, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE):
+def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_name_from, lang_name_to, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE, window_size=config.DEFAULT_WINDOW):
     batch_number = 1
     docs = []
     vectors1 = []
@@ -25,7 +25,7 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
     zero_treshold = 0
 
     logging.debug(f"Aligning started.")
-    for lines_from_batch, lines_from_proxy_batch, lines_to_batch in helper.get_batch(lines_from, lines_to, lines_to, batch_size):
+    for lines_from_batch, lines_to_batch in helper.get_batch_intersected(lines_from, lines_to, batch_size, window_size):
         print("batch:", batch_number)
         logging.debug(f"Batch {batch_number}. Calculating vectors.")
         vectors1 = [*vectors1, *get_line_vectors(lines_from_batch)]
@@ -34,13 +34,14 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
         logging.debug(f"Batch {batch_number}. Vectors calculated. len(vectors1)={len(vectors1)}. len(vectors2)={len(vectors2)}.")
 
         #test version restriction
-        break
+        if len(vectors1) >= 100:
+            break
     
     logging.debug(f"Calculating similarity matrix.")
     sim_matrix = get_sim_matrix(vectors1, vectors2)
     sim_matrix_best = sim_helper.best_per_row(sim_matrix)
 
-    sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, window_size=2)
+    sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=2)
 
     # res_ru, res_zh, res_ru_proxy, sims = get_pairs(lines_from, lines_to, lines_to, sim_matrix, threshold)
     

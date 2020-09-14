@@ -48,7 +48,7 @@
 
     <div class="text-h4 mt-10 font-weight-bold">⚖️ Alignment</div>
     <v-alert type="info" border="left" colored-border color="blue" class="mt-6" elevation="2">
-      This is a test version. Only {{DEFAULT_BATCHSIZE}} lines will be aligned.
+      This is a test version. Only {{TEST_LIMIT}} lines will be aligned.
     </v-alert>
     <v-row class="mt-6">
       <v-col cols="12" sm="6">
@@ -99,8 +99,11 @@
           <v-card>
             <div class="grey lighten-5">
               <v-card-title>batch {{i}}</v-card-title>
-              <v-card-text>lines 0 - 40
-                lines</v-card-text>
+              <v-card-text>
+                <v-chip color="grey" text-color="black" small outlined>
+                  {{DEFAULT_BATCHSIZE * i + 1}} — {{DEFAULT_BATCHSIZE * (i + 1)}}
+                </v-chip>
+              </v-card-text>
             </div>
             <v-divider></v-divider>
             <v-img :src="img"></v-img>
@@ -155,6 +158,7 @@
   } from "vuex";
   import {
     DEFAULT_BATCHSIZE,
+    TEST_LIMIT,
     API_URL
   } from "@/common/config";
   import {
@@ -185,6 +189,7 @@
         DEFAULT_FROM,
         DEFAULT_TO,
         DEFAULT_BATCHSIZE,
+        TEST_LIMIT,
         files: {
           ru: null,
           zh: null,

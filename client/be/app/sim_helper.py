@@ -2,7 +2,8 @@ import numpy as np
 
 def best_per_row(sim_matrix):
     sim_matrix_best = np.zeros_like(sim_matrix)
-    sim_matrix_best[range(len(sim_matrix)), sim_matrix.argmax(1)] = sim_matrix[range(len(sim_matrix)), sim_matrix.argmax(1)]
+    max_sim = sim_matrix.argmax(1)
+    sim_matrix_best[range(sim_matrix.shape[0]), max_sim] = sim_matrix[range(sim_matrix.shape[0]), max_sim]
     return sim_matrix_best
 
 def fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=1):

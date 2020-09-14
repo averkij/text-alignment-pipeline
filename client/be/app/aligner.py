@@ -54,9 +54,6 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
         res_img_batch = "{0}_{1}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
         res_img_batch_best = "{0}_{1}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
 
-        # print(res_img_batch, res_img_batch_best)
-
-        
         plt.figure(figsize=(12,8))
         sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)
         plt.savefig(res_img_batch, bbox_inches="tight")
@@ -69,7 +66,7 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
         plt.savefig(res_img_batch_best, bbox_inches="tight")
 
         logging.debug(f"Processing lines.")
-        doc = get_processed(lines_from_batch, lines_to_pre_batch + lines_to_curr_batch + lines_to_post_batch, line_ids_from, line_ids_to, sim_matrix, zero_treshold, batch_number, batch_size)
+        doc = get_processed(lines_from_batch, lines_to_pre_batch + lines_to_curr_batch + lines_to_post_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
         docs.append(doc)
 
     logging.debug(f"Dumping to file {processing_from_to}.")
@@ -78,8 +75,10 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
 def get_line_vectors(lines):
     return model_dispatcher.models[config.MODEL].embed(lines)
 
-def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, threshold, batch_number, batch_size, candidates_count=50):
+def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, threshold, batch_number, batch_size, candidates_count=50):
     doc = {}
+    best_sim_ind = sim_matrix_best.argmax(1)
+    best_variants = np.argpartition(sim_matrix, axis=1, kth=-candidates_count)
     for line_from_id in range(sim_matrix.shape[0]):
         line_id_from_abs = line_ids_from[line_from_id]
         line = DocLine(line_id_from_abs, lines_from[line_from_id])
@@ -87,23 +86,16 @@ def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, 
             "trn": (DocLine(0,''), 0.0 ,False),     #translation (best from candidates)
             "cnd": []      #all candidates
             }
-        candidates = []
-        for line_to_id in range(sim_matrix.shape[1]):
-            # line_id_to_abs = line_ids_to[line_to_id]           
-            if sim_matrix[line_from_id, line_to_id] > threshold:
-                candidates.append((line_to_id, sim_matrix[line_from_id, line_to_id]))
-        for i,c in enumerate(sorted(candidates, key=lambda x: x[1], reverse=True)[:candidates_count]):
-            if i==0:
-                doc[line]["trn"] = (DocLine(line_ids_to[c[0]], lines_to[c[0]]), sim_matrix[line_from_id, c[0]], False)
-            doc[line]["cnd"].append(
-                (
+        candidates = [(line_to_id, sim_matrix[line_from_id, line_to_id]) for line_to_id in best_variants[line_from_id] if sim_matrix[line_from_id, line_to_id] > threshold]
+        doc[line]["trn"] = (DocLine(line_ids_to[best_sim_ind[line_from_id]], lines_to[best_sim_ind[line_from_id]]), sim_matrix[line_from_id, best_sim_ind[line_from_id]], False)
+        doc[line]["cnd"] = [
                     #text with line_id
-                    DocLine(
+                    (DocLine(
                         line_id = line_ids_to[c[0]],
                         text = lines_to[c[0]]),
                     #text similarity
                     sim_matrix[line_from_id, c[0]])
-                )
+                    for c in candidates]
     return doc
 
 def get_pairs(lines_from, lines_to, ru_proxy_lines, sim_matrix, threshold):

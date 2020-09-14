@@ -29,7 +29,7 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
         batch_number += 1
             
         #test version restriction
-        if batch_number > 3:
+        if batch_number > 2:
             break
 
         print("batch:", batch_number)
@@ -54,11 +54,11 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
         res_img_batch = "{0}_{1}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
         res_img_batch_best = "{0}_{1}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
 
-        plt.figure(figsize=(12,8))
+        plt.figure(figsize=(12,6))
         sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)
         plt.savefig(res_img_batch, bbox_inches="tight")
 
-        plt.figure(figsize=(12,8))
+        plt.figure(figsize=(12,6))
         sns.heatmap(sim_matrix_best, cmap="Greens", vmin=zero_treshold, cbar=False)
         plt.xlabel(lang_name_to, fontsize=30, labelpad=-40)
         plt.ylabel(lang_name_from, fontsize=30, labelpad=-40)

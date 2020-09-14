@@ -128,7 +128,7 @@
         if (this.showLines) {
           return this.item.trans.filter(function (tr) {
             return tr.line_id < sid + wnd && tr.line_id > sid - wnd
-          }).slice(0,5);
+          }).sort((a,b) => (a.sim > b.sim) ? -1 : ((b.sim > a.sim) ? 1 : 0)).slice(0,5);
         }
         return [];
       }

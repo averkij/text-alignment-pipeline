@@ -95,18 +95,19 @@
       <div class="text-h5 mt-10 font-weight-bold">Visualization</div>
 
       <v-row class="mt-6">
-        <v-col v-for="(img, i) in processingImgBest" :key=i cols="12" sm="3">
+        <v-col v-for="(ind, i) in [1,2]" :key=i cols="12" sm="3">
           <v-card>
             <div class="grey lighten-5">
-              <v-card-title>batch {{i}}</v-card-title>
-              <v-card-text>
+              <v-card-title>
+                batch {{i}}
+                <v-spacer></v-spacer>
                 <v-chip color="grey" text-color="black" small outlined>
                   {{DEFAULT_BATCHSIZE * i + 1}} — {{DEFAULT_BATCHSIZE * (i + 1)}}
                 </v-chip>
-              </v-card-text>
+                </v-card-title>
             </div>
             <v-divider></v-divider>
-            <v-img :src="img"></v-img>
+            <v-img :src="`${API_URL}/static/img/${username}/${selectedProcessing}.best_${ind}.png`"></v-img>
           </v-card>
         </v-col>
       </v-row>
@@ -190,6 +191,7 @@
         DEFAULT_TO,
         DEFAULT_BATCHSIZE,
         TEST_LIMIT,
+        API_URL,
         files: {
           ru: null,
           zh: null,

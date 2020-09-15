@@ -34,7 +34,7 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
             
             #test version restriction
             if batch_number > config.TEST_RESTRICTION_MAX_BATCHES or not state.processing_state_exist(processing_from_to):
-                logging.debug(f"[test batch restriction]. Finishing and removing state. {processing_from_to}")
+                logging.debug(f"[Test restriction]. Finishing and removing state. {processing_from_to}")
                 state.destroy_processing_state(processing_from_to)
                 break
             
@@ -79,6 +79,9 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
 
         logging.debug(f"Dumping to file {processing_from_to}.")
         pickle.dump(docs, open(processing_from_to, "wb"))
+
+        logging.debug(f"Alignment is finished. Removing state. {processing_from_to}")
+        state.destroy_processing_state(processing_from_to)
     except:
         logging.error(f"Error during alignment: {sys.exc_info()[0]}.")
         state.set_processing_state(processing_from_to, (con.PROC_ERROR, config.TEST_RESTRICTION_MAX_BATCHES, batch_number))

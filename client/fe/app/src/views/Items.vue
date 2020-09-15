@@ -93,7 +93,7 @@
               <v-list-item-content>
                 <v-list-item-title v-text="item.name"></v-list-item-title>
               </v-list-item-content>
-              <v-progress-linear :value="item.state[2]/item.state[1] * 100" color="amber" :active="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" absolute bottom></v-progress-linear>
+              <v-progress-linear stream buffer-value="0" :value="item.state[2]/item.state[1] * 100" color="green" :active="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" absolute bottom></v-progress-linear>
             </v-list-item>
           </v-list-item-group>
         </v-list>

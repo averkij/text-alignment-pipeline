@@ -226,7 +226,7 @@ def processing_list(username, lang_from, lang_to):
         return con.EMPTY_FILES
     files = {
         "items": {
-            lang_from: helper.get_processing_list_with_state(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
+            lang_from: helper.get_processing_list_with_state(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to), username)
         }
     }
     return files

@@ -58,9 +58,12 @@
         <InfoPanel :info="LANGUAGES[langCodeTo]" :splitted=splitted :selected=selected></InfoPanel>
       </v-col>
     </v-row>
-    <v-btn v-show="selected[langCodeFrom] && selected[langCodeTo]" class="success mt-6" :loading="isLoading.align"
-      :disabled="isLoading.align" @click="align()">
+    <v-btn v-if="!userAlignInProgress" v-show="selected[langCodeFrom] && selected[langCodeTo]" class="success mt-6"
+      :loading="isLoading.align" :disabled="isLoading.align" @click="align()">
       Align documents
+    </v-btn>
+    <v-btn v-else v-show="selected[langCodeFrom] && selected[langCodeTo]" class="error mt-6" @click="align()">
+      Stop alignment
     </v-btn>
 
     <div class="text-h4 mt-10 font-weight-bold">✒️ Result</div>
@@ -80,13 +83,17 @@
         <v-list class="pa-0">
           <v-list-item-group mandatory color="gray">
             <v-list-item v-for="(item, i) in itemsProcessing[langCodeFrom]" :key="i"
-              @change="selectProcessing(langCodeFrom, item.name, i)">
+              @change="selectProcessing(langCodeFrom, item, i)">
               <v-list-item-icon>
-                <v-icon>mdi-arrow-right</v-icon>
+                <v-icon v-if="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" color="blue">
+                  mdi-clock-outline</v-icon>
+                <v-icon v-else-if="item.state[0]==PROC_ERROR" color="error">mdi-alert-circle</v-icon>
+                <v-icon v-else color="teal">mdi-check</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title v-text="item.name"></v-list-item-title>
               </v-list-item-content>
+              <v-progress-linear :value="item.state[2]/item.state[1] * 100" color="amber" :active="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" absolute bottom></v-progress-linear>
             </v-list-item>
           </v-list-item-group>
         </v-list>
@@ -94,8 +101,11 @@
 
       <div class="text-h5 mt-10 font-weight-bold">Visualization</div>
 
-      <v-row class="mt-6">
-        <v-col v-for="(ind, i) in [1,2,3]" :key=i cols="12" sm="3">
+      <v-alert v-if="!selectedProcessing || !selectedProcessing.imgs || selectedProcessing.imgs.length == 0" type="info" border="left" colored-border color="purple" class="mt-6" elevation="2" >
+        Images will start showing after the first batch completion.
+      </v-alert>
+      <v-row v-else class="mt-6">
+        <v-col v-for="(img, i) in selectedProcessing.imgs" :key=i cols="12" sm="3">
           <v-card>
             <div class="grey lighten-5">
               <v-card-title>
@@ -104,20 +114,30 @@
                 <v-chip color="grey" text-color="black" small outlined>
                   {{DEFAULT_BATCHSIZE * i + 1}} — {{DEFAULT_BATCHSIZE * (i + 1)}}
                 </v-chip>
-                </v-card-title>
+              </v-card-title>
             </div>
             <v-divider></v-divider>
-            <v-img :src="`${API_URL}/static/img/${username}/${selectedProcessing}.best_${ind}.png`"></v-img>
+            <v-img :src="`${API_URL}/static/img/${username}/${img}`"
+              :lazy-src="`${API_URL}/static/proc_img_stub.jpg`">
+              <template v-slot:placeholder>
+                <v-row class="fill-height ma-0" align="center" justify="center">
+                  <v-progress-circular indeterminate color="green"></v-progress-circular>
+                </v-row>
+              </template>
+            </v-img>
           </v-card>
         </v-col>
       </v-row>
 
       <div class="text-h5 mt-10 font-weight-bold">Edit</div>
 
-      <v-card class="mt-6">
+      <v-alert v-if="!processing || !processing.items || processing.items.length == 0" type="info" border="left" colored-border color="info" class="mt-6" elevation="2" >
+        Please, wait. Alignment is in progress.
+      </v-alert>
+      <v-card v-else class="mt-6">
         <div class="green lighten-5" dark>
           <v-card-title class="pr-3">
-            {{selectedProcessing}}
+            {{selectedProcessing.name}}
             <v-spacer></v-spacer>
             <v-btn icon @click="collapseEditItems">
               <v-icon>mdi-collapse-all</v-icon>
@@ -169,7 +189,11 @@
   } from "@/common/langList";
   import {
     RESULT_OK,
-    RESULT_ERROR
+    RESULT_ERROR,
+    PROC_INIT,
+    PROC_IN_PROGRESS,
+    PROC_DONE,
+    PROC_ERROR,
   } from "@/common/constants"
   import {
     FETCH_ITEMS,
@@ -192,6 +216,10 @@
         DEFAULT_BATCHSIZE,
         TEST_LIMIT,
         API_URL,
+        PROC_INIT,
+        PROC_IN_PROGRESS,
+        PROC_ERROR,
+        PROC_DONE,
         files: {
           ru: null,
           zh: null,
@@ -221,7 +249,8 @@
           },
           align: false
         },
-        triggerCollapseEditItem: false
+        triggerCollapseEditItem: false,
+        userAlignInProgress: false
       };
     },
     methods: {
@@ -302,9 +331,9 @@
           page: 1
         });
       },
-      selectProcessing(langCode, name, fileId) {
+      selectProcessing(langCode, item, fileId) {
         if (langCode == this.langCodeFrom) {
-          this.selectedProcessing = name;
+          this.selectedProcessing = item;
           this.selectedProcessingId = fileId;
           this.$store.dispatch(GET_PROCESSING, {
             username: this.$route.params.username,
@@ -342,23 +371,18 @@
             langCodeTo: this.langCodeTo
           })
           .then(() => {
+            this.userAlignInProgress = true;
+            this.isLoading.align = false;
+
             this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
               username: this.$route.params.username,
               langCodeFrom: this.langCodeFrom,
               langCodeTo: this.langCodeTo
             }).then(() => {
-              console.log(this.itemsProcessing)
               this.selectFirstProcessingDocument(this.langCodeFrom);
             });
-            this.$store.dispatch(GET_PROCESSING, {
-              username: this.$route.params.username,
-              langCodeFrom: this.langCodeFrom,
-              langCodeTo: this.langCodeTo,
-              fileId: this.selectedIds[this.langCodeFrom],
-              linesCount: 10,
-              page: 1
-            });            
-            this.isLoading.align = false;
+
+            this.fetchItemsProvessingTimer();
           });
       },
       //helpers
@@ -381,11 +405,30 @@
       },
       selectFirstProcessingDocument(langCode) {
         if (this.itemsProcessingNotEmpty(langCode)) {
-          this.selectProcessing(langCode, this.itemsProcessing[langCode][0].name, 0);
+          this.selectProcessing(langCode, this.itemsProcessing[langCode][0], 0);
         }
       },
       collapseEditItems() {
         this.triggerCollapseEditItem = !this.triggerCollapseEditItem;
+      },
+      fetchItemsProvessingTimer() {
+        setTimeout(() => {
+          this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
+              username: this.$route.params.username,
+              langCodeFrom: this.langCodeFrom,
+              langCodeTo: this.langCodeTo
+            }).then(() => {
+              if (this.itemsProcessing[this.langCodeFrom].filter(x => x.state[0] == 0 || x.state[0] == 1).length > 0) {
+                this.userAlignInProgress = true;
+                this.fetchItemsProvessingTimer();
+              }
+              else {
+                this.userAlignInProgress = false;
+                this.selectFirstProcessingDocument(this.langCodeFrom);
+              }
+              this.selectProcessing(this.langCodeFrom, this.itemsProcessing[this.langCodeFrom][0], 0)
+            });
+        }, 5000)
       }
     },
     mounted() {
@@ -406,6 +449,10 @@
         langCodeFrom: this.langCodeFrom,
         langCodeTo: this.langCodeTo
       }).then(() => {
+        if (this.itemsProcessing[this.langCodeFrom].filter(x => x.state[0] == 0 || x.state[0] == 1).length > 0) {
+          this.userAlignInProgress = true;
+          this.fetchItemsProvessingTimer();
+        }
         this.selectFirstProcessingDocument(this.langCodeFrom);
       });
     },
@@ -419,21 +466,6 @@
           return true;
         }
         return (this.items[this.langCodeFrom].length == 0) & (this.items[this.langCodeTo].length == 0);
-      },
-      selectedProcessingImg() {
-        if (!this.selectedProcessing) {
-          return "";
-        }
-        return `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}_1.png`;
-      },
-      processingImgBest() {
-        if (!this.selectedProcessing) {
-          return "";
-        }
-        return [`${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best_1.png`,
-          `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best_2.png`,
-          `${API_URL}/static/img/${this.$route.params.username}/${this.selectedProcessing}.best_3.png`
-        ];
       },
       langCodeFrom() {
         let langCode = this.$route.params.from;

@@ -4,14 +4,16 @@ import pickle
 from sentence_transformers import SentenceTransformer
 import torch
 
+# torch.backends.quantized.engine = 'qnnpack'
+
 SENTENCE_TRANSFORMERS_MODEL_PATH = './models/sentence_transformers.bin'
 
 class SentenceTransformersModel():
     def __init__(self):        
         if os.path.isfile(SENTENCE_TRANSFORMERS_MODEL_PATH):
             print("Loading saved sentence_transformers model.")
-            self.model = torch.quantization.quantize_dynamic(pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb')), {torch.nn.Linear}, dtype=torch.qint8)
-            # self.model = pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb'))
+            # self.model = torch.quantization.quantize_dynamic(pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb')), {torch.nn.Linear}, dtype=torch.qint8)
+            self.model = pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb'))
         else:
             print("Loading sentence_transformers model from Internet.")
             self.model = SentenceTransformer('distiluse-base-multilingual-cased')      

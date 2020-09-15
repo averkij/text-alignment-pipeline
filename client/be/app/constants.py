@@ -17,6 +17,11 @@ EN_CODE = "en"
 TYPE_FROM = "from"
 TYPE_TO = "to"
 
+PROC_INIT = 0
+PROC_IN_PROGRESS = 1
+PROC_DONE = 2
+PROC_ERROR = 3
+
 EMPTY_LINES = {"items": {"ru":[], "zh":[]}}
 EMPTY_SIMS = {"items": {"ru":[], "zh":[], "sim":[]}}
 EMPTY_FILES = {"items": {"ru":[]}}

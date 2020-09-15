@@ -1,6 +1,7 @@
 import logging
 import os
 import pickle
+import sys
 from typing import List
 
 import matplotlib
@@ -12,9 +13,11 @@ from matplotlib import pyplot as plt
 from scipy import spatial
 
 import config
+import constants as con
 import helper
 import model_dispatcher
 import sim_helper
+import state_manager as state
 
 
 
@@ -22,55 +25,63 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
     batch_number = 0
     docs = []   
     zero_treshold = 0
-    vectors2_pre, vectors2_curr, vectors2_post = [], [], []
+    vectors2_pre, vectors2_curr, vectors2_post = [], [], [] 
 
     logging.debug(f"Aligning started.")
-    for lines_from_batch, lines_to_pre_batch, lines_to_curr_batch, lines_to_post_batch, line_ids_from, line_ids_to in helper.get_batch_intersected_parts(lines_from, lines_to, batch_size, window_size):
-        batch_number += 1
+    try:
+        for lines_from_batch, lines_to_pre_batch, lines_to_curr_batch, lines_to_post_batch, line_ids_from, line_ids_to in helper.get_batch_intersected_parts(lines_from, lines_to, batch_size, window_size):
+            batch_number += 1
             
-        #test version restriction
-        if batch_number > 2:
-            break
+            #test version restriction
+            if batch_number > config.TEST_RESTRICTION_MAX_BATCHES or not state.processing_state_exist(processing_from_to):
+                logging.debug(f"[test batch restriction]. Finishing and removing state. {processing_from_to}")
+                state.destroy_processing_state(processing_from_to)
+                break
+            
+            state.set_processing_state(processing_from_to, (con.PROC_IN_PROGRESS, config.TEST_RESTRICTION_MAX_BATCHES, batch_number))
 
-        print("batch:", batch_number)
-        logging.debug(f"Batch {batch_number}. Calculating vectors.")
+            print("batch:", batch_number)
+            logging.debug(f"Batch {batch_number}. Calculating vectors.")
+            
+            if len(vectors2_post)>0:
+                vectors2_pre = vectors2_post[:]
+            else:
+                vectors2_pre = get_line_vectors(lines_to_pre_batch)        
+            vectors2_curr, vectors2_post = get_line_vectors(lines_to_curr_batch), get_line_vectors(lines_to_post_batch)
+
+            vectors1 = [*get_line_vectors(lines_from_batch)]
+            vectors2 = [*vectors2_pre, *vectors2_curr, *vectors2_post]
+            logging.debug(f"Batch {batch_number}. Vectors calculated. len(vectors1)={len(vectors1)}. len(vectors2)={len(vectors2)}.")
         
-        if len(vectors2_post)>0:
-            vectors2_pre = vectors2_post[:]
-        else:
-            vectors2_pre = get_line_vectors(lines_to_pre_batch)        
-        vectors2_curr, vectors2_post = get_line_vectors(lines_to_curr_batch), get_line_vectors(lines_to_post_batch)
+            logging.debug(f"Calculating similarity matrix.")
+            sim_matrix = get_sim_matrix(vectors1, vectors2)
+            sim_matrix_best = sim_helper.best_per_row(sim_matrix)
 
-        vectors1 = [*get_line_vectors(lines_from_batch)]
-        vectors2 = [*vectors2_pre, *vectors2_curr, *vectors2_post]
-        logging.debug(f"Batch {batch_number}. Vectors calculated. len(vectors1)={len(vectors1)}. len(vectors2)={len(vectors2)}.")
-    
-        logging.debug(f"Calculating similarity matrix.")
-        sim_matrix = get_sim_matrix(vectors1, vectors2)
-        sim_matrix_best = sim_helper.best_per_row(sim_matrix)
+            sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=2)
+        
+            res_img_batch = "{0}_{1}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
+            res_img_batch_best = "{0}_{1}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
 
-        sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=2)
-    
-        res_img_batch = "{0}_{1}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
-        res_img_batch_best = "{0}_{1}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
+            plt.figure(figsize=(12,6))
+            sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)
+            plt.savefig(res_img_batch, bbox_inches="tight")
 
-        plt.figure(figsize=(12,6))
-        sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)
-        plt.savefig(res_img_batch, bbox_inches="tight")
+            plt.figure(figsize=(12,6))
+            sns.heatmap(sim_matrix_best, cmap="Greens", vmin=zero_treshold, cbar=False)
+            plt.xlabel(lang_name_to, fontsize=30, labelpad=-40)
+            plt.ylabel(lang_name_from, fontsize=30, labelpad=-40)
+            plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
+            plt.savefig(res_img_batch_best, bbox_inches="tight")
 
-        plt.figure(figsize=(12,6))
-        sns.heatmap(sim_matrix_best, cmap="Greens", vmin=zero_treshold, cbar=False)
-        plt.xlabel(lang_name_to, fontsize=30, labelpad=-40)
-        plt.ylabel(lang_name_from, fontsize=30, labelpad=-40)
-        plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
-        plt.savefig(res_img_batch_best, bbox_inches="tight")
+            logging.debug(f"Processing lines.")
+            doc = get_processed(lines_from_batch, lines_to_pre_batch + lines_to_curr_batch + lines_to_post_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
+            docs.append(doc)
 
-        logging.debug(f"Processing lines.")
-        doc = get_processed(lines_from_batch, lines_to_pre_batch + lines_to_curr_batch + lines_to_post_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
-        docs.append(doc)
-
-    logging.debug(f"Dumping to file {processing_from_to}.")
-    pickle.dump(docs, open(processing_from_to, "wb"))
+        logging.debug(f"Dumping to file {processing_from_to}.")
+        pickle.dump(docs, open(processing_from_to, "wb"))
+    except:
+        logging.error(f"Error during alignment: {sys.exc_info()[0]}.")
+        state.set_processing_state(processing_from_to, (con.PROC_ERROR, config.TEST_RESTRICTION_MAX_BATCHES, batch_number))
 
 def get_line_vectors(lines):
     return model_dispatcher.models[config.MODEL].embed(lines)

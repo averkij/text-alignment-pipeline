@@ -2,11 +2,22 @@ import os
 import constants as con
 import pathlib
 import pickle
+import glob
+import state_manager as state
 
-def get_files_list(folder):
+def get_files_list(folder, mask="*.txt"):
+    return [os.path.basename(x) for x in get_files_list_with_path(folder, mask)]
+
+def get_files_list_with_path(folder, mask="*.txt"):
     if not os.path.isdir(folder):
         return []
-    return os.listdir(folder)
+    return glob.glob("{0}/{1}".format(folder,mask))
+
+def get_processing_list_with_state(folder):
+    res = []
+    for file in get_files_list_with_path(folder):
+        res.append({"name": os.path.basename(file), "state": state.get_processing_state(file, (con.PROC_DONE,0,0))})
+    return res
 
 def create_folders(username, lang):
     if username and lang:

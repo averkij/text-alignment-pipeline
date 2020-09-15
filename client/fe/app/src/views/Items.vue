@@ -80,12 +80,12 @@
         <v-list class="pa-0">
           <v-list-item-group mandatory color="gray">
             <v-list-item v-for="(item, i) in itemsProcessing[langCodeFrom]" :key="i"
-              @change="selectProcessing(langCodeFrom, item, i)">
+              @change="selectProcessing(langCodeFrom, item.name, i)">
               <v-list-item-icon>
                 <v-icon>mdi-arrow-right</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title v-text="item"></v-list-item-title>
+                <v-list-item-title v-text="item.name"></v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -95,11 +95,11 @@
       <div class="text-h5 mt-10 font-weight-bold">Visualization</div>
 
       <v-row class="mt-6">
-        <v-col v-for="(ind, i) in [1,2]" :key=i cols="12" sm="3">
+        <v-col v-for="(ind, i) in [1,2,3]" :key=i cols="12" sm="3">
           <v-card>
             <div class="grey lighten-5">
               <v-card-title>
-                batch {{i}}
+                batch {{i+1}}
                 <v-spacer></v-spacer>
                 <v-chip color="grey" text-color="black" small outlined>
                   {{DEFAULT_BATCHSIZE * i + 1}} — {{DEFAULT_BATCHSIZE * (i + 1)}}
@@ -342,6 +342,14 @@
             langCodeTo: this.langCodeTo
           })
           .then(() => {
+            this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
+              username: this.$route.params.username,
+              langCodeFrom: this.langCodeFrom,
+              langCodeTo: this.langCodeTo
+            }).then(() => {
+              console.log(this.itemsProcessing)
+              this.selectFirstProcessingDocument(this.langCodeFrom);
+            });
             this.$store.dispatch(GET_PROCESSING, {
               username: this.$route.params.username,
               langCodeFrom: this.langCodeFrom,
@@ -349,14 +357,7 @@
               fileId: this.selectedIds[this.langCodeFrom],
               linesCount: 10,
               page: 1
-            });
-            this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
-              username: this.$route.params.username,
-              langCodeFrom: this.langCodeFrom,
-              langCodeTo: this.langCodeTo
-            }).then(() => {
-              this.selectFirstProcessingDocument(this.langCodeFrom);
-            });
+            });            
             this.isLoading.align = false;
           });
       },
@@ -380,7 +381,7 @@
       },
       selectFirstProcessingDocument(langCode) {
         if (this.itemsProcessingNotEmpty(langCode)) {
-          this.selectProcessing(langCode, this.itemsProcessing[langCode][0], 0);
+          this.selectProcessing(langCode, this.itemsProcessing[langCode][0].name, 0);
         }
       },
       collapseEditItems() {

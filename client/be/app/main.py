@@ -2,18 +2,21 @@ import datetime
 import logging
 import os
 import pickle
-import tempfile
 import sys
+import tempfile
+from multiprocessing import Process
 
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
 
 import aligner
+import config
 import constants as con
 import editor
 import helper
 import output
 import splitter
+import state_manager as state
 from aligner import DocLine
 
 #from mlflow import log_metric
@@ -23,7 +26,9 @@ from aligner import DocLine
 app = Flask(__name__)
 CORS(app)
 
-logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+# logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.getLogger('matplotlib.font_manager').disabled = True
 
 @app.route('/api/hello')
 def start():
@@ -121,7 +126,12 @@ def align(username, lang_from, lang_to, id_from, id_to):
         lines_to = input_to.readlines()
         #lines_ru_proxy = input_proxy.readlines()
 
-    aligner.serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_from, lang_to)
+    #TODO refactor to queues (!)
+    state.init_processing(processing_from_to, (con.PROC_INIT, config.TEST_RESTRICTION_MAX_BATCHES, 0))   
+    alignment = Process(target=aligner.serialize_docs, args=(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_from, lang_to), daemon=True)
+    alignment.start()
+
+    #aligner.serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_from, lang_to)
     return con.EMPTY_LINES
 
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/<int:count>/<int:page>", methods=["GET"])
@@ -216,7 +226,7 @@ def processing_list(username, lang_from, lang_to):
         return con.EMPTY_FILES
     files = {
         "items": {
-            lang_from: helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
+            lang_from: helper.get_processing_list_with_state(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
         }
     }
     return files

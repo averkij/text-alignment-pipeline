@@ -1,4 +1,6 @@
 .vscode/settings.json
+client/be/app/data/*
+client/be/app/static/img/*
 client/fe/node_modules
 client/be/static/er5/done/ru/kryzhovnik_ru.txt
 client/be/static/er5/done/zh/kryzhovnik_zh.txt

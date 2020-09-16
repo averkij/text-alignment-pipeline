@@ -214,6 +214,9 @@
     DOWNLOAD_SPLITTED,
     DOWNLOAD_PROCESSING
   } from "@/store/actions.type";
+  import {
+    SET_ITEMS_PROCESSING,
+  } from "@/store/mutations.type";
 
   export default {
     data() {
@@ -373,6 +376,7 @@
       },
       align() {
         this.isLoading.align = true;
+        this.initProcessingDocument();
         this.$store
           .dispatch(ALIGN_SPLITTED, {
             username: this.$route.params.username,
@@ -394,6 +398,33 @@
 
             this.fetchItemsProvessingTimer();
           });
+      },
+      initProcessingDocument() {        
+        let processingItems = JSON.parse(JSON.stringify(this.itemsProcessing[this.langCodeFrom]));
+        let currentIndex = -1;
+        if (this.itemsProcessingNotEmpty(this.langCodeFrom)){
+          currentIndex = processingItems.findIndex(x => x.name==this.selected[this.langCodeFrom]);
+        }
+        if (currentIndex >= 0) {
+          processingItems.splice(currentIndex, 1,
+          {
+              "imgs":[],
+              "name": this.selected[this.langCodeFrom],
+              "state": [0,3,0]
+          });
+        } else {
+           processingItems.push(
+            {
+              "imgs":[],
+              "name": this.selected[this.langCodeFrom],
+              "state": [0,3,0]
+            });
+        }
+        this.$store
+          .commit(SET_ITEMS_PROCESSING, {
+          items: processingItems,
+          langCode: this.langCodeFrom
+        });
       },
       //helpers
       itemsNotEmpty(langCode) {

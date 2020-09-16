@@ -25,11 +25,10 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
     batch_number = 0
     docs = []   
     zero_treshold = 0
-    vectors2_pre, vectors2_curr, vectors2_post = [], [], [] 
 
     logging.debug(f"Aligning started.")
     try:
-        for lines_from_batch, lines_to_pre_batch, lines_to_curr_batch, lines_to_post_batch, line_ids_from, line_ids_to in helper.get_batch_intersected_parts(lines_from, lines_to, batch_size, window_size):
+        for lines_from_batch, lines_to_batch, line_ids_from, line_ids_to in helper.get_batch_intersected(lines_from, lines_to, batch_size, window_size):
             batch_number += 1
             
             #test version restriction
@@ -42,15 +41,9 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
 
             print("batch:", batch_number)
             logging.debug(f"Batch {batch_number}. Calculating vectors.")
-            
-            if len(vectors2_post)>0:
-                vectors2_pre = vectors2_post[:]
-            else:
-                vectors2_pre = get_line_vectors(lines_to_pre_batch)        
-            vectors2_curr, vectors2_post = get_line_vectors(lines_to_curr_batch), get_line_vectors(lines_to_post_batch)
 
             vectors1 = [*get_line_vectors(lines_from_batch)]
-            vectors2 = [*vectors2_pre, *vectors2_curr, *vectors2_post]
+            vectors2 = [*get_line_vectors(lines_to_batch)]
             logging.debug(f"Batch {batch_number}. Vectors calculated. len(vectors1)={len(vectors1)}. len(vectors2)={len(vectors2)}.")
         
             logging.debug(f"Calculating similarity matrix.")
@@ -74,7 +67,7 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
             plt.savefig(res_img_batch_best, bbox_inches="tight")
 
             logging.debug(f"Processing lines.")
-            doc = get_processed(lines_from_batch, lines_to_pre_batch + lines_to_curr_batch + lines_to_post_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
+            doc = get_processed(lines_from_batch, lines_to_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
             docs.append(doc)
 
         logging.debug(f"Dumping to file {processing_from_to}.")
@@ -82,8 +75,8 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
 
         logging.debug(f"Alignment is finished. Removing state. {processing_from_to}")
         state.destroy_processing_state(processing_from_to)
-    except:
-        logging.error(f"Error during alignment: {sys.exc_info()[0]}.")
+    except Exception as e:
+        logging.error(e, exc_info=True)
         state.set_processing_state(processing_from_to, (con.PROC_ERROR, config.TEST_RESTRICTION_MAX_BATCHES, batch_number))
 
 def get_line_vectors(lines):
@@ -92,7 +85,6 @@ def get_line_vectors(lines):
 def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, threshold, batch_number, batch_size, candidates_count=50):
     doc = {}
     best_sim_ind = sim_matrix_best.argmax(1)
-    best_variants = np.argpartition(sim_matrix, axis=1, kth=-candidates_count)
     for line_from_id in range(sim_matrix.shape[0]):
         line_id_from_abs = line_ids_from[line_from_id]
         line = DocLine(line_id_from_abs, lines_from[line_from_id])
@@ -100,7 +92,8 @@ def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, 
             "trn": (DocLine(0,''), 0.0 ,False),     #translation (best from candidates)
             "cnd": []      #all candidates
             }
-        candidates = [(line_to_id, sim_matrix[line_from_id, line_to_id]) for line_to_id in best_variants[line_from_id] if sim_matrix[line_from_id, line_to_id] > threshold]
+
+        candidates = [(line_to_id, sim_matrix[line_from_id, line_to_id]) for line_to_id in range(sim_matrix.shape[1]) if sim_matrix[line_from_id, line_to_id] > threshold]
         doc[line]["trn"] = (DocLine(line_ids_to[best_sim_ind[line_from_id]], lines_to[best_sim_ind[line_from_id]]), sim_matrix[line_from_id, best_sim_ind[line_from_id]], False)
         doc[line]["cnd"] = [
                     #text with line_id

@@ -235,3 +235,7 @@ client/be/app/static/img/a/chekhov_6_ru.txt.png
 client/be/app/static/img/b/kameraden_ru.txt.best.png
 client/be/app/static/img/b/kameraden_ru.txt.png
 client/be/app/__pycache__/state_manager.cpython-38.pyc
+client/be/app/__pycache__/editor.cpython-37.pyc
+client/be/app/__pycache__/output.cpython-37.pyc
+client/be/app/__pycache__/output_templates.cpython-37.pyc
+client/be/app/__pycache__/state_manager.cpython-37.pyc

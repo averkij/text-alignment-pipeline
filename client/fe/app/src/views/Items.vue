@@ -83,7 +83,7 @@
         <v-list class="pa-0">
           <v-list-item-group mandatory color="gray">
             <v-list-item v-for="(item, i) in itemsProcessing[langCodeFrom]" :key="i"
-              @change="selectProcessing(langCodeFrom, item, i)">
+              @change="selectProcessing(item, i)">
               <v-list-item-icon>
                 <v-icon v-if="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" color="blue">
                   mdi-clock-outline</v-icon>
@@ -131,7 +131,15 @@
 
       <div class="text-h5 mt-10 font-weight-bold">Edit</div>
 
-      <v-alert v-if="!processing || !processing.items || processing.items.length == 0" type="info" border="left" colored-border color="info" class="mt-6" elevation="2" >
+      <div class="text-center" v-if="isLoading.processing" >
+        <v-progress-circular
+          indeterminate
+          color="green"></v-progress-circular>
+      </div>      
+      <v-alert v-else-if="selectedProcessing && selectedProcessing.state[0]==PROC_ERROR" type="error" border="left" colored-border color="error" class="mt-6" elevation="2" >
+        Error occured. Please, write to @averkij.
+      </v-alert>
+      <v-alert v-else-if="!processing || !processing.items || processing.items.length == 0" type="info" border="left" colored-border color="info" class="mt-6" elevation="2" >
         Please, wait. Alignment is in progress.
       </v-alert>
       <v-card v-else class="mt-6">
@@ -247,7 +255,8 @@
             de: false,
             en: false
           },
-          align: false
+          align: false,
+          processing: false
         },
         triggerCollapseEditItem: false,
         userAlignInProgress: false
@@ -331,19 +340,20 @@
           page: 1
         });
       },
-      selectProcessing(langCode, item, fileId) {
-        if (langCode == this.langCodeFrom) {
-          this.selectedProcessing = item;
-          this.selectedProcessingId = fileId;
-          this.$store.dispatch(GET_PROCESSING, {
-            username: this.$route.params.username,
-            langCodeFrom: this.langCodeFrom,
-            langCodeTo: this.langCodeTo,
-            fileId,
-            linesCount: 10,
-            page: 1
-          });
-        }
+      selectProcessing(item, fileId) {
+        this.isLoading.processing = true;
+        this.selectedProcessing = item;
+        this.selectedProcessingId = fileId;
+        this.$store.dispatch(GET_PROCESSING, {
+          username: this.$route.params.username,
+          langCodeFrom: this.langCodeFrom,
+          langCodeTo: this.langCodeTo,
+          fileId,
+          linesCount: 10,
+          page: 1
+        }).then(() => {
+          this.isLoading.processing = false;
+        });
       },
       editProcessing(line_id, text, text_type, callback) {
         this.$store
@@ -379,7 +389,7 @@
               langCodeFrom: this.langCodeFrom,
               langCodeTo: this.langCodeTo
             }).then(() => {
-              this.selectFirstProcessingDocument(this.langCodeFrom);
+              this.selectFirstProcessingDocument();
             });
 
             this.fetchItemsProvessingTimer();
@@ -403,9 +413,9 @@
           this.selectAndLoadPreview(langCode, this.items[langCode][0], 0);
         }
       },
-      selectFirstProcessingDocument(langCode) {
-        if (this.itemsProcessingNotEmpty(langCode)) {
-          this.selectProcessing(langCode, this.itemsProcessing[langCode][0], 0);
+      selectFirstProcessingDocument() {
+        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {
+          this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0);
         }
       },
       collapseEditItems() {
@@ -424,9 +434,9 @@
               }
               else {
                 this.userAlignInProgress = false;
-                this.selectFirstProcessingDocument(this.langCodeFrom);
+                this.selectFirstProcessingDocument();
               }
-              this.selectProcessing(this.langCodeFrom, this.itemsProcessing[this.langCodeFrom][0], 0)
+              this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0)
             });
         }, 5000)
       }
@@ -453,7 +463,7 @@
           this.userAlignInProgress = true;
           this.fetchItemsProvessingTimer();
         }
-        this.selectFirstProcessingDocument(this.langCodeFrom);
+        this.selectFirstProcessingDocument();
       });
     },
     computed: {

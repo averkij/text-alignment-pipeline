@@ -110,6 +110,12 @@ export const ItemsService = {
       `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/${params.linesCount}/${params.page}`
     );
   },
+  stopAlignment(params) {
+    return ApiService.post(
+      "items",
+      `${params.username}/align/stop/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}`
+    );
+  },
   alignSplitted(params) {
     return ApiService.get(
       "items",

@@ -37,6 +37,16 @@ def create_folders(username, lang):
 def check_folder(folder):
     pathlib.Path(folder).mkdir(parents=True, exist_ok=True) 
 
+def check_file(folder, files, file_id):
+    if len(files) < file_id+1:
+        logging.debug(f"[{username}]. Document {lang} with id={file_id} not found. folder: {folder}")
+        return False
+    processing_file = os.path.join(folder, files[file_id])
+    if not os.path.isfile(processing_file):
+        logging.debug(f"[{username}]. Document {processing_file} not found.")
+        return False
+    return True
+
 def get_batch(iter1, iter2, iter3, n):
     l1 = len(iter1)
     l3 = len(iter3)

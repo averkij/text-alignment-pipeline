@@ -136,18 +136,16 @@ def align(username, lang_from, lang_to, id_from, id_to):
 
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/<int:count>/<int:page>", methods=["GET"])
 def get_processing(username, lang_from, lang_to, file_id, count, page):
-    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
-    if len(files) < file_id+1:
-        return con.EMPTY_SIMS
-    processing_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
-    logging.debug(f"[{username}]. Get processing file. {processing_from_to}.")
-    if not os.path.isfile(processing_from_to):
+    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
+    files = helper.get_files_list(processing_folder)
+    processing_file = os.path.join(processing_folder, files[file_id])
+    if not helper.check_file(processing_folder, files, file_id):
         abort(404)
         
     res = []
     lines_count = 0    
     shift = (page-1)*count
-    for line_from, translation, candidates in helper.read_processing(processing_from_to):
+    for line_from, translation, candidates in helper.read_processing(processing_file):
         lines_count += 1
         if count>0 and (lines_count<=shift or lines_count>shift+count):
             continue
@@ -170,17 +168,19 @@ def get_processing(username, lang_from, lang_to, file_id, count, page):
 
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/edit", methods=["POST"])
 def edit_processing(username, lang_from, lang_to, file_id):
-    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
-    if len(files) < file_id+1:
-        return con.EMPTY_SIMS
-    processing_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
-    logging.debug(f"[{username}]. Editing file. {processing_from_to}.")
-    if not os.path.isfile(processing_from_to):
+    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
+    files = helper.get_files_list(processing_folder)
+    processing_file = os.path.join(processing_folder, files[file_id])
+    if not helper.check_file(processing_folder, files, file_id):
+        abort(404)
+
+    logging.debug(f"[{username}]. Editing file. {processing_file}.")
+    if not os.path.isfile(processing_file):
         abort(404)
     line_id, line_id_is_int = helper.tryParseInt(request.form.get("line_id", -1))
     text = request.form.get("text", '')
     if line_id_is_int and line_id >= 0:
-        editor.edit_doc(processing_from_to, line_id, text)
+        editor.edit_doc(processing_file, line_id, text)
     else:
         abort(400)
     return ('', 200)
@@ -188,16 +188,13 @@ def edit_processing(username, lang_from, lang_to, file_id):
 @app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<file_format>", methods=["GET"])
 def download_processsing(username, lang_from, lang_to, file_id, lang, file_format):
     logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
-    files = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to))
-    if len(files) < file_id+1:
-        logging.debug(f"[{username}]. Document {lang} with id={file_id} not found.")
-        return con.EMPTY_SIMS
-    processing_file = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to, files[file_id])
-    if not os.path.isfile(processing_file):
-        logging.debug(f"[{username}]. Document {processing_file} not found.")
+    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
+    files = helper.get_files_list(processing_folder)
+    processing_file = os.path.join(processing_folder, files[file_id])
+    if not helper.check_file(processing_folder, files, file_id):
         abort(404)
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")    
     download_folder = os.path.join(con.UPLOAD_FOLDER, username, con.DOWNLOAD_FOLDER)
     helper.check_folder(download_folder)
     download_file = os.path.join(download_folder, "{0}_{1}_{2}.{3}".format(os.path.splitext(files[file_id])[0], lang, timestamp, file_format))
@@ -230,6 +227,18 @@ def processing_list(username, lang_from, lang_to):
         }
     }
     return files
+
+@app.route("/items/<username>/align/stop/<lang_from>/<lang_to>/<int:file_id>", methods=["POST"])
+def stop_alignment(username, lang_from, lang_to, file_id):
+    logging.debug(f"[{username}]. Stopping alignment for {lang_from}-{lang_to} {file_id}.")
+    processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
+    files = helper.get_files_list(processing_folder)
+    processing_file = os.path.join(processing_folder, files[file_id])
+    if not helper.check_file(processing_folder, files, file_id):
+        abort(404)
+    state.destroy_processing_state(processing_file)
+    return ('', 200)
+
 
 @app.route("/debug/items", methods=["GET"])
 def show_items_tree():

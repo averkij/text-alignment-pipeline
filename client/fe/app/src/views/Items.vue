@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="d-flex">
-      <div class="text-h3 mt-5 align-self-start">🤗</div>
-      <div class="text-h3 mt-5 pl-3">
+      <div class="text-h3 mt-5 align-self-start"><v-img src="@/assets/logo.png" width="50px" height="50px"/></div>
+      <div class="text-h3 mt-5 ml-3">
         Hello, <span class="text-capitalize">{{ username }}!</span>
-        <div class="text-subtitle-1 mt-2 pl-1">Let's make it parallel.</div>
+        <div class="text-subtitle-1 mt-2 pl-1">Let's make it parallel</div>
         <!-- <div class="text-subtitle-2 text-right">— Somebody</div> -->
       </div>
     </div>
@@ -59,10 +59,10 @@
       </v-col>
     </v-row>
     <v-btn v-if="!userAlignInProgress" v-show="selected[langCodeFrom] && selected[langCodeTo]" class="success mt-6"
-      :loading="isLoading.align" :disabled="isLoading.align" @click="align()">
+      :loading="isLoading.align || isLoading.alignStopping" :disabled="isLoading.align || isLoading.alignStopping" @click="align()">
       Align documents
     </v-btn>
-    <v-btn v-else v-show="selected[langCodeFrom] && selected[langCodeTo]" class="error mt-6" @click="align()">
+    <v-btn v-else v-show="selected[langCodeFrom] && selected[langCodeTo]" class="error mt-6" @click="stopAlignment()">
       Stop alignment
     </v-btn>
 
@@ -109,7 +109,7 @@
           <v-card>
             <div class="grey lighten-5">
               <v-card-title>
-                batch {{i+1}}
+                часть {{i+1}}
                 <v-spacer></v-spacer>
                 <v-chip color="grey" text-color="black" small outlined>
                   {{DEFAULT_BATCHSIZE * i + 1}} — {{DEFAULT_BATCHSIZE * (i + 1)}}
@@ -209,6 +209,7 @@
     UPLOAD_FILES,
     GET_SPLITTED,
     GET_PROCESSING,
+    STOP_ALIGNMENT,
     EDIT_PROCESSING,
     ALIGN_SPLITTED,
     DOWNLOAD_SPLITTED,
@@ -245,6 +246,8 @@
         },
         selectedProcessing: null,
         selectedProcessingId: null,
+        currentlyProcessing: null,
+        currentlyProcessingId: null,
         selectedIds: {
           ru: null,
           zh: null,
@@ -377,6 +380,7 @@
       align() {
         this.isLoading.align = true;
         this.initProcessingDocument();
+        this.currentlyProcessing = this.selected[this.langCodeFrom]
         this.$store
           .dispatch(ALIGN_SPLITTED, {
             username: this.$route.params.username,
@@ -393,11 +397,21 @@
               langCodeFrom: this.langCodeFrom,
               langCodeTo: this.langCodeTo
             }).then(() => {
-              this.selectFirstProcessingDocument();
+              this.selectCurrentlyProcessingDocument();
             });
 
             this.fetchItemsProvessingTimer();
           });
+      },
+      stopAlignment() {
+        this.userAlignInProgress = false;
+        this.isLoading.alignStopping = true;
+        this.$store.dispatch(STOP_ALIGNMENT, {
+          username: this.$route.params.username,
+          langCodeFrom: this.langCodeFrom,
+          langCodeTo: this.langCodeTo,
+          fileId: this.currentlyProcessingId
+        });
       },
       initProcessingDocument() {        
         let processingItems = JSON.parse(JSON.stringify(this.itemsProcessing[this.langCodeFrom]));
@@ -445,8 +459,17 @@
         }
       },
       selectFirstProcessingDocument() {
-        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {
+        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {          
           this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0);
+        }
+      },
+      selectCurrentlyProcessingDocument() {
+        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {
+          this.currentlyProcessingId = this.itemsProcessing[this.langCodeFrom].findIndex(x => x.name==this.currentlyProcessing);
+          console.log(this.currentlyProcessing, this.currentlyProcessingId)
+          if (this.currentlyProcessingId >=0) {
+            this.selectProcessing(this.itemsProcessing[this.langCodeFrom][this.currentlyProcessingId], this.currentlyProcessingId);
+          }
         }
       },
       collapseEditItems() {
@@ -464,8 +487,9 @@
                 this.fetchItemsProvessingTimer();
               }
               else {
-                this.userAlignInProgress = false;
-                this.selectFirstProcessingDocument();
+                this.userAlignInProgress = false;                
+                this.isLoading.alignStopping = false;
+                this.selectCurrentlyProcessingDocument();
               }
               this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0)
             });

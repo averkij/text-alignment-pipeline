@@ -11,6 +11,7 @@ import {
   GET_SPLITTED,
   GET_PROCESSING,
   EDIT_PROCESSING,
+  STOP_ALIGNMENT,
   ALIGN_SPLITTED
 } from "./actions.type";
 
@@ -120,6 +121,10 @@ export const actions = {
         console.log(`Didn't find processing document.`);
       }
     );
+    return;
+  },
+  async [STOP_ALIGNMENT](context, params) {
+    await ItemsService.stopAlignment(params);
     return;
   },
   // params {fileId, username}

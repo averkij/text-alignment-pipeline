@@ -52,8 +52,8 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
 
             sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=2)
         
-            res_img_batch = "{0}_{1}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
-            res_img_batch_best = "{0}_{1}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
+            res_img_batch = "{0}_{1:04d}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
+            res_img_batch_best = "{0}_{1:04d}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
 
             plt.figure(figsize=(12,6))
             sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)

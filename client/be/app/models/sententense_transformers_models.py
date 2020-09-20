@@ -1,5 +1,6 @@
 import os
 import pickle
+from helper import lazy_property
 
 from sentence_transformers import SentenceTransformer
 import torch
@@ -7,21 +8,44 @@ import torch
 # torch.backends.quantized.engine = 'qnnpack'
 
 SENTENCE_TRANSFORMERS_MODEL_PATH = './models/sentence_transformers.bin'
+SENTENCE_TRANSFORMERS_XLM_100_MODEL_PATH = './models/sentence_transformers_xlm_100.bin'
 
-class SentenceTransformersModel():
-    def __init__(self):        
+class SentenceTransformersModel(): 
+    @lazy_property
+    def model(self):
         if os.path.isfile(SENTENCE_TRANSFORMERS_MODEL_PATH):
-            print("Loading saved sentence_transformers model.")
+            print("Loading saved distiluse-base-multilingual-cased model.")
             # self.model = torch.quantization.quantize_dynamic(pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb')), {torch.nn.Linear}, dtype=torch.qint8)
-            self.model = pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb'))
+            _model = pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb'))
         else:
-            print("Loading sentence_transformers model from Internet.")
-            self.model = SentenceTransformer('distiluse-base-multilingual-cased')      
+            print("Loading distiluse-base-multilingual-cased model from Internet.")
+            _model = SentenceTransformer('distiluse-base-multilingual-cased')
+        return _model
+             
+    def embed(self, lines):
+        vecs = self.model.encode(lines)
+        return vecs
+
+class SentenceTransformersModelXlm100(): 
+    @lazy_property
+    def model(self):
+        if os.path.isfile(SENTENCE_TRANSFORMERS_XLM_100_MODEL_PATH):
+            print("Loading saved xlm-r-100langs-bert-base-nli-mean-tokens model.")
+            # self.model = torch.quantization.quantize_dynamic(pickle.load(open(SENTENCE_TRANSFORMERS_MODEL_PATH, 'rb')), {torch.nn.Linear}, dtype=torch.qint8)
+            _model = pickle.load(open(SENTENCE_TRANSFORMERS_XLM_100_MODEL_PATH, 'rb'))
+        else:
+            print("Loading xlm-r-100langs-bert-base-nli-mean-tokens model from Internet.")
+            _model = SentenceTransformer('xlm-r-100langs-bert-base-nli-mean-tokens')
+        return _model
+             
     def embed(self, lines):
         vecs = self.model.encode(lines)
         return vecs
 
 sentence_transformers_model = SentenceTransformersModel()
+sentence_transformers_model_xlm_100 = SentenceTransformersModelXlm100()
+
+
 
 ###########model saving
 # model = SentenceTransformer('distiluse-base-multilingual-cased')

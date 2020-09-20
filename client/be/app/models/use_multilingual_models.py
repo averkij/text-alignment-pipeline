@@ -1,5 +1,6 @@
 import os
 import pickle
+from helper import lazy_property
 
 import tensorflow.compat.v2 as tf
 import tensorflow_hub as hub
@@ -9,13 +10,15 @@ from tensorflow_text import SentencepieceTokenizer
 USE_MULTILINGUAL_V3_MODEL_PATH = './models/use_multilingual_models_saved/saved_model.pb'
 
 class UseMultilingualV3():
-    def __init__(self):        
+    @lazy_property
+    def model(self):        
         if os.path.isfile(USE_MULTILINGUAL_V3_MODEL_PATH):
             print("Loading saved use_multilingual_v3 model.")
-            self.model = tf.saved_model.load("./models/use_multilingual_models_saved")
+            _model = tf.saved_model.load("./models/use_multilingual_models_saved")
         else:
             print("Loading use_multilingual_v3 model from tf_hub.")
-            self.model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual/3')
+            _model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual/3')
+        return _model
             
     def embed(self, lines):
         vecs = self.model(lines).numpy()

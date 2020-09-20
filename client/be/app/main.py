@@ -9,6 +9,8 @@ from multiprocessing import Process
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
 import aligner
 import config
 import constants as con
@@ -17,11 +19,9 @@ import helper
 import output
 import splitter
 import state_manager as state
-from aligner import DocLine
+from aligner import DocLine 
 
 #from mlflow import log_metric
-
-
 
 app = Flask(__name__)
 CORS(app)

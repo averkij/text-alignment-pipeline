@@ -100,11 +100,11 @@ def splitted(username, lang, id, count, page):
 def align(username, lang_from, lang_to, id_from, id_to):
     files_from = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang_from))
     files_to = helper.get_files_list(os.path.join(con.UPLOAD_FOLDER,username, con.SPLITTED_FOLDER, lang_to))
+    logging.info(f"[{username}]. Aligning documents. {files_from[id_from]}, {files_to[id_to]}.")
     if len(files_from) < id_from+1 or len(files_to) < id_to+1:
-        logging.debug(f"[{username}]. Documents not found.")
+        logging.info(f"[{username}]. Documents not found.")
         return con.EMPTY_SIMS
     
-    logging.debug(f"[{username}]. Aligning documents. {files_from[id_from]}, {files_to[id_to]}.")
     processing_folder_from_to = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
     helper.check_folder(processing_folder_from_to)
     processing_from_to = os.path.join(processing_folder_from_to, files_from[id_from])
@@ -218,8 +218,7 @@ def processing_list(username, lang_from, lang_to):
         logging.debug(f"[{username}]. Wrong language code: {lang_from}-{lang_to}.")
         return con.EMPTY_FILES
     processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
-    if not os.path.isdir(processing_folder):
-        return con.EMPTY_FILES
+    helper.check_folder(processing_folder)    
     files = {
         "items": {
             lang_from: helper.get_processing_list_with_state(os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to), username)

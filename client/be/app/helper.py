@@ -28,7 +28,6 @@ def get_processing_list_with_state(folder, username):
 
 def clean_img_user_foler(username, file):
     imgs = get_files_list_with_path(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username), mask=f"{os.path.basename(file)}.best_*.png")
-    print(imgs)
     for img in imgs:
         if os.path.isfile(img):
             os.remove(img)

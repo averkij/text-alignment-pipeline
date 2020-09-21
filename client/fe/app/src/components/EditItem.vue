@@ -7,7 +7,19 @@
             {{ parseInt(item.line_id) + 1 }}
           </div>
           <v-divider class="d-table-cell" vertical></v-divider>
-          <div class="d-table-cell pa-2">{{ item.text }}</div>
+          <div class="d-table-cell fill-width color-transition" :class="[{blue: changed_from},{'lighten-5': changed_from}]">
+            <div class="pa-2">
+              <div class="d-table fill-height fill-width">
+                <div class="d-table-cell">
+                  <v-textarea class="ta-custom" auto-grow rows=1 text-wrap @click.native.stop @keyup.space.prevent
+                    @keydown.ctrl.83.prevent="$event.target.blur()"
+                    @blur="editProcessing($event, item.line_id, 'from')" @input="onTextChange('from')"
+                    :value="item.text">
+                  </v-textarea>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </v-col>
       <v-col class="text-left" cols="6">
@@ -29,13 +41,13 @@
           </div>
           <v-divider class="d-table-cell" vertical></v-divider>
           <div class="d-table-cell fill-width color-transition"
-            :class="[{blue: state==STATE_CHANGED},{'lighten-5': state==STATE_CHANGED}]">
+            :class="[{blue: changed_to},{'lighten-5': changed_to}]">
             <div class="pa-2">
               <div class="d-table fill-height fill-width">
                 <div class="d-table-cell">
                   <v-textarea class="ta-custom" auto-grow rows=1 text-wrap @click.native.stop @keyup.space.prevent
                     @keydown.ctrl.83.prevent="$event.target.blur()"
-                    @blur="editProcessing($event, item.line_id, 'text_from')" @input="onTextChange"
+                    @blur="editProcessing($event, item.line_id, 'to')" @input="onTextChange('to')"
                     :value="item.selected.text">
                   </v-textarea>
                 </div>
@@ -47,31 +59,31 @@
               </div>
             </div>
             <!-- <v-expand-transition> -->
-              <!-- <v-slide-y-transition group hide-on-leave> -->
-              <!-- <div v-show="showLines"> -->
-                <div v-for="(t,i) in linesTo" :key="i">
-                  <v-divider></v-divider>
-                  <div class="d-table fill-height fill-width">
-                    <div class="d-table-cell lighten-5 grey text-center font-weight-medium" style="min-width:45px">
-                      <div class="fill-height lighten-5 d-flex flex-column justify-space-between">
-                        <div class="pa-2 font-weight-medium">
-                          {{ t.line_id + 1 }}
-                        </div>
-                        <div class="text-caption pa-1">
-                          {{ t.sim | numeral("0.00") }}
-                        </div>
-                      </div>
+            <!-- <v-slide-y-transition group hide-on-leave> -->
+            <!-- <div v-show="showLines"> -->
+            <div v-for="(t,i) in linesTo" :key="i">
+              <v-divider></v-divider>
+              <div class="d-table fill-height fill-width">
+                <div class="d-table-cell lighten-5 grey text-center font-weight-medium" style="min-width:45px">
+                  <div class="fill-height lighten-5 d-flex flex-column justify-space-between">
+                    <div class="pa-2 font-weight-medium">
+                      {{ t.line_id + 1 }}
                     </div>
-                    <v-divider class="d-table-cell" vertical></v-divider>
-                    <div class="d-table-cell yellow pa-2 fill-width"
-                      :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">
-                      {{ t.text }}
+                    <div class="text-caption pa-1">
+                      {{ t.sim | numeral("0.00") }}
                     </div>
                   </div>
                 </div>
-              <!-- </div> -->
-              <!-- </v-expand-transition> -->
-              <!-- </v-slide-y-transition> -->
+                <v-divider class="d-table-cell" vertical></v-divider>
+                <div class="d-table-cell yellow pa-2 fill-width"
+                  :class="[{'lighten-4': t.line_id==item.selected.line_id}, {'lighten-5': t.line_id!=item.selected.line_id}]">
+                  {{ t.text }}
+                </div>
+              </div>
+            </div>
+            <!-- </div> -->
+            <!-- </v-expand-transition> -->
+            <!-- </v-slide-y-transition> -->
           </div>
         </div>
       </v-col>
@@ -95,7 +107,9 @@
       return {
         state: STATE_SAVED,
         STATE_CHANGED,
-        showLines: false
+        showLines: false,
+        changed_from: false,
+        changed_to: false
       }
     },
     methods: {
@@ -104,14 +118,21 @@
         this.$emit('editProcessing', line_id, event.target.value, text_type, (res) => {
           console.log("edit result:", res)
           if (res == RESULT_OK) {
-            this.state = STATE_SAVED
+            this.state = STATE_SAVED;
+            this.changed_from = false;
+            this.changed_to = false;
           } else {
             console.log("Edit error on save.")
           }
         })
       },
-      onTextChange() {
+      onTextChange(text_type) {
         this.state = STATE_CHANGED
+        if (text_type == "from") {
+          this.changed_from = true;
+        } else {
+          this.changed_to = true;
+        }
       },
       toggleShowLines() {
         this.showLines = !this.showLines;
@@ -128,7 +149,7 @@
         if (this.showLines) {
           return this.item.trans.filter(function (tr) {
             return tr.line_id < sid + wnd && tr.line_id > sid - wnd
-          }).sort((a,b) => (a.sim > b.sim) ? -1 : ((b.sim > a.sim) ? 1 : 0)).slice(0,5);
+          }).sort((a, b) => (a.sim > b.sim) ? -1 : ((b.sim > a.sim) ? 1 : 0)).slice(0, 5);
         }
         return [];
       }

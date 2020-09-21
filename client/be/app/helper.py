@@ -98,7 +98,7 @@ def read_processing(input_file):
     docs = pickle.load(open(input_file, "rb"))
     for doc in docs:
         for line in doc:
-            yield line, doc[line]["trn"], doc[line]["cnd"]
+            yield line, doc[line]["from"], doc[line]["to"], doc[line]["cnd"]
 
 def tryParseInt(value):
     try:

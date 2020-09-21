@@ -9,10 +9,10 @@ def edit_doc(edit_file, line_id, text, text_type=con.TYPE_TO):
     for doc in docs:
         if line_to_find in doc:
             if text_type == con.TYPE_TO:
-                tr = doc[line_to_find]["trn"]
-                doc[line_to_find]["trn"] = (DocLine(tr[0].line_id, text), tr[1], True) #IsEdited = True
+                tr = doc[line_to_find]["to"]
+                doc[line_to_find]["to"] = (DocLine(tr[0].line_id, text), tr[1], True) #IsEdited = True
             elif text_type == con.TYPE_FROM:
-                pass
+                doc[line_to_find]["from"] = (DocLine(line_id,text), True) #IsEdited = True
             else:
                 raise Exception("Incorrect text type.")
             break

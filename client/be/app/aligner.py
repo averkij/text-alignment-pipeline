@@ -45,16 +45,19 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
             vectors1 = [*get_line_vectors(lines_from_batch)]
             vectors2 = [*get_line_vectors(lines_to_batch)]
             logging.debug(f"Batch {batch_number}. Vectors calculated. len(vectors1)={len(vectors1)}. len(vectors2)={len(vectors2)}.")
-        
+
+            # Similarity matrix
             logging.debug(f"Calculating similarity matrix.")
             sim_matrix = get_sim_matrix(vectors1, vectors2)
             sim_matrix_best = sim_helper.best_per_row(sim_matrix)
 
+            # Heuristics
             sim_matrix_best = sim_helper.fix_inside_window(sim_matrix, sim_matrix_best, fixed_window_size=2)
         
             res_img_batch = "{0}_{1:04d}{2}".format(os.path.splitext(res_img)[0], batch_number, os.path.splitext(res_img)[1])
             res_img_batch_best = "{0}_{1:04d}{2}".format(os.path.splitext(res_img_best)[0], batch_number, os.path.splitext(res_img_best)[1])
 
+            # Visualization
             plt.figure(figsize=(12,6))
             sns.heatmap(sim_matrix, cmap="Greens", vmin=zero_treshold, cbar=False)
             plt.savefig(res_img_batch, bbox_inches="tight")
@@ -66,6 +69,7 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
             plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
             plt.savefig(res_img_batch_best, bbox_inches="tight")
 
+            # Actual work
             logging.debug(f"Processing lines.")
             doc = get_processed(lines_from_batch, lines_to_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
             docs.append(doc)
@@ -88,13 +92,11 @@ def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, 
     for line_from_id in range(sim_matrix.shape[0]):
         line_id_from_abs = line_ids_from[line_from_id]
         line = DocLine(line_id_from_abs, lines_from[line_from_id])
-        doc[line] = {
-            "trn": (DocLine(0,''), 0.0 ,False),     #translation (best from candidates)
-            "cnd": []      #all candidates
-            }
+        doc[line] = {}
 
         candidates = [(line_to_id, sim_matrix[line_from_id, line_to_id]) for line_to_id in range(sim_matrix.shape[1]) if sim_matrix[line_from_id, line_to_id] > threshold]
-        doc[line]["trn"] = (DocLine(line_ids_to[best_sim_ind[line_from_id]], lines_to[best_sim_ind[line_from_id]]), sim_matrix[line_from_id, best_sim_ind[line_from_id]], False)
+        doc[line]["from"] = (line, False) #("line", "isEdited")
+        doc[line]["to"] = (DocLine(line_ids_to[best_sim_ind[line_from_id]], lines_to[best_sim_ind[line_from_id]]), sim_matrix[line_from_id, best_sim_ind[line_from_id]], False)
         doc[line]["cnd"] = [
                     #text with line_id
                     (DocLine(

@@ -125,7 +125,8 @@ export const ItemsService = {
   editProcessing(params) {
     let form = new FormData();
     form.append("line_id", params.line_id);
-    form.append("text", params.text)
+    form.append("text", params.text);
+    form.append("text_type", params.text_type);
     return ApiService.post(
       "items",
       `${params.username}/processing/${params.langCodeFrom}/${params.langCodeTo}/${params.fileId}/edit`,

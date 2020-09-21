@@ -144,22 +144,23 @@ def get_processing(username, lang_from, lang_to, file_id, count, page):
     res = []
     lines_count = 0    
     shift = (page-1)*count
-    for line_from, translation, candidates in helper.read_processing(processing_file):
+    for line_from_orig, line_from, line_to, candidates in helper.read_processing(processing_file):
         lines_count += 1
         if count>0 and (lines_count<=shift or lines_count>shift+count):
             continue
         res.append({
-            "text": line_from.text,
-            "line_id": line_from.line_id,
+            "text": line_from[0].text.strip(),
+            "line_id": line_from[0].line_id,
+            "text_orig": line_from_orig.text.strip(),
             "trans": [{
-                "text": t[0].text, 
+                "text": t[0].text.strip(), 
                 "line_id":t[0].line_id, 
                 "sim": t[1]
                 } for t in candidates],
             "selected": {
-                "text": translation[0].text.strip(),
-                "line_id": translation[0].line_id,
-                "sim": translation[1]
+                "text": line_to[0].text.strip(),
+                "line_id": line_to[0].line_id,
+                "sim": line_to[1]
                 }})
     total_pages = (lines_count//count) + (1 if lines_count%count != 0 else 0)
     meta = {"page": page, "total_pages": total_pages}
@@ -172,14 +173,15 @@ def edit_processing(username, lang_from, lang_to, file_id):
     processing_file = os.path.join(processing_folder, files[file_id])
     if not helper.check_file(processing_folder, files, file_id):
         abort(404)
-
     logging.debug(f"[{username}]. Editing file. {processing_file}.")
     if not os.path.isfile(processing_file):
         abort(404)
+
     line_id, line_id_is_int = helper.tryParseInt(request.form.get("line_id", -1))
     text = request.form.get("text", '')
+    text_type = request.form.get("text_type", con.TYPE_TO)
     if line_id_is_int and line_id >= 0:
-        editor.edit_doc(processing_file, line_id, text)
+        editor.edit_doc(processing_file, line_id, text, text_type)
     else:
         abort(400)
     return ('', 200)
@@ -209,7 +211,7 @@ def download_processsing(username, lang_from, lang_to, file_id, lang, file_forma
     return send_file(download_file, as_attachment=True)  
 
 @app.route("/items/<username>/processing/list/<lang_from>/<lang_to>", methods=["GET"])
-def processing_list(username, lang_from, lang_to):
+def list_processing(username, lang_from, lang_to):
     
     #TODO add language validation
 
@@ -266,4 +268,4 @@ def route_frontend(path):
         return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=9000)
+    app.run(host="0.0.0.0", debug=True, port=80)

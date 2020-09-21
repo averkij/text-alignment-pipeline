@@ -9,13 +9,13 @@ from multiprocessing import Process
 from flask import Flask, abort, request, send_file
 from flask_cors import CORS
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+import helper
+helper.configure_logging()
 
 import aligner
 import config
 import constants as con
 import editor
-import helper
 import output
 import splitter
 import state_manager as state
@@ -25,10 +25,6 @@ from aligner import DocLine
 
 app = Flask(__name__)
 CORS(app)
-
-# logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-logging.getLogger('matplotlib.font_manager').disabled = True
 
 @app.route('/api/hello')
 def start():
@@ -117,7 +113,10 @@ def align(username, lang_from, lang_to, id_from, id_to):
     res_img_best = os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username, f"{files_from[id_from]}.best.png")
     splitted_from = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang_from, files_from[id_from])
     splitted_to = os.path.join(con.UPLOAD_FOLDER, username, con.SPLITTED_FOLDER, lang_to, files_to[id_to])
-   
+    
+    logging.info(f"[{username}]. Cleaning images.")
+    helper.clean_img_user_foler(username, files_from[id_from])
+    
     logging.debug(f"[{username}]. Preparing for alignment. {splitted_from}, {splitted_to}.")
     with open(splitted_from, mode="r", encoding="utf-8") as input_from, \
          open(splitted_to, mode="r", encoding="utf-8") as input_to:
@@ -268,4 +267,4 @@ def route_frontend(path):
         return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=80)
+    app.run(host="0.0.0.0", debug=True, port=9000)

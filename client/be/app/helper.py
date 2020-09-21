@@ -1,10 +1,12 @@
 import os
+import sys
 import constants as con
 import pathlib
 import pickle
 import glob
 import state_manager as state
 import logging
+from warnings import simplefilter
 
 def get_files_list(folder, mask="*.txt"):
     return [os.path.basename(x) for x in get_files_list_with_path(folder, mask)]
@@ -23,6 +25,13 @@ def get_processing_list_with_state(folder, username):
             "imgs": get_files_list(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username), mask=f"{os.path.basename(file)}.best_*.png")
             })
     return res
+
+def clean_img_user_foler(username, file):
+    imgs = get_files_list_with_path(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username), mask=f"{os.path.basename(file)}.best_*.png")
+    print(imgs)
+    for img in imgs:
+        if os.path.isfile(img):
+            os.remove(img)
 
 def create_folders(username, lang):
     if username and lang:
@@ -98,6 +107,12 @@ def tryParseInt(value):
     except ValueError:
         return value, False
 
+def configure_logging(level=logging.INFO):
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    simplefilter(action='ignore', category=FutureWarning)
+    # logging.basicConfig(level=level, filename='app.log', filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+    logging.basicConfig(stream=sys.stdout, level=level, filemode='a', format='%(asctime)s [%(levelname)s] - %(process)d: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+    logging.getLogger('matplotlib.font_manager').disabled = True
 
 #attribute
 def lazy_property(fn):

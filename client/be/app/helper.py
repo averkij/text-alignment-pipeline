@@ -22,10 +22,15 @@ def get_processing_list_with_state(folder, username):
         res.append({
             "name": os.path.basename(file),
             "state": state.get_processing_state(file, (con.PROC_DONE,0,0)),
-            "imgs": get_files_list(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username), mask=f"{os.path.basename(file)}.best_*.png")
+            "imgs": get_files_list(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username), mask=f"{os.path.basename(file)}.best_*.png"),
+            "sim_grades": get_sim_grades(file)
             })
     return res
 
+def get_sim_grades(processing_file):
+    docs = pickle.load(open(processing_file, "rb"))
+    return docs["sim_grades"]
+    
 def clean_img_user_foler(username, file):
     imgs = get_files_list_with_path(os.path.join(con.STATIC_FOLDER, con.IMG_FOLDER, username), mask=f"{os.path.basename(file)}.best_*.png")
     for img in imgs:
@@ -47,11 +52,11 @@ def check_folder(folder):
 
 def check_file(folder, files, file_id):
     if len(files) < file_id+1:
-        logging.debug(f"[{username}]. Document {lang} with id={file_id} not found. folder: {folder}")
+        logging.debug(f"Document with id={file_id} not found. folder: {folder}")
         return False
     processing_file = os.path.join(folder, files[file_id])
     if not os.path.isfile(processing_file):
-        logging.debug(f"[{username}]. Document {processing_file} not found.")
+        logging.debug(f"Document {processing_file} not found.")
         return False
     return True
 
@@ -96,7 +101,7 @@ DEFAULT_CULTURE = "en"
 
 def read_processing(input_file):
     docs = pickle.load(open(input_file, "rb"))
-    for doc in docs:
+    for doc in docs["items"]:
         for line in doc:
             yield line, doc[line]["from"], doc[line]["to"], doc[line]["cnd"]
 

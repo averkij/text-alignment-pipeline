@@ -23,8 +23,12 @@ import state_manager as state
 
 def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_best, lang_name_from, lang_name_to, threshold=config.DEFAULT_TRESHOLD, batch_size=config.DEFAULT_BATCHSIZE, window_size=config.DEFAULT_WINDOW):
     batch_number = 0
-    docs = []   
+    docs = {
+        "items":[],
+        "sim_grades":{}
+        }   
     zero_treshold = 0
+    sims = []
 
     logging.debug(f"Aligning started.")
     try:
@@ -69,10 +73,17 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
             plt.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False, left=False, labelleft=False)
             plt.savefig(res_img_batch_best, bbox_inches="tight")
 
+            # Aggregating similarities for grade calculation
+            best_sim_ind = sim_matrix_best.argmax(1)
+            sims.extend(sim_matrix_best[range(best_sim_ind.shape[0]), best_sim_ind])            
+
             # Actual work
-            logging.debug(f"Processing lines.")
-            doc = get_processed(lines_from_batch, lines_to_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, zero_treshold, batch_number, batch_size)
-            docs.append(doc)
+            logging.debug(f"Processing lines.")            
+            doc = get_processed(lines_from_batch, lines_to_batch, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, best_sim_ind, zero_treshold, batch_number, batch_size)
+            docs["items"].append(doc)
+
+        sim_grades = calc_sim_grades(sims)
+        docs["sim_grades"] = sim_grades
 
         logging.debug(f"Dumping to file {processing_from_to}.")
         pickle.dump(docs, open(processing_from_to, "wb"))
@@ -83,12 +94,22 @@ def serialize_docs(lines_from, lines_to, processing_from_to, res_img, res_img_be
         logging.error(e, exc_info=True)
         state.set_processing_state(processing_from_to, (con.PROC_ERROR, config.TEST_RESTRICTION_MAX_BATCHES, batch_number))
 
+def calc_sim_grades(sims):
+    key, res = 0, {}
+    for i, s in enumerate(sorted(sims)):
+        while key < s:
+            res[round(key*100)] = len(sims) - i
+            key += 0.01
+    while len(res) <= 100:
+        res[round(key*100)] = 0
+        key += 0.01
+    return res
+
 def get_line_vectors(lines):
     return model_dispatcher.models[config.MODEL].embed(lines)
 
-def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, threshold, batch_number, batch_size, candidates_count=50):
+def get_processed(lines_from, lines_to, line_ids_from, line_ids_to, sim_matrix, sim_matrix_best, best_sim_ind, threshold, batch_number, batch_size, candidates_count=50):
     doc = {}
-    best_sim_ind = sim_matrix_best.argmax(1)
     for line_from_id in range(sim_matrix.shape[0]):
         line_id_from_abs = line_ids_from[line_from_id]
         line = DocLine(line_id_from_abs, lines_from[line_from_id])

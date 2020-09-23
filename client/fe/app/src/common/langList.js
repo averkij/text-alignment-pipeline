@@ -2,7 +2,7 @@ export const LANGUAGES = {
     'ru': {
         langCode: "ru",
         name: "Russian",
-        icon: "🥄"
+        icon: "⚽️"
     },
     'zh' :{
         langCode: "zh",
@@ -12,12 +12,42 @@ export const LANGUAGES = {
     'de': {
         langCode: "de",
         name: "German",
-        icon: "📏"
+        icon: "🍺"
     },
     'en' :{
         langCode: "en",
         name: "English",
         icon: "🧸"
+    },
+    'fr' :{
+        langCode: "fr",
+        name: "French",
+        icon: "🥖"
+    },
+    'it' :{
+        langCode: "it",
+        name: "Italian",
+        icon: "🍕"
+    },
+    'es' :{
+        langCode: "es",
+        name: "Spanish",
+        icon: "🍅"
+    },
+    'tr' :{
+        langCode: "tr",
+        name: "Turkish",
+        icon: "☕️"
+    },
+    'pl' :{
+        langCode: "pl",
+        name: "Polish",
+        icon: "🍬"
+    },
+    'pt' :{
+        langCode: "pt",
+        name: "Portugal",
+        icon: "🍊"
     }
 };
 export const DEFAULT_FROM = 'ru';

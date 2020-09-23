@@ -186,8 +186,8 @@ def edit_processing(username, lang_from, lang_to, file_id):
         abort(400)
     return ('', 200)
 
-@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<file_format>", methods=["GET"])
-def download_processsing(username, lang_from, lang_to, file_id, lang, file_format):
+@app.route("/items/<username>/processing/<lang_from>/<lang_to>/<int:file_id>/download/<lang>/<file_format>/<int:threshold>", methods=["GET"])
+def download_processsing(username, lang_from, lang_to, file_id, lang, file_format, threshold):
     logging.debug(f"[{username}]. Downloading {lang_from}-{lang_to} {file_id} {lang} result document.")
     processing_folder = os.path.join(con.UPLOAD_FOLDER, username, con.PROCESSING_FOLDER, lang_from, lang_to)
     files = helper.get_files_list(processing_folder)
@@ -203,9 +203,9 @@ def download_processsing(username, lang_from, lang_to, file_id, lang, file_forma
     logging.debug(f"[{username}]. Preparing file for downloading {download_file}.")
 
     if file_format==con.FORMAT_TMX:
-        output.save_tmx(processing_file, download_file, lang_from, lang_to)
+        output.save_tmx(processing_file, download_file, lang_from, lang_to, threshold)
     elif file_format==con.FORMAT_PLAIN:
-        output.save_plain_text(processing_file, download_file, first_lang = lang==lang_from)
+        output.save_plain_text(processing_file, download_file, first_lang = lang==lang_from, threshold=threshold)
 
     logging.debug(f"[{username}]. File {download_file} prepared. Sent to user.")
     return send_file(download_file, as_attachment=True)  

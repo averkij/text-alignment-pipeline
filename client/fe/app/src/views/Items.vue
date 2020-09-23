@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="d-flex">
-      <div class="text-h3 mt-5 align-self-start"><v-img src="@/assets/logo.png" width="50px" height="50px"/></div>
+      <div class="text-h3 mt-5 align-self-start">
+        <v-img src="@/assets/logo.png" width="50px" height="50px" />
+      </div>
       <div class="text-h3 mt-5 ml-3">
         Hello, <span class="text-capitalize">{{ username }}!</span>
         <div class="text-subtitle-1 mt-2 pl-1">Let's make it parallel</div>
@@ -59,7 +61,8 @@
       </v-col>
     </v-row>
     <v-btn v-if="!userAlignInProgress" v-show="selected[langCodeFrom] && selected[langCodeTo]" class="success mt-6"
-      :loading="isLoading.align || isLoading.alignStopping" :disabled="isLoading.align || isLoading.alignStopping" @click="align()">
+      :loading="isLoading.align || isLoading.alignStopping" :disabled="isLoading.align || isLoading.alignStopping"
+      @click="align()">
       Align documents
     </v-btn>
     <v-btn v-else v-show="selected[langCodeFrom] && selected[langCodeTo]" class="error mt-6" @click="stopAlignment()">
@@ -93,7 +96,9 @@
               <v-list-item-content>
                 <v-list-item-title v-text="item.name"></v-list-item-title>
               </v-list-item-content>
-              <v-progress-linear stream buffer-value="0" :value="item.state[2]/item.state[1] * 100" color="green" :active="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" absolute bottom></v-progress-linear>
+              <v-progress-linear stream buffer-value="0" :value="item.state[2]/item.state[1] * 100" color="green"
+                :active="item.state[0]==PROC_INIT || item.state[0]==PROC_IN_PROGRESS" absolute bottom>
+              </v-progress-linear>
             </v-list-item>
           </v-list-item-group>
         </v-list>
@@ -101,7 +106,8 @@
 
       <div class="text-h5 mt-10 font-weight-bold">Visualization</div>
 
-      <v-alert v-if="!selectedProcessing || !selectedProcessing.imgs || selectedProcessing.imgs.length == 0" type="info" border="left" colored-border color="purple" class="mt-6" elevation="2" >
+      <v-alert v-if="!selectedProcessing || !selectedProcessing.imgs || selectedProcessing.imgs.length == 0" type="info"
+        border="left" colored-border color="purple" class="mt-6" elevation="2">
         Images will start showing after the first batch completion.
       </v-alert>
       <v-row v-else class="mt-6">
@@ -109,7 +115,7 @@
           <v-card>
             <div class="grey lighten-5">
               <v-card-title>
-                часть {{i+1}}
+                batch {{i+1}}
                 <v-spacer></v-spacer>
                 <v-chip color="grey" text-color="black" small outlined>
                   {{DEFAULT_BATCHSIZE * i + 1}} — {{DEFAULT_BATCHSIZE * (i + 1)}}
@@ -117,8 +123,7 @@
               </v-card-title>
             </div>
             <v-divider></v-divider>
-            <v-img :src="`${API_URL}/static/img/${username}/${img}`"
-              :lazy-src="`${API_URL}/static/proc_img_stub.jpg`">
+            <v-img :src="`${API_URL}/static/img/${username}/${img}`" :lazy-src="`${API_URL}/static/proc_img_stub.jpg`">
               <template v-slot:placeholder>
                 <v-row class="fill-height ma-0" align="center" justify="center">
                   <v-progress-circular indeterminate color="green"></v-progress-circular>
@@ -131,15 +136,15 @@
 
       <div class="text-h5 mt-10 font-weight-bold">Edit</div>
 
-      <div class="text-center" v-if="isLoading.processing" >
-        <v-progress-circular
-          indeterminate
-          color="green"></v-progress-circular>
-      </div>      
-      <v-alert v-else-if="selectedProcessing && selectedProcessing.state[0]==PROC_ERROR" type="error" border="left" colored-border color="error" class="mt-6" elevation="2" >
+      <div class="text-center" v-if="isLoading.processing">
+        <v-progress-circular indeterminate color="green"></v-progress-circular>
+      </div>
+      <v-alert v-else-if="selectedProcessing && selectedProcessing.state[0]==PROC_ERROR" type="error" border="left"
+        colored-border color="error" class="mt-6" elevation="2">
         Error occured. Please, write to @averkij.
       </v-alert>
-      <v-alert v-else-if="!processing || !processing.items || processing.items.length == 0" type="info" border="left" colored-border color="info" class="mt-6" elevation="2" >
+      <v-alert v-else-if="!processing || !processing.items || processing.items.length == 0" type="info" border="left"
+        colored-border color="info" class="mt-6" elevation="2">
         Please, wait. Alignment is in progress.
       </v-alert>
       <v-card v-else class="mt-6">
@@ -165,20 +170,56 @@
         </div>
       </v-card>
 
-      <div class="text-h4 mt-10 font-weight-bold">🧲 Download</div>
+      <div class="text-h4 mt-10 font-weight-bold">🍍 Corpora</div>
 
-      <div class="mt-5">
-        <v-btn class="primary ma-5" @click="downloadProcessing(langCodeFrom)">Download [{{langCodeFrom}}]</v-btn>
-        <v-btn class="primary ma-5" @click="downloadProcessing(langCodeTo)">Download [{{langCodeTo}}]</v-btn>
-        <v-btn class="primary ma-5" @click="downloadProcessingTmx()">Download TMX</v-btn>
+      <v-alert v-if="!processing || !processing.items || processing.items.length == 0" type="info" border="left"
+        colored-border color="info" class="mt-6" elevation="2">
+        Please, wait. Alignment is in progress.
+      </v-alert>
+      <div v-else>
+        <div class="mt-10">
+          <v-row>
+            <v-col cols="12">
+              <v-subheader class="pl-0">Similarity threshold: {{thresholdText}}</v-subheader>
+              <v-slider v-model="downloadThreshold" thumb-label :thumb-size="24">
+                <template v-slot:thumb-label="{ value }">
+                  {{ satisfactionEmojis[Math.min(Math.floor(value / 10), 9)] }}
+                </template>
+              </v-slider>
+            </v-col>
+          </v-row>
+          <div class="text-center">
+            <v-progress-circular :rotate="360" :size="260" :width="15" :value="corporaSizeRelative" color="teal">
+              <div class="text-h2 black--text mt-4" style="line-height:2rem !important;">{{corporaSizeAbsolute}} <br />
+                <span class="text-h5 grey--text">sentences</span></div>
+              <!-- <div class="text-h5 black--text">sentences</div> -->
+            </v-progress-circular>
+          </div>
+        </div>
+        <div class="mt-10">
+          <v-row>
+            <v-col cols="12" sm="6">
+              <DownloadPanel @downloadFile="downloadProcessing" :info="LANGUAGES[langCodeFrom]" :isLoading=isLoading
+                :count=100 :countOrig=splitted[langCodeFrom].meta.lines_count>
+              </DownloadPanel>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <DownloadPanel @downloadFile="downloadProcessing" :info="LANGUAGES[langCodeTo]" :isLoading=isLoading
+                :count=100 :countOrig=splitted[langCodeTo].meta.lines_count>
+              </DownloadPanel>
+            </v-col>
+          </v-row>
+        </div>
+        <div class="text-h5 mt-10 font-weight-bold">Corpora in TMX format</div>
+        <v-btn class="primary ma-5" @click="downloadProcessingTmx()">Download</v-btn>
       </div>
-
     </div>
   </div>
 </template>
 
 <script>
   import RawPanel from "@/components/RawPanel";
+  import DownloadPanel from "@/components/DownloadPanel";
   import SplittedPanel from "@/components/SplittedPanel";
   import InfoPanel from "@/components/InfoPanel";
   import EditItem from "@/components/EditItem";
@@ -261,11 +302,19 @@
             de: false,
             en: false
           },
+          download: {
+            ru: false,
+            zh: false,
+            de: false,
+            en: false
+          },
           align: false,
           processing: false
         },
         triggerCollapseEditItem: false,
-        userAlignInProgress: false
+        userAlignInProgress: false,
+        satisfactionEmojis: ['😍', '😄', '😁', '😊', '🙂', '😐', '🙁', '☹️', '😢', '😭'],
+        downloadThreshold: 9
       };
     },
     methods: {
@@ -321,7 +370,8 @@
           langCodeFrom: this.langCodeFrom,
           langCodeTo: this.langCodeTo,
           langCodeDownload: langCode,
-          format: "txt"
+          format: "txt",
+          threshold: this.downloadThreshold
         });
       },
       downloadProcessingTmx() {
@@ -332,7 +382,8 @@
           langCodeFrom: this.langCodeFrom,
           langCodeTo: this.langCodeTo,
           langCodeDownload: this.langCodeFrom,
-          format: "tmx"
+          format: "tmx",
+          threshold: this.downloadThreshold
         });
       },
       selectAndLoadPreview(langCode, name, fileId) {
@@ -413,32 +464,30 @@
           fileId: this.currentlyProcessingId
         });
       },
-      initProcessingDocument() {        
+      initProcessingDocument() {
         let processingItems = JSON.parse(JSON.stringify(this.itemsProcessing[this.langCodeFrom]));
         let currentIndex = -1;
-        if (this.itemsProcessingNotEmpty(this.langCodeFrom)){
-          currentIndex = processingItems.findIndex(x => x.name==this.selected[this.langCodeFrom]);
+        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {
+          currentIndex = processingItems.findIndex(x => x.name == this.selected[this.langCodeFrom]);
         }
         if (currentIndex >= 0) {
-          processingItems.splice(currentIndex, 1,
-          {
-              "imgs":[],
-              "name": this.selected[this.langCodeFrom],
-              "state": [0,3,0]
+          processingItems.splice(currentIndex, 1, {
+            "imgs": [],
+            "name": this.selected[this.langCodeFrom],
+            "state": [0, 3, 0]
           });
         } else {
-           processingItems.push(
-            {
-              "imgs":[],
-              "name": this.selected[this.langCodeFrom],
-              "state": [0,3,0]
-            });
+          processingItems.push({
+            "imgs": [],
+            "name": this.selected[this.langCodeFrom],
+            "state": [0, 3, 0]
+          });
         }
         this.$store
           .commit(SET_ITEMS_PROCESSING, {
-          items: processingItems,
-          langCode: this.langCodeFrom
-        });
+            items: processingItems,
+            langCode: this.langCodeFrom
+          });
       },
       //helpers
       itemsNotEmpty(langCode) {
@@ -459,16 +508,18 @@
         }
       },
       selectFirstProcessingDocument() {
-        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {          
+        if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {
           this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0);
         }
       },
       selectCurrentlyProcessingDocument() {
         if (this.itemsProcessingNotEmpty(this.langCodeFrom)) {
-          this.currentlyProcessingId = this.itemsProcessing[this.langCodeFrom].findIndex(x => x.name==this.currentlyProcessing);
+          this.currentlyProcessingId = this.itemsProcessing[this.langCodeFrom].findIndex(x => x.name == this
+            .currentlyProcessing);
           console.log(this.currentlyProcessing, this.currentlyProcessingId)
-          if (this.currentlyProcessingId >=0) {
-            this.selectProcessing(this.itemsProcessing[this.langCodeFrom][this.currentlyProcessingId], this.currentlyProcessingId);
+          if (this.currentlyProcessingId >= 0) {
+            this.selectProcessing(this.itemsProcessing[this.langCodeFrom][this.currentlyProcessingId], this
+              .currentlyProcessingId);
           }
         }
       },
@@ -478,21 +529,21 @@
       fetchItemsProvessingTimer() {
         setTimeout(() => {
           this.$store.dispatch(FETCH_ITEMS_PROCESSING, {
-              username: this.$route.params.username,
-              langCodeFrom: this.langCodeFrom,
-              langCodeTo: this.langCodeTo
-            }).then(() => {
-              if (this.itemsProcessing[this.langCodeFrom].filter(x => x.state[0] == 0 || x.state[0] == 1).length > 0) {
-                this.userAlignInProgress = true;
-                this.fetchItemsProvessingTimer();
-              }
-              else {
-                this.userAlignInProgress = false;                
-                this.isLoading.alignStopping = false;
-                this.selectCurrentlyProcessingDocument();
-              }
-              this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0)
-            });
+            username: this.$route.params.username,
+            langCodeFrom: this.langCodeFrom,
+            langCodeTo: this.langCodeTo
+          }).then(() => {
+            if (this.itemsProcessing[this.langCodeFrom].filter(x => x.state[0] == 0 || x.state[0] == 1).length >
+              0) {
+              this.userAlignInProgress = true;
+              this.fetchItemsProvessingTimer();
+            } else {
+              this.userAlignInProgress = false;
+              this.isLoading.alignStopping = false;
+              this.selectCurrentlyProcessingDocument();
+            }
+            this.selectProcessing(this.itemsProcessing[this.langCodeFrom][0], 0)
+          });
         }, 5000)
       }
     },
@@ -546,10 +597,27 @@
         }
         return DEFAULT_TO;
       },
+      thresholdText() {
+        if (this.downloadThreshold == 0) {
+          return "no threshold";
+        } else if (this.downloadThreshold == 100) {
+          return "realy?";
+        }
+        return (this.downloadThreshold / 100).toFixed(2);
+      },
+      corporaSizeRelative() {
+        return this.selectedProcessing['sim_grades'][this.downloadThreshold] / this.selectedProcessing['sim_grades'][
+          0
+        ] * 100;
+      },
+      corporaSizeAbsolute() {
+        return this.selectedProcessing['sim_grades'][this.downloadThreshold];
+      }
     },
     components: {
       EditItem,
       RawPanel,
+      DownloadPanel,
       SplittedPanel,
       InfoPanel
     }

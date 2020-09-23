@@ -6,7 +6,7 @@ from aligner import DocLine
 def edit_doc(edit_file, line_id, text, text_type=con.TYPE_TO):
     docs = pickle.load(open(edit_file, "rb"))
     line_to_find = DocLine(line_id)
-    for doc in docs:
+    for doc in docs["items"]:
         if line_to_find in doc:
             if text_type == con.TYPE_TO:
                 tr = doc[line_to_find]["to"]

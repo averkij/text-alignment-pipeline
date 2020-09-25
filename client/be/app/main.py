@@ -43,7 +43,7 @@ def items(username, lang):
             logging.debug(f"[{username}]. Loading lang document {file.filename}.")
             raw_path = os.path.join(con.UPLOAD_FOLDER, username, con.RAW_FOLDER, lang, file.filename)
             file.save(raw_path)
-            splitter.split_to_sentences(file.filename, lang, username)
+            splitter.split_by_sentences(file.filename, lang, username)
             logging.debug(f"[{username}]. Success. {file.filename} is loaded.")
         return ('', 200)
     #return documents list
@@ -268,4 +268,4 @@ def route_frontend(path):
         return send_file(index_path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=80)
+    app.run(host="0.0.0.0", debug=True, port=9000)

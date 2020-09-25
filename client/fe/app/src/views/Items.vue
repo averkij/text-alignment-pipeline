@@ -234,7 +234,8 @@
   import {
     LANGUAGES,
     DEFAULT_FROM,
-    DEFAULT_TO
+    DEFAULT_TO,
+    LanguageProviderService
   } from "@/common/langList";
   import {
     RESULT_OK,
@@ -273,41 +274,16 @@
         PROC_IN_PROGRESS,
         PROC_ERROR,
         PROC_DONE,
-        files: {
-          ru: null,
-          zh: null,
-          de: null,
-          en: null
-        },
-        selected: {
-          ru: null,
-          zh: null,
-          de: null,
-          en: null
-        },
+        files: LanguageProviderService.initGeneralVars(),
+        selected: LanguageProviderService.initGeneralVars(),
         selectedProcessing: null,
         selectedProcessingId: null,
         currentlyProcessing: null,
         currentlyProcessingId: null,
-        selectedIds: {
-          ru: null,
-          zh: null,
-          de: null,
-          en: null
-        },
+        selectedIds: LanguageProviderService.initGeneralVars(),
         isLoading: {
-          upload: {
-            ru: false,
-            zh: false,
-            de: false,
-            en: false
-          },
-          download: {
-            ru: false,
-            zh: false,
-            de: false,
-            en: false
-          },
+          upload: LanguageProviderService.initGeneralBools(),
+          download: LanguageProviderService.initGeneralBools(),
           align: false,
           processing: false
         },

@@ -3,6 +3,10 @@ import {
 } from "@/common/api.service";
 
 import {
+  LanguageProviderService
+} from "@/common/langList";
+
+import {
   FETCH_ITEMS,
   FETCH_ITEMS_PROCESSING,
   UPLOAD_FILES,
@@ -23,40 +27,10 @@ import {
 } from "./mutations.type";
 
 const initialState = {
-  items: {
-    ru: [],
-    zh: [],
-    de: [],
-    en: []
-  },
-  itemsProcessing: {
-    ru: [],
-    zh: [],
-    de: [],
-    en: []
-  },
-  splitted: {
-    ru: {
-      lines: [],
-      meta: {}
-    },
-    zh: {
-      lines: [],
-      meta: {}
-    },
-    de: {
-      lines: [],
-      meta: {}
-    },
-    en: {
-      lines: [],
-      meta: {}
-    }
-  },
-  processing: {
-    items: [],
-    meta: {}
-  }
+  items: LanguageProviderService.initItems(),
+  itemsProcessing: LanguageProviderService.initItems(),
+  splitted: LanguageProviderService.initSplitted(),
+  processing: LanguageProviderService.initProcessing()
 };
 
 export const state = {

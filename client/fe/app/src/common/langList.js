@@ -4,7 +4,7 @@ export const LANGUAGES = {
         name: "Russian",
         icon: "⚽️"
     },
-    'zh' :{
+    'zh': {
         langCode: "zh",
         name: "Chinese",
         icon: "🥢"
@@ -14,37 +14,37 @@ export const LANGUAGES = {
         name: "German",
         icon: "🍺"
     },
-    'en' :{
+    'en': {
         langCode: "en",
         name: "English",
         icon: "🧸"
     },
-    'fr' :{
+    'fr': {
         langCode: "fr",
         name: "French",
         icon: "🥖"
     },
-    'it' :{
+    'it': {
         langCode: "it",
         name: "Italian",
         icon: "🍕"
     },
-    'es' :{
+    'es': {
         langCode: "es",
         name: "Spanish",
         icon: "🍅"
     },
-    'tr' :{
+    'tr': {
         langCode: "tr",
         name: "Turkish",
         icon: "☕️"
     },
-    'pl' :{
+    'pl': {
         langCode: "pl",
         name: "Polish",
         icon: "🍬"
     },
-    'pt' :{
+    'pt': {
         langCode: "pt",
         name: "Portugal",
         icon: "🍊"
@@ -52,3 +52,43 @@ export const LANGUAGES = {
 };
 export const DEFAULT_FROM = 'ru';
 export const DEFAULT_TO = 'zh';
+
+export const LanguageProviderService = {
+    initItems() {
+        let res = {}
+        Object.keys(LANGUAGES).forEach(x => {
+            res[x] = [];
+        })
+        return res;
+    },
+    initSplitted() {
+        let res = {}
+        Object.keys(LANGUAGES).forEach(x => {
+            res[x] = {
+                lines: [],
+                meta: {}
+            };
+        })
+        return res;
+    },
+    initProcessing() {
+        return {
+            items: [],
+            meta: {}
+        }
+    },
+    initGeneralVars() {
+        let res = {}
+        Object.keys(LANGUAGES).forEach(x => {
+            res[x] = null;
+        })
+        return res;
+    },
+    initGeneralBools() {
+        let res = {}
+        Object.keys(LANGUAGES).forEach(x => {
+            res[x] = false;
+        })
+        return res;
+    }
+}

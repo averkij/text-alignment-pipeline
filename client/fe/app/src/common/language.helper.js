@@ -53,7 +53,7 @@ export const LANGUAGES = {
 export const DEFAULT_FROM = 'ru';
 export const DEFAULT_TO = 'zh';
 
-export const LanguageProviderService = {
+export const LanguageHelper = {
     initItems() {
         let res = {}
         Object.keys(LANGUAGES).forEach(x => {

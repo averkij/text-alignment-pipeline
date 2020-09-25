@@ -235,8 +235,8 @@
     LANGUAGES,
     DEFAULT_FROM,
     DEFAULT_TO,
-    LanguageProviderService
-  } from "@/common/langList";
+    LanguageHelper
+  } from "@/common/language.helper";
   import {
     RESULT_OK,
     RESULT_ERROR,
@@ -274,16 +274,16 @@
         PROC_IN_PROGRESS,
         PROC_ERROR,
         PROC_DONE,
-        files: LanguageProviderService.initGeneralVars(),
-        selected: LanguageProviderService.initGeneralVars(),
+        files: LanguageHelper.initGeneralVars(),
+        selected: LanguageHelper.initGeneralVars(),
         selectedProcessing: null,
         selectedProcessingId: null,
         currentlyProcessing: null,
         currentlyProcessingId: null,
-        selectedIds: LanguageProviderService.initGeneralVars(),
+        selectedIds: LanguageHelper.initGeneralVars(),
         isLoading: {
-          upload: LanguageProviderService.initGeneralBools(),
-          download: LanguageProviderService.initGeneralBools(),
+          upload: LanguageHelper.initGeneralBools(),
+          download: LanguageHelper.initGeneralBools(),
           align: false,
           processing: false
         },

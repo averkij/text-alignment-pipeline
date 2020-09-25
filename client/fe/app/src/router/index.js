@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import { DEFAULT_FROM, DEFAULT_TO } from "@/common/langList";
+import { DEFAULT_FROM, DEFAULT_TO } from "@/common/language.helper";
 
 Vue.use(VueRouter);
 

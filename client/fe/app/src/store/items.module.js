@@ -3,8 +3,8 @@ import {
 } from "@/common/api.service";
 
 import {
-  LanguageProviderService
-} from "@/common/langList";
+  LanguageHelper
+} from "@/common/language.helper";
 
 import {
   FETCH_ITEMS,
@@ -27,10 +27,10 @@ import {
 } from "./mutations.type";
 
 const initialState = {
-  items: LanguageProviderService.initItems(),
-  itemsProcessing: LanguageProviderService.initItems(),
-  splitted: LanguageProviderService.initSplitted(),
-  processing: LanguageProviderService.initProcessing()
+  items: LanguageHelper.initItems(),
+  itemsProcessing: LanguageHelper.initItems(),
+  splitted: LanguageHelper.initSplitted(),
+  processing: LanguageHelper.initProcessing()
 };
 
 export const state = {

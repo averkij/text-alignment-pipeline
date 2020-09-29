@@ -1,3 +1,6 @@
+# Lorem ipsum
+Just another new header
+
 # Text Alignment Pipeline
 
 ## Objective
